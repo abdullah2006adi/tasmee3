@@ -57,6 +57,16 @@ button,input,select,textarea{font:inherit;color:inherit}
 #saved::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g2);margin-inline-end:6px;vertical-align:middle}
 #saved.bad{color:var(--g0)} #saved.bad::before{background:var(--g0)}
 
+#sync{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
+#sync i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+#sync[data-state="ok"]{color:var(--g2);border-color:var(--g2)} #sync[data-state="ok"] i{background:var(--g2)}
+#sync[data-state="wait"] i{background:var(--g1);animation:pulse 1s infinite}
+#sync[data-state="err"]{color:var(--g0);border-color:var(--g0)} #sync[data-state="err"] i{background:var(--g0)}
+#sync[data-state="off"]{color:var(--accent);border-color:var(--accent)} #sync[data-state="off"] i{background:var(--accent)}
+@keyframes pulse{50%{opacity:.3}}
+#sync-panel{position:fixed;z-index:40;top:calc(var(--hdr) + 8px);left:max(16px,env(safe-area-inset-left,0px));width:min(400px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.2);padding:16px 18px;display:grid;gap:4px}
+#sync-panel h3{margin:0 0 6px;font-size:1.15rem}
+.err-msg{color:var(--g0);background:var(--g0s);border-radius:8px;padding:6px 10px;margin:8px 0 0;font-size:.88rem}
 main{padding-block:18px 60px;display:grid;gap:16px}
 .view{display:grid;gap:16px;min-width:0}
 .banner{background:var(--accent-soft);border-radius:var(--r);padding:10px 14px;font-size:.9rem}
@@ -270,7 +280,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .keys{display:none}
 }
-@media (max-width:520px){ .brand small,#saved{display:none} .tab{padding:5px 10px} .atext{font-size:23px} .sb-grade{grid-template-columns:repeat(3,minmax(0,1fr))} .sb-grade > div{padding:6px 8px} }
+@media (max-width:520px){ .brand small,#saved{display:none} #sync{order:-1} .tab{padding:5px 10px} .atext{font-size:23px} .sb-grade{grid-template-columns:repeat(3,minmax(0,1fr))} .sb-grade > div{padding:6px 8px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media print{.top,.bar,.tools,.roster,.no-print{display:none!important} body{background:#fff}}
 </style>
@@ -288,6 +298,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
       <button class="tab" role="tab" data-tab="stats">إحصاء الشُّعب</button>
     </nav>
     <span id="saved">محفوظ</span>
+    <button type="button" id="sync" data-state="off"><i></i><span>تفعيل المزامنة</span></button>
   </div>
 </header>
 
@@ -297,7 +308,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   <section id="v-recite" class="view" hidden></section>
   <section id="v-results" class="view" hidden></section>
   <section id="v-stats" class="view" hidden></section>
-  <p class="foot">النص القرآني بالرسم العثماني من مشروع تنزيل (tanzil.net). البيانات محفوظة في هذا المتصفح.</p>
+  <p class="foot">النص القرآني بالرسم العثماني من مشروع تنزيل (tanzil.net). البيانات محفوظة في هذا المتصفح، وفي حسابك عند تفعيل المزامنة.</p>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -340,11 +351,14 @@ try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { S = nul
 if (!S || !Array.isArray(S.classes) || !Array.isArray(S.sheets)) S = demo();
 S.ui = Object.assign({ tab: 'recite', sheet: null, student: null, editClass: null, resSheet: null, resSort: 'list', lastClass: null, lastSurah: 64, statSurah: 'all' }, S.ui || {});
 /* upgrade older saves: one error string per ayah → list of errors; sheet date → each student's date */
-S.sheets.forEach(sh => Object.values(sh.recs || {}).forEach(r => {
-  r.s = r.s || {}; r.e = r.e || {};
-  Object.keys(r.e).forEach(a => { if (!Array.isArray(r.e[a])) r.e[a] = String(r.e[a] || '').trim() ? [r.e[a]] : []; if (!r.e[a].length) delete r.e[a]; });
-  if (!r.date && sh.date && (Object.keys(r.s).length || Object.keys(r.e).length)) r.date = sh.date;
-}));
+function migrate() {
+  S.sheets.forEach(sh => { sh.recs = sh.recs || {}; Object.values(sh.recs).forEach(r => {
+    r.s = r.s || {}; r.e = r.e || {};
+    Object.keys(r.e).forEach(a => { if (!Array.isArray(r.e[a])) r.e[a] = String(r.e[a] || '').trim() ? [r.e[a]] : []; if (!r.e[a].length) delete r.e[a]; });
+    if (!r.date && sh.date && (Object.keys(r.s).length || Object.keys(r.e).length)) r.date = sh.date;
+  }); });
+}
+migrate();
 
 function demo() {
   const mk = (sec, names) => ({ id: uid(), grade: 'سابع', section: sec, demo: true, students: names.map(n => ({ id: uid(), name: n })) });
@@ -370,7 +384,7 @@ function demo() {
 let saveT;
 function save(now) {
   clearTimeout(saveT);
-  const go = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); setSaved('محفوظ'); } catch (e) { setSaved('تعذّر الحفظ', true); } };
+  const go = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); setSaved('محفوظ'); } catch (e) { setSaved('تعذّر الحفظ', true); } syncSchedule(); };
   if (now) go(); else { setSaved('جارٍ الحفظ…'); saveT = setTimeout(go, 300); }
 }
 function setSaved(t, bad) { const el = $('#saved'); el.textContent = t; el.classList.toggle('bad', !!bad); }
@@ -584,6 +598,7 @@ function rClasses() {
   $$('[data-edit]', v).forEach(b => b.addEventListener('click', () => { S.ui.editClass = b.dataset.edit; save(); render(); window.scrollTo(0, 0); }));
   $$('[data-del]', v).forEach(b => b.addEventListener('click', () => arm(b, () => {
     const id = b.dataset.del;
+    markDel(id); S.sheets.filter(s => s.classId === id).forEach(s => markDel(s.id));
     S.classes = S.classes.filter(c => c.id !== id);
     S.sheets = S.sheets.filter(s => s.classId !== id);
     if (S.ui.sheet && !sheetById(S.ui.sheet)) S.ui.sheet = null;
@@ -697,7 +712,7 @@ function rRecite() {
     changed();
   });
   $('#all2').addEventListener('click', () => { const r = rec(); for (let a = sh.from; a <= sh.to; a++) { r.s[a] = 2; updRow(a); } stamp(); clearAbsent(); changed(); });
-  $('#clr').addEventListener('click', e => arm(e.currentTarget, () => { delete sh.recs[S.ui.student]; save(true); rRecite(); toast('مُسح تسميع الطالب'); }));
+  $('#clr').addEventListener('click', e => arm(e.currentTarget, () => { sh.recs[S.ui.student] = { s: {}, e: {} }; save(true); rRecite(); toast('مُسح تسميع الطالب'); }));
 
   const ay = $('#ayat');
   ay.addEventListener('click', e => {
@@ -909,13 +924,203 @@ function rResults() {
   $('#x-xlsx').addEventListener('click', () => exportXlsx(sh));
   $('#x-edit').addEventListener('click', () => { S.ui.sheet = sh.id; S.ui.tab = 'recite'; save(); render(); window.scrollTo(0, 0); });
   $('#x-del').addEventListener('click', e => arm(e.currentTarget, () => {
-    S.sheets = S.sheets.filter(s => s.id !== sh.id);
+    markDel(sh.id); S.sheets = S.sheets.filter(s => s.id !== sh.id);
     if (S.ui.sheet === sh.id) S.ui.sheet = null;
     S.ui.resSheet = null; save(true); rResults(); toast('حُذف الكشف');
   }));
   $$('[data-wa]', v).forEach(b => b.addEventListener('click', () => { const st = studs.find(x => x.id === b.dataset.wa); sendWA(st, sheetReport(sh, st)); }));
   $$('[data-open]', v).forEach(b => b.addEventListener('click', () => { S.ui.sheet = sh.id; S.ui.student = b.dataset.open; S.ui.tab = 'recite'; save(); render(); window.scrollTo(0, 0); }));
 }
+
+/* ---------- cloud sync (Firebase project of the «استعداد» platform) ---------- */
+const FB_BASE = window.TASMEE3_FB_BASE || 'https://www.gstatic.com/firebasejs/10.12.2/';
+const FB_CFG = { apiKey: 'AIzaSyAhLiI0JcQ2bv2O_Sie9S5jmaPNVY6dhTA', authDomain: 'iste3dad.firebaseapp.com', projectId: 'iste3dad', storageBucket: 'iste3dad.firebasestorage.app', messagingSenderId: '554024504423', appId: '1:554024504423:web:641bc771edfa677e74d8c2' };
+const LOGIN_DOMAIN = 'iste3dad-students.com';
+const SY = { fb: null, user: null, H: {}, timer: null, busy: false, again: false, state: 'off', msg: '', last: null, unsub: [], pending: false, ready: false };
+const clone = o => JSON.parse(JSON.stringify(o));
+const demoIds = () => new Set(S.classes.filter(c => c.demo).map(c => c.id));
+const strip = o => { const c = Object.assign({}, o); delete c.u; return JSON.stringify(c); };
+const sheetHead = sh => JSON.stringify([sh.classId, sh.surah, sh.from, sh.to, sh.date || '']);
+function markDel(id) { S.deleted = S.deleted || {}; S.deleted[id] = Date.now(); }
+
+async function fbLoad() {
+  if (SY.fb) return SY.fb;
+  const [A, AU, FS] = await Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'].map(f => import(FB_BASE + f)));
+  const app = A.getApps && A.getApps().length ? A.getApps()[0] : A.initializeApp(FB_CFG);
+  SY.fb = { AU, FS, auth: AU.getAuth(app), db: FS.getFirestore(app) };
+  return SY.fb;
+}
+function syncUI() {
+  const b = $('#sync'); if (!b) return;
+  const t = { off: 'تفعيل المزامنة', wait: 'جارٍ المزامنة…', ok: 'متزامن', err: 'تعذّرت المزامنة', na: 'المزامنة غير متاحة' }[SY.state];
+  b.dataset.state = SY.state;
+  b.querySelector('span').textContent = t;
+  b.title = SY.user ? 'الحساب: ' + SY.user.email + (SY.msg ? '\n' + SY.msg : '') : 'سجّل الدخول بحساب منصة استعداد لمزامنة البيانات بين أجهزتك';
+  const p = $('#sync-panel'); if (p && !p.hidden) syncPanel();
+}
+function setSync(state, msg) { SY.state = state; SY.msg = msg || ''; syncUI(); }
+function fbErr(e) {
+  const c = (e && e.code) || '';
+  if (c.includes('permission-denied')) return 'قاعدة البيانات رفضت الحفظ: أضف قاعدة كشف التسميع في إعدادات Firebase (انظر التعليمات).';
+  if (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found') || c.includes('invalid-email')) return 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+  if (c.includes('too-many-requests')) return 'محاولات كثيرة، انتظر قليلاً ثم أعد المحاولة.';
+  if (c.includes('network') || c.includes('unavailable')) return 'لا يوجد اتصال بالإنترنت. ستُرفع التعديلات عند عودة الاتصال.';
+  return 'حدث خطأ: ' + (c || (e && e.message) || '');
+}
+
+/* remote → local */
+function mergeRemote(meta, sheets, full) {
+  const dIds = demoIds();
+  const del = Object.assign({}, S.deleted || {});
+  Object.entries((meta && meta.deleted) || {}).forEach(([k, v]) => { del[k] = Math.max(del[k] || 0, v); });
+  const hasRemote = (meta && (meta.classes || []).length) || (sheets && sheets.length);
+  if (hasRemote && dIds.size) { S.classes = S.classes.filter(c => !c.demo); S.sheets = S.sheets.filter(s => !dIds.has(s.classId)); }
+  if (meta) {
+    const map = new Map(S.classes.map(c => [c.id, c]));
+    (meta.classes || []).forEach(rc => { const lc = map.get(rc.id); SY.H['c:' + rc.id] = strip(rc); if (!lc || (rc.u || 0) >= (lc.u || 0)) map.set(rc.id, rc); });
+    S.classes = [...map.values()];
+    if (meta.wa && (meta.waU || 0) >= (S.waU || 0)) { S.wa = meta.wa; S.waU = meta.waU; }
+    if (meta.wa) SY.H.wa = JSON.stringify(meta.wa);
+  }
+  (sheets || []).forEach(rs => {
+    SY.H['s:' + rs.id] = sheetHead(rs);
+    Object.keys(rs.recs || {}).forEach(sid => { SY.H['r:' + rs.id + ':' + sid] = strip(rs.recs[sid]); });
+    const ls = S.sheets.find(x => x.id === rs.id);
+    if (!ls) { S.sheets.push(rs); return; }
+    if ((rs.u || 0) >= (ls.u || 0)) { ls.classId = rs.classId; ls.surah = rs.surah; ls.from = rs.from; ls.to = rs.to; ls.date = rs.date; ls.u = rs.u; }
+    Object.keys(rs.recs || {}).forEach(sid => { const lr = ls.recs[sid]; if (!lr || (rs.recs[sid].u || 0) >= (lr.u || 0)) ls.recs[sid] = rs.recs[sid]; });
+  });
+  S.deleted = del;
+  S.classes = S.classes.filter(c => !(del[c.id] && del[c.id] >= (c.u || 0)));
+  S.sheets = S.sheets.filter(s => !(del[s.id] && del[s.id] >= (s.u || 0)) && S.classes.some(c => c.id === s.classId));
+  if (meta) SY.H.del = JSON.stringify(meta.deleted || {});
+  migrate();
+}
+/* local → remote: stamp what changed since the last known cloud state */
+function collectDirty() {
+  const now = Date.now(), dIds = demoIds(), out = { meta: false, sheets: new Set() };
+  S.classes.filter(c => !c.demo).forEach(c => { const h = strip(c); if (SY.H['c:' + c.id] !== h) { c.u = now; out.meta = true; } });
+  if (S.wa && SY.H.wa !== JSON.stringify(S.wa)) { S.waU = now; out.meta = true; }
+  if (SY.H.del !== JSON.stringify(S.deleted || {})) out.meta = true;
+  S.sheets.filter(sh => !dIds.has(sh.classId)).forEach(sh => {
+    if (SY.H['s:' + sh.id] !== sheetHead(sh)) { sh.u = now; out.sheets.add(sh.id); }
+    Object.keys(sh.recs || {}).forEach(sid => { const h = strip(sh.recs[sid]); if (SY.H['r:' + sh.id + ':' + sid] !== h) { sh.recs[sid].u = now; out.sheets.add(sh.id); } });
+  });
+  return out;
+}
+async function pushNow() {
+  if (!SY.user || !SY.ready) return;
+  if (SY.busy) { SY.again = true; return; }
+  const d = collectDirty();
+  const delSheets = Object.keys(S.deleted || {}).filter(id => SY.H['s:' + id]);
+  if (!d.meta && !d.sheets.size && !delSheets.length) { if (SY.state !== 'ok') setSync('ok'); return; }
+  SY.busy = true; setSync('wait');
+  const { FS, db } = SY.fb, uid = SY.user.uid;
+  try {
+    const jobs = [];
+    d.sheets.forEach(id => { const sh = S.sheets.find(x => x.id === id); if (sh) jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid, 'sheets', id), clone(sh)).then(() => { SY.H['s:' + id] = sheetHead(sh); Object.keys(sh.recs).forEach(sid => SY.H['r:' + id + ':' + sid] = strip(sh.recs[sid])); })); });
+    delSheets.forEach(id => jobs.push(FS.deleteDoc(FS.doc(db, 'tasmee3', uid, 'sheets', id)).then(() => { Object.keys(SY.H).forEach(k => { if (k === 's:' + id || k.startsWith('r:' + id + ':')) delete SY.H[k]; }); })));
+    if (d.meta) {
+      const meta = clone({ classes: S.classes.filter(c => !c.demo), deleted: S.deleted || {}, wa: S.wa || null, waU: S.waU || 0, u: Date.now() });
+      jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid), meta).then(() => { meta.classes.forEach(c => SY.H['c:' + c.id] = strip(c)); SY.H.del = JSON.stringify(meta.deleted); if (meta.wa) SY.H.wa = JSON.stringify(meta.wa); }));
+    }
+    await Promise.all(jobs);
+    localStorage.setItem(KEY, JSON.stringify(S));
+    SY.last = new Date(); setSync('ok');
+  } catch (e) { setSync('err', fbErr(e)); }
+  SY.busy = false;
+  if (SY.again) { SY.again = false; syncSchedule(); }
+}
+function syncSchedule() { if (!SY.user || !SY.ready) return; clearTimeout(SY.timer); SY.timer = setTimeout(pushNow, 1200); }
+
+function applyRemote() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  const a = document.activeElement;
+  if (a && a.closest && a.closest('main') && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) { SY.pending = true; return; }
+  SY.pending = false; render();
+}
+document.addEventListener('focusout', () => setTimeout(() => {
+  if (!SY.pending) return;
+  const a = document.activeElement;
+  if (!(a && a.closest && a.closest('main') && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) { SY.pending = false; render(); }
+}, 400));
+
+async function startSync(user) {
+  SY.user = user; SY.ready = false; setSync('wait');
+  const { FS, db } = SY.fb, uid = user.uid;
+  try {
+    const [m, list] = await Promise.all([FS.getDoc(FS.doc(db, 'tasmee3', uid)), FS.getDocs(FS.collection(db, 'tasmee3', uid, 'sheets'))]);
+    SY.H = {};
+    mergeRemote(m.exists() ? m.data() : null, list.docs.map(x => x.data()), true);
+    SY.ready = true;
+    applyRemote();
+    await pushNow();
+    SY.unsub.forEach(f => f()); SY.unsub = [];
+    SY.unsub.push(FS.onSnapshot(FS.doc(db, 'tasmee3', uid), snap => {
+      if (snap.metadata && snap.metadata.hasPendingWrites) return;
+      if (!snap.exists()) return;
+      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && JSON.stringify(d.deleted || {}) === JSON.stringify(S.deleted || {})) return;
+      collectDirty(); mergeRemote(d, [], false); applyRemote(); syncSchedule();
+    }, e => setSync('err', fbErr(e))));
+    SY.unsub.push(FS.onSnapshot(FS.collection(db, 'tasmee3', uid, 'sheets'), snap => {
+      if (snap.metadata && snap.metadata.hasPendingWrites) return;
+      const ch = snap.docChanges().filter(c => c.type !== 'removed').map(c => c.doc.data())
+        .filter(rs => { const ls = S.sheets.find(x => x.id === rs.id); return !ls || JSON.stringify(ls) !== JSON.stringify(rs); });
+      if (!ch.length) return;
+      collectDirty(); mergeRemote(null, ch, false); applyRemote(); syncSchedule();
+    }, e => setSync('err', fbErr(e))));
+    SY.last = new Date(); if (SY.state === 'wait') setSync('ok');
+  } catch (e) { SY.ready = false; setSync('err', fbErr(e)); }
+}
+function stopSync() { SY.unsub.forEach(f => f()); SY.unsub = []; SY.user = null; SY.ready = false; SY.H = {}; setSync('off'); }
+
+async function initSync() {
+  try {
+    const fb = await fbLoad();
+    fb.AU.onAuthStateChanged(fb.auth, u => { if (u && (!SY.user || SY.user.uid !== u.uid)) startSync({ uid: u.uid, email: u.email }); else if (!u && SY.user) stopSync(); else if (!u) setSync('off'); });
+  } catch (e) { setSync('na', 'المزامنة تعمل في موقعك على GitHub، ولا تعمل في هذه المعاينة.'); }
+}
+window.addEventListener('online', () => syncSchedule());
+document.addEventListener('visibilitychange', () => { if (!document.hidden && SY.user && SY.state === 'err') startSync(SY.user); });
+
+function syncPanel() {
+  let p = $('#sync-panel');
+  if (!p) { p = document.createElement('div'); p.id = 'sync-panel'; p.setAttribute('role', 'dialog'); document.body.appendChild(p); }
+  p.hidden = false;
+  if (SY.state === 'na') {
+    p.innerHTML = `<h3>المزامنة بين الأجهزة</h3><p class="muted">${esc(SY.msg)}</p><div class="actions"><button class="btn ghost" data-close>إغلاق</button></div>`;
+  } else if (!SY.user) {
+    p.innerHTML = `<h3>المزامنة بين الأجهزة</h3>
+      <p class="muted" style="margin:0 0 10px">سجّل الدخول بحساب المعلم نفسه الذي تدخل به منصة «استعداد». تُحفظ الشعب والدرجات في حسابك، وتظهر في كل جهاز تسجّل الدخول منه.</p>
+      <label class="fld"><span>البريد أو اسم المستخدم</span><input id="sy-u" autocomplete="username" dir="ltr"></label>
+      <label class="fld" style="margin-top:8px"><span>كلمة المرور</span><input id="sy-p" type="password" autocomplete="current-password" dir="ltr"></label>
+      <p id="sy-e" class="err-msg" hidden></p>
+      <div class="actions"><button class="btn primary" id="sy-in">دخول</button><button class="btn ghost" data-close>إغلاق</button></div>`;
+    const go = async () => {
+      const u = $('#sy-u').value.trim(), pw = $('#sy-p').value, er = $('#sy-e');
+      if (!u || !pw) return;
+      $('#sy-in').disabled = true; er.hidden = true;
+      try { await SY.fb.AU.signInWithEmailAndPassword(SY.fb.auth, u.includes('@') ? u : u + '@' + LOGIN_DOMAIN, pw); closeSync(); toast('تم الدخول، جارٍ جلب بياناتك…'); }
+      catch (e) { er.textContent = fbErr(e); er.hidden = false; $('#sy-in').disabled = false; }
+    };
+    $('#sy-in').addEventListener('click', go);
+    $('#sy-p').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    setTimeout(() => $('#sy-u').focus(), 0);
+  } else {
+    p.innerHTML = `<h3>المزامنة بين الأجهزة</h3>
+      <p style="margin:0">الحساب: <b dir="ltr">${esc(SY.user.email)}</b></p>
+      <p class="muted" style="margin:4px 0 0">${SY.state === 'ok' ? 'كل التعديلات محفوظة في حسابك' + (SY.last ? '، آخر مزامنة ' + SY.last.toLocaleTimeString('ar') : '') + '.' : SY.state === 'wait' ? 'جارٍ المزامنة…' : ''}</p>
+      ${SY.state === 'err' ? `<p class="err-msg">${esc(SY.msg)}</p>` : ''}
+      <div class="actions"><button class="btn ghost" id="sy-now">مزامنة الآن</button><button class="btn ghost" id="sy-out">تسجيل الخروج</button><button class="btn danger" id="sy-wipe" data-msg="اضغط مجدداً للتأكيد">خروج ومسح البيانات من هذا الجهاز</button><button class="btn ghost" data-close>إغلاق</button></div>
+      <p class="hint">«خروج ومسح البيانات» مناسب لجهاز مشترك مثل لابتوب المدرسة. بياناتك تبقى محفوظة في حسابك.</p>`;
+    $('#sy-now').addEventListener('click', () => startSync(SY.user));
+    $('#sy-out').addEventListener('click', async () => { await SY.fb.AU.signOut(SY.fb.auth); closeSync(); toast('تم تسجيل الخروج'); });
+    $('#sy-wipe').addEventListener('click', e => arm(e.currentTarget, async () => { await SY.fb.AU.signOut(SY.fb.auth); try { localStorage.removeItem(KEY); } catch (er) {} location.reload(); }));
+  }
+  $$('[data-close]', p).forEach(b => b.addEventListener('click', closeSync));
+}
+function closeSync() { const p = $('#sync-panel'); if (p) p.hidden = true; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSync(); });
 
 /* ---------- WhatsApp reports ---------- */
 const WA_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>';
@@ -1259,6 +1464,8 @@ function exportXlsx(sh) {
 
 render();
 save(true);
+$('#sync').addEventListener('click', () => { const p = $('#sync-panel'); if (p && !p.hidden) closeSync(); else syncPanel(); });
+initSync();
 })();
 </script>
 </body>
