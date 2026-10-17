@@ -218,6 +218,14 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .errlog div{break-inside:avoid;margin-bottom:10px}
 .errlog b{display:block}
 .errlog ul{margin:2px 0 0;padding-inline-start:18px;color:var(--muted);font-size:.92rem}
+.modes{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);padding:4px;border-radius:12px;flex-wrap:wrap;justify-self:start}
+.modes button{border:0;background:transparent;padding:6px 16px;border-radius:9px;cursor:pointer;font-weight:700;color:var(--muted)}
+.modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.res th.sv{min-width:84px;line-height:1.3}
+.res th.sv small{display:block;font-weight:400;color:var(--muted);font-size:.7rem}
+.res td.go{cursor:pointer}
+.res td.go:hover{outline:2px solid var(--accent);outline-offset:-2px}
+.res sup{font-size:.6rem;margin-inline-start:2px}
 .legend{display:flex;gap:6px;flex-wrap:wrap;font-size:.8rem}
 .legend span{border-radius:6px;padding:1px 10px;font-weight:700}
 
@@ -781,6 +789,7 @@ function barHtml(st, k) {
 function rResults() {
   const v = $('#v-results');
   if (!S.sheets.length) { v.innerHTML = '<section class="panel"><p class="empty">لا توجد كشوف بعد. افتح كشفاً من تبويب «التسميع».</p></section>'; return; }
+  if (S.ui.resMode === 'class') { rResultsClass(); return; }
   let sh = sheetById(S.ui.resSheet) || cur() || S.sheets[S.sheets.length - 1];
   S.ui.resSheet = sh.id;
   const c = cls(sh.classId), studs = c ? c.students : [];
@@ -815,7 +824,7 @@ function rResults() {
     return items.length ? `<div><b>${esc(s.name)}</b><ul>${items.join('')}</ul></div>` : '';
   }).join('');
 
-  v.innerHTML = `
+  v.innerHTML = `${modeBar()}
     <section class="panel bar">
       <label class="fld grow"><span>الكشف</span><select id="x-sheet">${S.sheets.map(s => `<option value="${s.id}"${s.id === sh.id ? ' selected' : ''}>${esc(sheetLabel(s))}</option>`).join('')}</select></label>
       <label class="fld"><span>ترتيب الجدول</span><select id="x-sort"><option value="list"${S.ui.resSort === 'list' ? ' selected' : ''}>حسب القائمة</option><option value="rank"${S.ui.resSort === 'rank' ? ' selected' : ''}>حسب أفضل تسميع</option></select></label>
@@ -836,6 +845,7 @@ function rResults() {
     <p class="hint" style="margin:0">الدرجة النهائية = النسبة − عدد أخطاء النطق. درجة الشفوي من 6: ‎80 فأكثر = 6، ‎70 = 5، ‎60 = 4، ‎40 = 3، ‎20 = 2، أقل من ذلك = 1. الرقم الأحمر الصغير في خانة الآية يعني أخطاء نطق (مرّر المؤشر لقراءتها).</p>
     <section class="panel"><h2>سجل أخطاء النطق</h2>${log ? `<div class="errlog">${log}</div>` : '<p class="muted" style="margin:0">لا توجد أخطاء نطق مسجّلة في هذا الكشف.</p>'}</section>`;
 
+  bindModes();
   $('#x-sheet').addEventListener('change', e => { S.ui.resSheet = e.target.value; save(); rResults(); });
   $('#x-sort').addEventListener('change', e => { S.ui.resSort = e.target.value; save(); rResults(); });
   $('#x-xlsx').addEventListener('click', () => exportXlsx(sh));
@@ -846,6 +856,102 @@ function rResults() {
     S.ui.resSheet = null; save(true); rResults(); toast('حُذف الكشف');
   }));
   $$('[data-open]', v).forEach(b => b.addEventListener('click', () => { S.ui.sheet = sh.id; S.ui.student = b.dataset.open; S.ui.tab = 'recite'; save(); render(); window.scrollTo(0, 0); }));
+}
+
+/* ---------- results: every surah for one class ---------- */
+const modeBar = () => `<div class="modes" role="tablist" aria-label="طريقة العرض">
+    <button type="button" data-mode="sheet" aria-selected="${S.ui.resMode !== 'class'}">نتائج سورة واحدة</button>
+    <button type="button" data-mode="class" aria-selected="${S.ui.resMode === 'class'}">درجات الطلاب في كل السور</button></div>`;
+function bindModes() {
+  $$('#v-results [data-mode]').forEach(b => b.addEventListener('click', () => { S.ui.resMode = b.dataset.mode; save(); rResults(); }));
+}
+function classSummary(c) {
+  const sheets = S.sheets.filter(s => s.classId === c.id);
+  const rows = c.students.map((s, i) => {
+    const ks = sheets.map(sh => calc(sh, s.id));
+    const evs = ks.filter(k => k.ev);
+    const avg = evs.length ? evs.reduce((t, k) => t + k.fin, 0) / evs.length : null;
+    return { s, i, ks, avg, cnt: evs.length };
+  });
+  const colAvg = sheets.map((sh, j) => { const ev = rows.map(r => r.ks[j]).filter(k => k.ev); return ev.length ? ev.reduce((t, k) => t + k.fin, 0) / ev.length : null; });
+  const allEv = rows.filter(r => r.avg != null);
+  const total = allEv.length ? allEv.reduce((t, r) => t + r.avg, 0) / allEv.length : null;
+  return { sheets, rows, colAvg, total };
+}
+function rResultsClass() {
+  const v = $('#v-results');
+  const withSheets = S.classes.filter(c => S.sheets.some(s => s.classId === c.id));
+  let c = cls(S.ui.resClass);
+  if (!c || !withSheets.includes(c)) c = (cur() && cls(cur().classId)) || withSheets[0];
+  S.ui.resClass = c.id;
+  const sm = classSummary(c);
+  let rows = sm.rows.slice();
+  if (S.ui.resSort === 'rank') rows.sort((a, b) => (b.avg ?? -1) - (a.avg ?? -1) || a.i - b.i);
+  const gcell = (val, extra) => val == null ? `<td class="gr">—</td>` : `<td class="gr ${gcls(grade(val))}"${extra || ''}>${fmt(val)}</td>`;
+  const head = sm.sheets.map(sh => `<th class="sv">${sname(sh.surah)}${fullRange(sh) ? '' : `<small>${sh.from}–${sh.to}</small>`}${dupOf(sh) && sh.date ? `<small>${sh.date}</small>` : ''}</th>`).join('');
+  const body = rows.map(r => `<tr><td>${r.i + 1}</td><td class="nm">${esc(r.s.name)}</td>${r.ks.map((k, j) => k.ev
+      ? `<td class="gr ${gcls(k.g)} go" data-sh="${sm.sheets[j].id}" data-st="${r.s.id}" title="${esc(sname(sm.sheets[j].surah))}: ${k.g.label}${k.absent ? ' · لم يحفظ' : ''}${k.date ? ' · ' + k.date : ''}">${fmt(k.fin)}${k.absent ? '<sup>✕</sup>' : ''}</td>`
+      : `<td class="go" data-sh="${sm.sheets[j].id}" data-st="${r.s.id}" title="لم يُقيَّم بعد">—</td>`).join('')}
+    <td class="sum"></td>${gcell(r.avg)}<td class="gr ${r.avg != null ? gcls(grade(r.avg)) : ''}">${r.avg != null ? grade(r.avg).label : '—'}</td><td>${r.cnt} / ${sm.sheets.length}</td></tr>`).join('');
+  const foot = `<tr><td></td><td class="nm">متوسط الشعبة</td>${sm.colAvg.map(a => gcell(a)).join('')}<td class="sum"></td>${gcell(sm.total)}<td class="gr ${sm.total != null ? gcls(grade(sm.total)) : ''}">${sm.total != null ? grade(sm.total).label : '—'}</td><td></td></tr>`;
+
+  v.innerHTML = `${modeBar()}
+    <section class="panel bar">
+      <label class="fld grow"><span>الشعبة</span><select id="xc-class">${withSheets.map(x => `<option value="${x.id}"${x.id === c.id ? ' selected' : ''}>${esc(cname(x))}</option>`).join('')}</select></label>
+      <label class="fld"><span>ترتيب الجدول</span><select id="xc-sort"><option value="list"${S.ui.resSort === 'list' ? ' selected' : ''}>حسب القائمة</option><option value="rank"${S.ui.resSort === 'rank' ? ' selected' : ''}>حسب أعلى متوسط</option></select></label>
+      <button class="btn primary" id="xc-xlsx">تصدير إلى Excel</button>
+    </section>
+    <div class="tscroll"><table class="res">
+      <thead><tr><th>م</th><th class="nm">اسم الطالب</th>${head}<th class="sum"></th><th>متوسط الطالب</th><th>التقدير</th><th>السور المقيَّمة</th></tr></thead>
+      <tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
+    <div class="legend">${GRADES.slice().reverse().map(g => `<span class="${gcls(g)}">${g.label} ${g.range}</span>`).join('')}</div>
+    <p class="hint" style="margin:0">كل خانة هي الدرجة النهائية للطالب في تلك السورة. العلامة ✕ تعني أنه «لم يحفظ». اضغط أي خانة لفتح تسميع الطالب في تلك السورة.</p>`;
+
+  bindModes();
+  $('#xc-class').addEventListener('change', e => { S.ui.resClass = e.target.value; save(); rResultsClass(); });
+  $('#xc-sort').addEventListener('change', e => { S.ui.resSort = e.target.value; save(); rResultsClass(); });
+  $('#xc-xlsx').addEventListener('click', () => exportClassXlsx(c));
+  $$('#v-results td.go').forEach(td => td.addEventListener('click', () => { S.ui.sheet = td.dataset.sh; S.ui.student = td.dataset.st; S.ui.tab = 'recite'; save(); render(); window.scrollTo(0, 0); }));
+}
+function exportClassXlsx(c) {
+  if (!window.XLSX) { toast('تعذّر تحميل مكتبة Excel، تحقق من الاتصال بالإنترنت', true); return; }
+  const sm = classSummary(c);
+  let rows = sm.rows.slice();
+  if (S.ui.resSort === 'rank') rows.sort((a, b) => (b.avg ?? -1) - (a.avg ?? -1) || a.i - b.i);
+  const H = ['م', 'اسم الطالب'].concat(sm.sheets.map(sh => sname(sh.surah) + (fullRange(sh) ? '' : ' ' + sh.from + '–' + sh.to))).concat(['متوسط الطالب', 'التقدير', 'السور المقيَّمة']);
+  const W = H.length;
+  const fill = (row, o) => { while (row.length < W) row.push(xlCell('', o)); return row; };
+  const gc = (val, z) => val == null ? xlCell('—', z) : xlCell(r1(val), Object.assign({}, z, { bg: XL_GRADE[grade(val).key][0], fc: XL_GRADE[grade(val).key][1], b: true }), '0.0');
+  const A = [];
+  A.push(fill([xlCell('درجات الطلاب في السور — ' + cname(c), { sz: 22, b: true, bg: '0B6656', fc: 'FFFFFF', nb: true })], { bg: '0B6656', nb: true }));
+  A.push(fill([xlCell('عدد الطلاب ' + c.students.length + '  ·  عدد السور ' + sm.sheets.length + (sm.total != null ? '  ·  متوسط الشعبة ' + r1(sm.total) + '% (' + grade(sm.total).label + ')' : '') + '  ·  تاريخ التصدير ' + today(), { sz: 13, bg: 'D3E9E2', nb: true })], { bg: 'D3E9E2', nb: true }));
+  A.push(fill([xlCell('', { nb: true })], { nb: true }));
+  A.push(H.map(h => xlCell(h, { b: true, bg: '0E4F44', fc: 'FFFFFF', wrap: true, sz: 13 })));
+  rows.forEach((r, n) => {
+    const z = { bg: n % 2 ? 'F3F7F5' : 'FFFFFF' };
+    const row = [xlCell(r.i + 1, z), xlCell(r.s.name, Object.assign({ h: 'right', b: true }, z))];
+    r.ks.forEach(k => row.push(k.ev ? gc(k.fin, z) : xlCell('—', z)));
+    row.push(gc(r.avg, z), r.avg != null ? xlCell(grade(r.avg).label, Object.assign({}, z, { bg: XL_GRADE[grade(r.avg).key][0], fc: XL_GRADE[grade(r.avg).key][1], b: true })) : xlCell('—', z), xlCell(r.cnt + ' / ' + sm.sheets.length, z));
+    A.push(row);
+  });
+  const z = { bg: 'E1E9E6', b: true };
+  const f = [xlCell('', z), xlCell('متوسط الشعبة', Object.assign({ h: 'right' }, z))];
+  sm.colAvg.forEach(a => f.push(gc(a, z)));
+  f.push(gc(sm.total, z), sm.total != null ? xlCell(grade(sm.total).label, { b: true, bg: XL_GRADE[grade(sm.total).key][0], fc: XL_GRADE[grade(sm.total).key][1] }) : xlCell('—', z), xlCell('', z));
+  A.push(f);
+  A.push(fill([xlCell('', { nb: true })], { nb: true }));
+  const leg = [xlCell('', { nb: true }), xlCell('مفتاح التقديرات', { b: true, nb: true, h: 'right' })];
+  GRADES.slice().reverse().forEach(g => leg.push(xlCell(g.label + '\n' + g.range, { b: true, sz: 12, wrap: true, bg: XL_GRADE[g.key][0], fc: XL_GRADE[g.key][1] })));
+  A.push(leg);
+  const ws = XLSX.utils.aoa_to_sheet(A);
+  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(W, leg.length) - 1 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: Math.max(W, leg.length) - 1 } }];
+  ws['!cols'] = [{ wch: 6 }, { wch: 30 }].concat(Array(Math.max(W, leg.length) - 2).fill({ wch: 12 }));
+  ws['!rows'] = A.map((_, r) => ({ hpt: r === 0 ? 40 : r === 1 ? 26 : r === 2 ? 8 : r === 3 ? 36 : r === A.length - 1 ? 36 : 24 }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'درجات السور');
+  wb.Workbook = { Views: [{ RTL: true }] };
+  try { XLSX.writeFile(wb, 'درجات السور ' + cname(c) + '.xlsx'); toast('نُزّل ملف Excel'); }
+  catch (err) { toast('تعذّر تنزيل الملف من هذه الصفحة', true); }
 }
 
 /* ---------- view: class statistics ---------- */
