@@ -6,186 +6,227 @@
 <title>كشف التسميع</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: a teacher's marking desk — roster column beside the ayah sheet; every ayah carries its grade + pronunciation box, like the Excel rows */
+/* Layout: a teacher's marking desk — roster beside the ayah sheet; a sticky grade bar follows the teacher down the ayat */
 :root{
   --bg:#eaf0ee; --surface:#fbfdfc; --sunk:#e1e9e6; --ink:#10302a; --muted:#566d67; --line:#cad8d3;
   --accent:#0b6656; --accent-ink:#f3fbf8; --accent-soft:#d3e9e2; --gold:#9c6a17;
-  --g2:#1b7a45; --g2s:#d9eee1; --g1:#a46500; --g1s:#f5e6c4; --g0:#b33c28; --g0s:#f6dad3; --on:#ffffff;
-  --f-ui:"IBM Plex Sans Arabic",system-ui,"Segoe UI",Tahoma,sans-serif;
-  --f-display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --g2:#1b7a45; --g1:#a46500; --g0:#b33c28; --g0s:#f6dad3; --on:#ffffff;
+  --gw:#f6c9c4; --gwi:#8c1d13; --gm:#fbec9a; --gmi:#5f4c00; --go:#fcd0a1; --goi:#853e00;
+  --gg:#cde5fa; --ggi:#0c4a7d; --gv:#bde6c6; --gvi:#14592a; --ge1:#2fe873; --ge2:#d6f9e0; --gei:#053d19;
+  --f-ui:"Sakkal Majalla","IBM Plex Sans Arabic",system-ui,"Segoe UI",Tahoma,sans-serif;
   --f-quran:"Amiri Quran","Amiri","Traditional Arabic","Scheherazade New",serif;
-  --r:10px;
+  --r:10px; --hdr:64px; --bar:70px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0c1513; --surface:#132019; --sunk:#0f1a17; --ink:#e2ece8; --muted:#92a8a1; --line:#25352f;
   --accent:#3fb39d; --accent-ink:#04201a; --accent-soft:#173a32; --gold:#d6a453;
-  --g2:#4cc07d; --g2s:#173826; --g1:#e2ad45; --g1s:#3a2e14; --g0:#ef7059; --g0s:#3d1d17; --on:#07130f;
+  --g2:#4cc07d; --g1:#e2ad45; --g0:#ef7059; --g0s:#3d1d17; --on:#07130f;
+  --gw:#5a2420; --gwi:#ffc2b8; --gm:#4d4310; --gmi:#ffe98a; --go:#57340f; --goi:#ffcf99;
+  --gg:#123b5c; --ggi:#b9dcff; --gv:#164a26; --gvi:#b5f0c4; --ge1:#22c95e; --ge2:#0f3a1f; --gei:#ecfff2;
   color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0c1513; --surface:#132019; --sunk:#0f1a17; --ink:#e2ece8; --muted:#92a8a1; --line:#25352f;
   --accent:#3fb39d; --accent-ink:#04201a; --accent-soft:#173a32; --gold:#d6a453;
-  --g2:#4cc07d; --g2s:#173826; --g1:#e2ad45; --g1s:#3a2e14; --g0:#ef7059; --g0s:#3d1d17; --on:#07130f;
+  --g2:#4cc07d; --g1:#e2ad45; --g0:#ef7059; --g0s:#3d1d17; --on:#07130f;
+  --gw:#5a2420; --gwi:#ffc2b8; --gm:#4d4310; --gmi:#ffe98a; --go:#57340f; --goi:#ffcf99;
+  --gg:#123b5c; --ggi:#b9dcff; --gv:#164a26; --gvi:#b5f0c4; --ge1:#22c95e; --ge2:#0f3a1f; --gei:#ecfff2;
   color-scheme:dark }
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html{direction:rtl}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6;margin:0}
+html{direction:rtl;scroll-padding-top:calc(var(--hdr) + var(--bar) + 12px)}
+html.sk{font-size:19px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:.95rem;line-height:1.6;margin:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1320px;margin:0 auto}
 
 /* header */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-block:10px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:8px}
 .brand{display:flex;align-items:baseline;gap:10px;margin-inline-end:auto}
-.brand h1{font-family:var(--f-display);font-weight:700;font-size:1.45rem;margin:0;color:var(--accent);letter-spacing:0}
+.brand h1{font-weight:700;font-size:1.45rem;margin:0;color:var(--accent)}
 .brand small{color:var(--muted);font-size:.8rem}
-.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:999px}
-.tab{border:0;background:transparent;padding:6px 16px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:500}
+.tabs{display:flex;gap:3px;background:var(--sunk);padding:4px;border-radius:999px;flex-wrap:wrap}
+.tab{border:0;background:transparent;padding:5px 14px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:600}
 .tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 #saved{font-size:.78rem;color:var(--muted);min-width:70px;text-align:left}
 #saved::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g2);margin-inline-end:6px;vertical-align:middle}
 #saved.bad{color:var(--g0)} #saved.bad::before{background:var(--g0)}
 
-main{padding-block:20px 60px;display:grid;gap:16px}
-.view{display:grid;gap:16px}
-.banner{background:var(--accent-soft);border-radius:var(--r);padding:10px 14px;font-size:.9rem;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+main{padding-block:18px 60px;display:grid;gap:16px}
+.view{display:grid;gap:16px;min-width:0}
+.banner{background:var(--accent-soft);border-radius:var(--r);padding:10px 14px;font-size:.9rem}
 
 /* generic */
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
-.panel h2{font-family:var(--f-display);font-weight:500;font-size:1.15rem;margin:0 0 12px}
+.panel h2{font-weight:700;font-size:1.2rem;margin:0 0 12px}
 .cols{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;align-items:start}
 .cols > .panel:last-child{grid-column:1/-1}
 .fld{display:grid;gap:4px;min-width:0}
-.fld > span{font-size:.8rem;color:var(--muted);font-weight:500}
+.fld > span{font-size:.8rem;color:var(--muted);font-weight:600}
 .fld em{font-style:normal;font-weight:400;opacity:.85}
-.fld input,.fld select,.fld textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:0}
 .fld textarea{resize:vertical;line-height:1.8}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
 .filebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
-.btn{border:1px solid transparent;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500;background:var(--sunk);display:inline-flex;align-items:center;gap:6px;text-decoration:none;white-space:nowrap}
+.btn{border:1px solid transparent;border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:600;background:var(--sunk);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn.primary{background:var(--accent);color:var(--accent-ink)}
 .btn.ghost{background:transparent;border-color:var(--line)}
 .btn.ghost:hover{background:var(--sunk)}
 .btn.danger{background:transparent;color:var(--g0);border-color:var(--line)}
 .btn.armed{background:var(--g0);color:var(--on);border-color:var(--g0)}
-.btn.sm{padding:4px 10px;font-size:.85rem}
+.btn.sm{padding:3px 10px;font-size:.85rem}
 .btn:disabled{opacity:.45;cursor:default}
+.btn.toggle[aria-pressed="true"]{background:var(--g0);color:var(--on);border-color:var(--g0)}
 .muted{color:var(--muted);font-size:.85rem}
 .hint{color:var(--muted);font-size:.85rem;margin:8px 0 0}
 .empty{color:var(--muted);padding:24px 0;text-align:center}
-.tag{font-size:.72rem;background:var(--g1s);color:var(--g1);padding:1px 8px;border-radius:999px;font-weight:600}
+.tag{font-size:.72rem;background:var(--gm);color:var(--gmi);padding:1px 8px;border-radius:999px;font-weight:700}
 .clist{list-style:none;margin:0;padding:0;display:grid}
 .clist li{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
 .clist li:first-child{border-top:0}
 .clist small{display:block;color:var(--muted);font-size:.8rem}
 .clist .act{display:flex;gap:6px}
 
+/* grade shading */
+.g-weak{background:var(--gw)!important;color:var(--gwi)!important}
+.g-acc{background:var(--gm)!important;color:var(--gmi)!important}
+.g-mid{background:var(--go)!important;color:var(--goi)!important}
+.g-good{background:var(--gg)!important;color:var(--ggi)!important}
+.g-vgood{background:var(--gv)!important;color:var(--gvi)!important}
+.g-exc{background:radial-gradient(ellipse at center,var(--ge1) 0%,var(--ge2) 100%)!important;color:var(--gei)!important}
+.g-none{background:var(--sunk)!important;color:var(--muted)!important}
+
 /* recite toolbar */
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
 .bar .fld{flex:1 1 150px}
 .bar .fld.grow{flex:2 1 220px}
 .bar .fld.sm{flex:0 1 92px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:12px;width:100%}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px;width:100%}
 .chips > span{font-size:.8rem;color:var(--muted)}
-.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:3px 12px;font-size:.82rem;cursor:pointer}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:2px 12px;font-size:.85rem;cursor:pointer}
 .chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 
 /* workspace */
-.work{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:start}
-.roster{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);max-height:calc(100vh - 100px);overflow:auto;padding:0}
-.rhead{display:flex;justify-content:space-between;align-items:baseline;padding:14px 16px 8px;position:sticky;top:0;background:var(--surface)}
-.rhead small{color:var(--muted);font-size:.78rem}
+.work{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
+.roster{position:sticky;top:calc(var(--hdr) + 12px);max-height:calc(100vh - var(--hdr) - 24px);overflow:auto;padding:0}
+.rhead{display:flex;justify-content:space-between;align-items:baseline;padding:12px 16px 6px;position:sticky;top:0;background:var(--surface);z-index:1}
+.rhead small{color:var(--muted);font-size:.8rem}
 .roster ol{list-style:none;margin:0;padding:0 6px 8px}
-.roster li button{width:100%;display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;text-align:right;border:0;background:transparent;padding:7px 10px;border-radius:8px;cursor:pointer}
+.roster li button{width:100%;display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;align-items:center;text-align:right;border:0;background:transparent;padding:6px 10px;border-radius:8px;cursor:pointer}
 .roster li button:hover{background:var(--sunk)}
 .roster li.on button{background:var(--accent-soft)}
 .roster .n{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
 .roster .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pill{font-size:.75rem;font-weight:600;border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums;background:var(--sunk);color:var(--muted)}
-.pill.hi{background:var(--g2s);color:var(--g2)} .pill.mid{background:var(--g1s);color:var(--g1)} .pill.lo{background:var(--g0s);color:var(--g0)}
+.pill{font-size:.78rem;font-weight:700;border-radius:999px;padding:0 9px;font-variant-numeric:tabular-nums;background:var(--sunk);color:var(--muted);white-space:nowrap}
 .mobile-only{display:none}
 
-.sheet{padding:0;overflow:hidden}
-.stu-head{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;padding:18px 18px 12px}
+.sheet{padding:0}
+.stu-head{display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;padding:16px 18px 12px}
 .stu-head small{color:var(--muted)}
-.stu-head h2{font-family:var(--f-display);font-size:1.6rem;margin:2px 0 0;font-weight:700}
-.nav{display:flex;gap:6px}
-.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-block:1px solid var(--line);background:var(--bg)}
-.st{padding:10px 14px;border-inline-start:1px solid var(--line);display:grid}
-.st:first-child{border-inline-start:0}
-.st > span{font-size:.75rem;color:var(--muted)}
-.st b{font-size:1.35rem;font-variant-numeric:tabular-nums;font-weight:600}
-.st b i{font-style:normal;font-size:.8rem;color:var(--muted);font-weight:400}
-.st.key b{color:var(--accent)}
-.prog{grid-column:1/-1;border-top:1px solid var(--line);padding:6px 14px;display:flex;gap:10px;align-items:center}
-.prog .track{flex:1;height:5px;background:var(--sunk);border-radius:9px;overflow:hidden}
+.stu-head h2{font-size:1.7rem;margin:0;font-weight:700}
+.stu-tools{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.stu-tools .fld{width:160px}
+
+/* sticky grade bar */
+.sbar{position:sticky;top:var(--hdr);z-index:4;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:stretch;background:var(--surface);border-block:1px solid var(--line);box-shadow:0 6px 12px -10px rgba(0,0,0,.25)}
+.sb-name{padding:8px 18px;display:grid;align-content:center;min-width:0}
+.sb-name small,.sb-cell small,.sb-grade small{font-size:.75rem;color:var(--muted);display:block;line-height:1.2}
+.sb-name b{font-size:1.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-name .prog{display:flex;gap:8px;align-items:center;margin-top:4px}
+.prog .track{flex:1;height:5px;background:var(--sunk);border-radius:9px;overflow:hidden;max-width:220px}
 .prog .track span{display:block;height:100%;background:var(--accent);border-radius:9px;transition:width .2s}
-.prog small{font-size:.75rem;color:var(--muted);white-space:nowrap}
-.tools{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;justify-content:space-between;align-items:center}
-.tools .legend{font-size:.8rem;color:var(--muted)}
-.basmala{font-family:var(--f-quran);text-align:center;font-size:1.5rem;color:var(--muted);margin:4px 0 6px}
+.prog small{white-space:nowrap}
+.sb-cell{padding:8px 18px;border-inline-start:1px solid var(--line);display:grid;align-content:center;text-align:center}
+.sb-cell b{font-size:1.5rem;font-variant-numeric:tabular-nums;line-height:1.2}
+.sb-err b{color:var(--g0)}
+.sb-grade{display:grid;grid-template-columns:repeat(3,minmax(92px,auto));border-inline-start:1px solid var(--line)}
+.sb-grade > div{padding:8px 16px;display:grid;align-content:center;text-align:center;border-inline-start:1px solid rgba(0,0,0,.08)}
+.sb-grade > div:first-child{border-inline-start:0}
+.sb-grade small{color:inherit!important;opacity:.8}
+.sb-grade b{font-size:1.5rem;font-variant-numeric:tabular-nums;line-height:1.2}
+.sb-grade b i{font-style:normal;font-size:.8rem;opacity:.8}
+
+.tools{display:flex;gap:8px;flex-wrap:wrap;padding:10px 18px;justify-content:space-between;align-items:center}
+.keys{font-size:.82rem;color:var(--muted);display:flex;gap:4px 12px;flex-wrap:wrap}
+kbd{font-family:inherit;font-size:.8rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--bg);color:var(--ink)}
+.basmala{font-family:var(--f-quran);text-align:center;font-size:24px;color:var(--muted);margin:4px 0 6px}
 
 .ayat{list-style:none;margin:0;padding:0}
-.ayah{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 18px;align-items:center;padding:14px 18px;border-top:1px solid var(--line)}
-.atext{font-family:var(--f-quran);font-size:1.6rem;line-height:2.15;margin:0}
-.anum{font-size:1.15rem;color:var(--gold);white-space:nowrap}
-.ctrl{display:grid;gap:6px;width:300px}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.seg button{border:0;border-inline-start:1px solid var(--line);background:var(--surface);padding:5px 4px;cursor:pointer;display:grid;line-height:1.25}
+.ayat.dim{opacity:.45}
+.ayah{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);gap:10px 20px;align-items:center;padding:14px 18px;border-top:1px solid var(--line)}
+.ayah:focus-within{background:var(--bg)}
+.atext{font-family:var(--f-quran);font-size:26px;line-height:2.1;margin:0;min-width:0}
+.anum{font-size:18px;color:var(--gold);white-space:nowrap}
+.ctrl{display:grid;gap:6px;min-width:0}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:9px;background:var(--surface);overflow:hidden}
+.seg:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.seg button{border:0;border-inline-start:1px solid var(--line);background:transparent;padding:4px 2px;cursor:pointer;display:grid;line-height:1.2;min-width:0}
 .seg button:first-child{border-inline-start:0}
-.seg button b{font-size:1.05rem;font-variant-numeric:tabular-nums}
-.seg button span{font-size:.7rem;color:var(--muted)}
+.seg button b{font-size:1.1rem;font-variant-numeric:tabular-nums}
+.seg button span{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .seg button:hover{background:var(--sunk)}
-.seg button[data-v="2"][aria-pressed="true"]{background:var(--g2);color:var(--on)}
-.seg button[data-v="1"][aria-pressed="true"]{background:var(--g1);color:var(--on)}
-.seg button[data-v="0"][aria-pressed="true"]{background:var(--g0);color:var(--on)}
-.seg button[aria-pressed="true"] span{color:inherit;opacity:.9}
-.err{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:0 10px;background:var(--bg)}
-.err span{font-size:.72rem;color:var(--muted);white-space:nowrap}
-.err input{border:0;background:transparent;padding:7px 0;flex:1;min-width:0;outline:none}
-.err:focus-within{border-color:var(--accent)}
-.ayah.has-err .err{border-color:var(--g0);background:var(--g0s)}
-.ayah.has-err .err span{color:var(--g0);font-weight:600}
-.ayah.has-err .err span::after{content:" −١"}
+.seg button[data-v="2"][aria-checked="true"]{background:var(--g2);color:var(--on)}
+.seg button[data-v="1"][aria-checked="true"]{background:var(--g1);color:var(--on)}
+.seg button[data-v="0"][aria-checked="true"]{background:var(--g0);color:var(--on)}
+.seg button[aria-checked="true"] span{color:inherit;opacity:.9}
+.errs{display:grid;gap:4px}
+.erow{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:0 10px;background:var(--bg);min-width:0}
+.erow span{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.erow input{border:0;background:transparent;padding:6px 0;flex:1;min-width:0;outline:none}
+.erow:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.erow.filled{border-color:var(--g0);background:var(--g0s)}
+.erow.filled span{color:var(--g0);font-weight:700}
+.erow.filled span::after{content:" −١"}
 
 /* results */
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
-.tile span{font-size:.78rem;color:var(--muted)}
-.tile b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums;font-weight:600}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 14px}
+.tile span{font-size:.8rem;color:var(--muted)}
+.tile b{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums;font-weight:700}
 .tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
-table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;font-size:.88rem;min-width:100%}
-.res th,.res td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;background:var(--surface)}
-.res thead th{background:var(--sunk);font-weight:600;font-size:.78rem;position:sticky;top:0}
+table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;font-size:.9rem;min-width:100%}
+.res th,.res td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;background:var(--surface)}
+.res thead th{background:var(--sunk);font-weight:700;font-size:.8rem}
 .res th.nm,.res td.nm{position:sticky;right:0;z-index:1;text-align:right;border-inline-end:1px solid var(--line);min-width:150px}
-.res thead th.nm{z-index:2}
-.res td.nm button{border:0;background:none;padding:0;cursor:pointer;color:var(--ink);font-weight:500;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.res td.nm button{border:0;background:none;padding:0;cursor:pointer;color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
 .res th.ay{min-width:46px;line-height:1.3}
-.res th.ay small{display:block;font-weight:400;color:var(--muted);font-size:.68rem;max-width:70px;overflow:hidden;text-overflow:ellipsis}
-.res td.c{font-weight:600}
-.res td.c2{color:var(--g2)} .res td.c1{color:var(--g1);background:var(--g1s)} .res td.c0{color:var(--g0);background:var(--g0s)}
+.res th.ay small{display:block;font-weight:400;color:var(--muted);font-size:.7rem;max-width:72px;overflow:hidden;text-overflow:ellipsis}
+.res td.c{font-weight:700}
+.res td.c2{color:var(--g2)} .res td.c1{color:var(--g1)} .res td.c0{color:var(--g0);background:var(--g0s)}
 .res td.e{position:relative}
-.res td.e::after{content:"";position:absolute;top:4px;left:4px;width:6px;height:6px;border-radius:50%;background:var(--g0)}
+.res td.e::after{content:attr(data-n);position:absolute;top:1px;left:2px;font-size:.62rem;color:var(--g0);font-weight:700}
 .res .sum{border-inline-start:2px solid var(--line)}
-.res td.fin{font-weight:700;color:var(--accent)}
+.res td.err{color:var(--g0);font-weight:700}
+.res td.gr{font-weight:700}
 .res td.rank{font-weight:700}
 .res tr.nt td{color:var(--muted)}
+.res tfoot td{font-weight:700;background:var(--sunk)}
+.meter{display:inline-block;width:90px;height:6px;border-radius:9px;background:var(--sunk);vertical-align:middle;margin-inline-start:8px;overflow:hidden}
+.meter span{display:block;height:100%;background:var(--accent)}
+.dist{display:flex;gap:3px;justify-content:center}
+.dist span{min-width:26px;border-radius:5px;padding:0 4px;font-weight:700;font-size:.82rem}
 .errlog{columns:2 320px;column-gap:28px}
 .errlog div{break-inside:avoid;margin-bottom:10px}
 .errlog b{display:block}
-.errlog ul{margin:2px 0 0;padding-inline-start:18px;color:var(--muted);font-size:.9rem}
+.errlog ul{margin:2px 0 0;padding-inline-start:18px;color:var(--muted);font-size:.92rem}
+.legend{display:flex;gap:6px;flex-wrap:wrap;font-size:.8rem}
+.legend span{border-radius:6px;padding:1px 10px;font-weight:700}
 
-#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
+#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:8px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:.2s;z-index:20;max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 #toast.bad{background:var(--g0);color:var(--on)}
-.foot{color:var(--muted);font-size:.78rem;text-align:center;padding-top:24px}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;padding-top:24px}
 
+@media (max-width:1000px){
+  .sbar{grid-template-columns:minmax(0,1fr) auto}
+  .sb-grade{grid-column:1/-1;border-inline-start:0;border-top:1px solid var(--line)}
+}
 @media (max-width:900px){
   .cols{grid-template-columns:1fr}
   .work{grid-template-columns:1fr}
@@ -193,13 +234,10 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   .mobile-only{display:block}
   .stu-pick{padding:14px 18px 0}
   .ayah{grid-template-columns:1fr}
-  .ctrl{width:100%}
-  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .st:nth-child(4){border-inline-start:0}
-  .st:nth-child(n+4){border-top:1px solid var(--line)}
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .keys{display:none}
 }
-@media (max-width:520px){ .brand small,#saved{display:none} .tab{padding:6px 11px} .atext{font-size:1.4rem} }
+@media (max-width:520px){ .brand small,#saved{display:none} .tab{padding:5px 10px} .atext{font-size:23px} .sb-grade{grid-template-columns:repeat(3,minmax(0,1fr))} .sb-grade > div{padding:6px 8px} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media print{.top,.bar,.tools,.roster,.no-print{display:none!important} body{background:#fff}}
 </style>
@@ -209,23 +247,23 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 
 <header class="top">
   <div class="wrap">
-    <div class="brand"><h1>كشف التسميع</h1><small>درجتان لكل آية · خطأ النطق ينقص درجة</small></div>
+    <div class="brand"><h1>كشف التسميع</h1><small>درجتان لكل آية · كل خطأ نطق ينقص درجة</small></div>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="classes">الشُّعب</button>
       <button class="tab" role="tab" data-tab="recite">التسميع</button>
       <button class="tab" role="tab" data-tab="results">النتائج</button>
+      <button class="tab" role="tab" data-tab="stats">إحصاء الشُّعب</button>
     </nav>
     <span id="saved">محفوظ</span>
   </div>
 </header>
 
 <main class="wrap">
-  <div id="demo-banner" class="banner" hidden>
-    <span>تظهر الآن شعبة <b>مثال</b> لتجربة الأداة. احذفها من تبويب «الشُّعب» بعد إضافة شعبك.</span>
-  </div>
+  <div id="demo-banner" class="banner" hidden>تظهر الآن شعب <b>مثال</b> لتجربة الأداة. احذفها من تبويب «الشُّعب» بعد إضافة شعبك.</div>
   <section id="v-classes" class="view" hidden></section>
   <section id="v-recite" class="view" hidden></section>
   <section id="v-results" class="view" hidden></section>
+  <section id="v-stats" class="view" hidden></section>
   <p class="foot">النص القرآني بالرسم العثماني من مشروع تنزيل (tanzil.net). البيانات محفوظة في هذا المتصفح.</p>
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -250,22 +288,49 @@ const cnt = (n, one, two, few, many) => n === 1 ? one : n === 2 ? two : (n >= 3 
 
 if (!Q.length) { document.body.insertAdjacentHTML('afterbegin', '<p style="padding:20px;color:#b33c28">تعذّر تحميل ملف النص القرآني quran.js — تأكد أنه بجانب index.html.</p>'); return; }
 
+/* Sakkal Majalla is a Windows font and draws small: enlarge the base size only when it is installed */
+try { const c = document.createElement('canvas').getContext('2d'), t = 'كشف التسميع والدرجات abc';
+  c.font = '40px monospace'; const w1 = c.measureText(t).width; c.font = '40px "Sakkal Majalla", monospace';
+  if (Math.abs(c.measureText(t).width - w1) > 1) document.documentElement.classList.add('sk'); } catch (e) {}
+
+/* ---------- grading ---------- */
+const GRADES = [
+  { min: 90, key: 'exc', label: 'ممتاز' }, { min: 80, key: 'vgood', label: 'جيد جداً' }, { min: 60, key: 'good', label: 'جيد' },
+  { min: 40, key: 'mid', label: 'متوسط' }, { min: 20, key: 'acc', label: 'مقبول' }, { min: -1, key: 'weak', label: 'ضعيف' }];
+const grade = f => GRADES.find(g => r1(f) >= g.min);
+const gcls = g => 'g-' + g.key;
+
 /* ---------- state ---------- */
 let S = null;
 try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { S = null; }
 if (!S || !Array.isArray(S.classes) || !Array.isArray(S.sheets)) S = demo();
-S.ui = Object.assign({ tab: 'recite', sheet: null, student: null, editClass: null, resSheet: null, resSort: 'list', lastClass: null, lastSurah: 64 }, S.ui || {});
+S.ui = Object.assign({ tab: 'recite', sheet: null, student: null, editClass: null, resSheet: null, resSort: 'list', lastClass: null, lastSurah: 64, statSurah: 'all' }, S.ui || {});
+/* upgrade older saves: one error string per ayah → list of errors; sheet date → each student's date */
+S.sheets.forEach(sh => Object.values(sh.recs || {}).forEach(r => {
+  r.s = r.s || {}; r.e = r.e || {};
+  Object.keys(r.e).forEach(a => { if (!Array.isArray(r.e[a])) r.e[a] = String(r.e[a] || '').trim() ? [r.e[a]] : []; if (!r.e[a].length) delete r.e[a]; });
+  if (!r.date && sh.date && (Object.keys(r.s).length || Object.keys(r.e).length)) r.date = sh.date;
+}));
 
 function demo() {
-  const names = ['محمد أحمد', 'عبدالله خالد', 'يوسف علي', 'عمر سالم', 'حمد ناصر', 'فهد راشد'];
-  const students = names.map(n => ({ id: uid(), name: n }));
-  const c = { id: uid(), grade: 'تاسع', section: '(مثال)', demo: true, students };
-  const sh = { id: uid(), classId: c.id, surah: 64, from: 1, to: 18, date: today(), recs: {} };
-  const o = a => { const r = {}; a.forEach((v, i) => r[i + 1] = v); return r; };
-  sh.recs[students[0].id] = { s: o([2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]), e: {} };
-  sh.recs[students[1].id] = { s: o([2,2,1,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2]), e: { 4: 'المدّ في «يعلم»' } };
-  sh.recs[students[2].id] = { s: o([2,1,1,2,0,2,1,2,1,2,2,0,1,2,2,1,0,0]), e: { 2: 'تشكيل «فمنكم»', 11: 'مخرج الصاد في «أصاب»' } };
-  return { classes: [c], sheets: [sh], ui: { tab: 'recite', sheet: sh.id, student: students[1].id, lastClass: c.id, lastSurah: 64 } };
+  const mk = (sec, names) => ({ id: uid(), grade: 'سابع', section: sec, demo: true, students: names.map(n => ({ id: uid(), name: n })) });
+  const a = mk('(مثال أ)', ['محمد أحمد', 'عبدالله خالد', 'يوسف علي', 'عمر سالم', 'حمد ناصر', 'فهد راشد']);
+  const b = mk('(مثال ب)', ['سالم محمد', 'راشد علي', 'ناصر حمد', 'خليفة سعيد', 'جاسم عبدالله']);
+  const o = arr => { const r = {}; arr.forEach((v, i) => { if (v != null) r[i + 1] = v; }); return r; };
+  const t = today();
+  const full = Array(18).fill(2);
+  const sa = { id: uid(), classId: a.id, surah: 64, from: 1, to: 18, recs: {} };
+  const s = a.students;
+  sa.recs[s[0].id] = { s: o(full), e: {}, date: t };
+  sa.recs[s[1].id] = { s: o([2,2,1,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2]), e: { 4: ['المدّ في «يعلم»'] }, date: t };
+  sa.recs[s[2].id] = { s: o([2,1,1,2,0,2,1,2,1,2,2,0,1,2,2,1,0,0]), e: { 2: ['تشكيل «فمنكم»', 'مخرج الكاف'], 11: ['مخرج الصاد في «أصاب»'] }, date: t };
+  sa.recs[s[3].id] = { s: {}, e: {}, absent: true };
+  const sb = { id: uid(), classId: b.id, surah: 64, from: 1, to: 18, recs: {} };
+  const u = b.students;
+  sb.recs[u[0].id] = { s: o(full), e: {}, date: t };
+  sb.recs[u[1].id] = { s: o([2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,1,2]), e: { 9: ['«يوم يجمعكم» إظهار الميم'] }, date: t };
+  sb.recs[u[2].id] = { s: o([2,1,2,1,1,2,1,2,1,2,1,2,2,1,0,1,2,1]), e: {}, date: t };
+  return { classes: [a, b], sheets: [sa, sb], ui: { tab: 'recite', sheet: sa.id, student: s[2].id, lastClass: a.id, lastSurah: 64 } };
 }
 
 let saveT;
@@ -285,32 +350,33 @@ const cname = c => c ? (c.grade + ' ' + c.section).trim() : '(شعبة محذو�
 const sname = n => Q[n - 1][0];
 const fullRange = sh => sh.from === 1 && sh.to === Q[sh.surah - 1][1].length;
 const rangeTxt = sh => fullRange(sh) ? 'كاملة' : 'الآيات ' + sh.from + '–' + sh.to;
-const sheetLabel = sh => cname(cls(sh.classId)) + ' · ' + sname(sh.surah) + (fullRange(sh) ? '' : ' (' + sh.from + '–' + sh.to + ')') + ' · ' + sh.date;
+const dupOf = sh => S.sheets.some(x => x !== sh && x.classId === sh.classId && x.surah === sh.surah && x.from === sh.from && x.to === sh.to);
+const sheetShort = sh => sname(sh.surah) + (fullRange(sh) ? '' : ' ' + sh.from + '–' + sh.to) + (dupOf(sh) && sh.date ? ' · ' + sh.date : '');
+const sheetLabel = sh => cname(cls(sh.classId)) + ' · ' + sheetShort(sh);
 const cur = () => S.ui.sheet && sheetById(S.ui.sheet);
+const errList = (r, a) => (r.e && Array.isArray(r.e[a]) ? r.e[a] : []).filter(x => String(x || '').trim());
 
 function calc(sh, sid) {
   const r = sh.recs[sid] || { s: {}, e: {} };
   const n = sh.to - sh.from + 1;
-  let sum = 0, c2 = 0, c1 = 0, c0 = 0, err = 0, touched = false;
+  let sum = 0, c2 = 0, c1 = 0, c0 = 0, err = 0;
   for (let a = sh.from; a <= sh.to; a++) {
     const v = r.s[a];
     if (v === 2) { c2++; sum += 2; } else if (v === 1) { c1++; sum += 1; } else if (v === 0) { c0++; }
-    if ((r.e[a] || '').trim()) err++;
+    err += errList(r, a).length;
   }
-  touched = (c2 + c1 + c0 + err) > 0;
+  const touched = (c2 + c1 + c0 + err) > 0, absent = !!r.absent;
   const pct = n ? sum * 100 / (2 * n) : 0;
   const fin = Math.max(0, pct - err);
   const oral = fin >= 80 ? 6 : fin >= 70 ? 5 : fin >= 60 ? 4 : fin >= 40 ? 3 : fin >= 20 ? 2 : fin >= 1 ? 1 : 0;
-  return { n, sum, c2, c1, c0, err, pct, fin, oral, touched, done: c2 + c1 + c0 };
+  return { n, sum, c2, c1, c0, err, pct, fin, oral, touched, absent, ev: touched && !absent, done: c2 + c1 + c0, date: r.date || '', g: grade(fin) };
 }
 function rankMap(sh, studs) {
-  const list = studs.map(s => ({ id: s.id, k: calc(sh, s.id) })).filter(x => x.k.touched);
+  const list = studs.map(s => ({ id: s.id, k: calc(sh, s.id) })).filter(x => x.k.ev);
   const m = {};
   list.forEach(x => { m[x.id] = 1 + list.filter(y => r1(y.k.fin) > r1(x.k.fin)).length; });
   return m;
 }
-const band = f => f >= 80 ? 'hi' : f >= 60 ? 'mid' : 'lo';
-
 function arm(btn, fn) {
   if (btn.dataset.armed) { fn(); return; }
   btn.dataset.armed = '1';
@@ -325,13 +391,20 @@ function download(blob, name) {
   document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
 }
+function setHdr() {
+  const root = document.documentElement.style;
+  root.setProperty('--hdr', $('.top').offsetHeight + 'px');
+  const b = $('#sbar'); root.setProperty('--bar', (b ? b.offsetHeight : 0) + 'px');
+}
+window.addEventListener('resize', setHdr);
 
 /* ---------- render shell ---------- */
 function render() {
   $$('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === S.ui.tab)));
   $$('.view').forEach(v => v.hidden = v.id !== 'v-' + S.ui.tab);
   $('#demo-banner').hidden = !S.classes.some(c => c.demo);
-  ({ classes: rClasses, recite: rRecite, results: rResults })[S.ui.tab]();
+  ({ classes: rClasses, recite: rRecite, results: rResults, stats: rStats })[S.ui.tab]();
+  setHdr();
 }
 $$('.tab').forEach(b => b.addEventListener('click', () => { S.ui.tab = b.dataset.tab; save(); render(); window.scrollTo(0, 0); }));
 
@@ -423,19 +496,19 @@ function rClasses() {
   });
 
   $('#f-save').addEventListener('click', () => {
-    const grade = $('#f-grade').value.trim(), sec = $('#f-sec').value.trim();
+    const grade_ = $('#f-grade').value.trim(), sec = $('#f-sec').value.trim();
     const names = parseNames(ta.value);
-    if (!grade && !sec) { toast('اكتب الصف والشعبة', true); return; }
+    if (!grade_ && !sec) { toast('اكتب الصف والشعبة', true); return; }
     if (!names.length) { toast('أضف اسماً واحداً على الأقل', true); return; }
     if (ed) {
       const by = {}; ed.students.forEach(s => by[s.name] = s);
       ed.students = names.map(n => by[n] || { id: uid(), name: n });
-      ed.grade = grade; ed.section = sec;
+      ed.grade = grade_; ed.section = sec;
       S.ui.editClass = null;
       toast('حُفظت تعديلات ' + cname(ed));
     } else {
-      if (S.classes.some(c => c.grade === grade && c.section === sec)) { toast('هذه الشعبة موجودة، استخدم «تعديل»', true); return; }
-      const c = { id: uid(), grade, section: sec, students: names.map(n => ({ id: uid(), name: n })) };
+      if (S.classes.some(c => c.grade === grade_ && c.section === sec)) { toast('هذه الشعبة موجودة، استخدم «تعديل»', true); return; }
+      const c = { id: uid(), grade: grade_, section: sec, students: names.map(n => ({ id: uid(), name: n })) };
       S.classes.push(c); S.ui.lastClass = c.id;
       toast('حُفظت شعبة ' + cname(c) + ' (' + cnt(names.length, 'طالب واحد', 'طالبان', 'طلاب', 'طالباً') + ')');
     }
@@ -456,7 +529,7 @@ function rClasses() {
   })));
 
   $('#b-export').addEventListener('click', () => {
-    download(new Blob([JSON.stringify({ app: 'tasmee3', v: 1, classes: S.classes, sheets: S.sheets }, null, 1)], { type: 'application/json' }), 'نسخة-كشف-التسميع-' + today() + '.json');
+    download(new Blob([JSON.stringify({ app: 'tasmee3', v: 2, classes: S.classes, sheets: S.sheets }, null, 1)], { type: 'application/json' }), 'نسخة-كشف-التسميع-' + today() + '.json');
   });
   $('#b-import').addEventListener('change', async e => {
     const f = e.target.files[0]; if (!f) return;
@@ -466,7 +539,8 @@ function rClasses() {
       let nc = 0, ns = 0;
       d.classes.forEach(c => { if (!cls(c.id)) { S.classes.push(c); nc++; } });
       d.sheets.forEach(s => { if (!sheetById(s.id)) { S.sheets.push(s); ns++; } });
-      save(true); render(); toast('استُعيدت ' + nc + ' شعبة و' + ns + ' كشف');
+      save(true); location.reload();
+      toast('استُعيدت ' + nc + ' شعبة و' + ns + ' كشف');
     } catch (err) { toast('الملف ليس نسخة احتياطية صالحة', true); }
     e.target.value = '';
   });
@@ -490,48 +564,49 @@ function rRecite() {
       <label class="fld grow"><span>السورة</span><select id="r-surah">${Q.map((s, i) => `<option value="${i + 1}"${i + 1 === selS ? ' selected' : ''}>${i + 1}. ${s[0]} (${s[1].length} آية)</option>`).join('')}</select></label>
       <label class="fld sm"><span>من آية</span><input id="r-from" type="number" inputmode="numeric" min="1" max="${total}" value="${sh ? sh.from : 1}"></label>
       <label class="fld sm"><span>إلى آية</span><input id="r-to" type="number" inputmode="numeric" min="1" max="${total}" value="${sh ? sh.to : total}"></label>
-      <label class="fld"><span>تاريخ التقييم</span><input id="r-date" type="date" value="${sh ? sh.date : today()}"></label>
       <button class="btn primary" id="r-open">فتح الكشف</button>
       <div class="chips" id="r-chips">${chipsHtml(selC)}</div>
     </section>`;
 
   if (sh) {
-    const c = cls(sh.classId);
-    const studs = c.students;
+    const c = cls(sh.classId), studs = c.students;
     if (!studs.some(s => s.id === S.ui.student)) S.ui.student = studs[0] && studs[0].id;
-    const st = studs.find(s => s.id === S.ui.student);
-    const idx = studs.indexOf(st);
+    const st = studs.find(s => s.id === S.ui.student), idx = studs.indexOf(st);
     const r = (st && sh.recs[st.id]) || { s: {}, e: {} };
-    const done = studs.filter(s => calc(sh, s.id).touched).length;
     let rows = '';
     for (let a = sh.from; a <= sh.to; a++) rows += ayahRow(sh, r, a);
     html += `<div class="work">
       <aside class="panel roster" aria-label="قائمة الطلاب">
-        <div class="rhead"><b>الطلاب</b><small id="r-done">سُمِّع ${done} من ${studs.length}</small></div>
+        <div class="rhead"><b>الطلاب</b><small id="r-done">${doneTxt(sh, studs)}</small></div>
         <ol id="roster">${studs.map((s, i) => rosterItem(sh, s, i)).join('')}</ol>
       </aside>
       <section class="panel sheet">
         <div class="stu-pick mobile-only"><label class="fld"><span>الطالب</span><select id="r-stu">${studs.map((s, i) => `<option value="${s.id}"${s.id === S.ui.student ? ' selected' : ''}>${i + 1}. ${esc(s.name)}</option>`).join('')}</select></label></div>
         ${st ? `
         <div class="stu-head">
-          <div><small>${esc(cname(c))} · سورة ${sname(sh.surah)} ${rangeTxt(sh)} · ${sh.date}</small><h2>${esc(st.name)}</h2></div>
-          <div class="nav"><button class="btn ghost" id="prev"${idx <= 0 ? ' disabled' : ''}>→ السابق</button><button class="btn ghost" id="next"${idx >= studs.length - 1 ? ' disabled' : ''}>التالي ←</button></div>
+          <div><small>${esc(cname(c))} · سورة ${sname(sh.surah)} ${rangeTxt(sh)}</small><h2>${esc(st.name)}</h2></div>
+          <div class="stu-tools">
+            <label class="fld"><span>تاريخ تقييم الطالب</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
+            <button class="btn ghost toggle" id="absent" aria-pressed="${!!r.absent}">الطالب لم يسمِّع</button>
+            <button class="btn ghost" id="prev"${idx <= 0 ? ' disabled' : ''}>→ السابق</button>
+            <button class="btn ghost" id="next"${idx >= studs.length - 1 ? ' disabled' : ''}>التالي ←</button>
+          </div>
         </div>
-        <div class="stats" id="stats">${statsHtml(calc(sh, st.id))}</div>
+        <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
         <div class="tools">
-          <span class="legend">اضغط الدرجة أمام كل آية، واضغطها مرة ثانية لإلغائها.</span>
+          <span class="keys"><span><kbd>2</kbd> <kbd>1</kbd> <kbd>0</kbd> الدرجة</span><span><kbd>Enter</kbd> خطأ نطق آخر في الآية نفسها</span><span><kbd>↓</kbd> الآية التالية</span><span><kbd>↑</kbd> رجوع</span></span>
           <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ghost" id="all2">الدرجة ٢ لكل الآيات</button><button class="btn sm danger" id="clr" data-msg="مسح تسميعه؟">مسح التسميع</button></span>
         </div>
         ${sh.from === 1 && sh.surah !== 1 && sh.surah !== 9 ? '<p class="basmala">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>' : ''}
-        <ol class="ayat" id="ayat">${rows}</ol>` : '<p class="empty">لا يوجد طلاب في هذه الشعبة.</p>'}
+        <ol class="ayat${r.absent ? ' dim' : ''}" id="ayat">${rows}</ol>` : '<p class="empty">لا يوجد طلاب في هذه الشعبة.</p>'}
       </section>
     </div>`;
   } else {
     html += `<section class="panel"><p class="empty">اختر الشعبة والسورة ثم اضغط «فتح الكشف»، أو افتح كشفاً محفوظاً من الأعلى.</p></section>`;
   }
   v.innerHTML = html;
+  setHdr();
 
-  /* toolbar */
   $('#r-class').addEventListener('change', e => { S.ui.lastClass = e.target.value; $('#r-chips').innerHTML = chipsHtml(e.target.value); bindChips(); save(); });
   $('#r-surah').addEventListener('change', e => {
     const n = +e.target.value, t = Q[n - 1][1].length;
@@ -541,38 +616,42 @@ function rRecite() {
   });
   $('#r-open').addEventListener('click', openSheet);
   bindChips();
-  if (!sh) return;
+  if (!sh || !$('#ayat')) { bindStudentPick(sh); return; }
+  bindStudentPick(sh);
 
-  /* workspace */
-  const pick = id => { S.ui.student = id; save(); rRecite(); const sp = $('.sheet'); if (sp && sp.getBoundingClientRect().top < 0) sp.scrollIntoView({ block: 'start' }); };
-  $('#roster').addEventListener('click', e => { const li = e.target.closest('li[data-s]'); if (li) pick(li.dataset.s); });
-  $('#r-stu').addEventListener('change', e => pick(e.target.value));
-  const studs = cls(sh.classId).students, idx = studs.findIndex(s => s.id === S.ui.student);
-  const pv = $('#prev'), nx = $('#next');
-  if (pv) pv.addEventListener('click', () => idx > 0 && pick(studs[idx - 1].id));
-  if (nx) nx.addEventListener('click', () => idx < studs.length - 1 && pick(studs[idx + 1].id));
-  const all2 = $('#all2');
-  if (!all2) return;
-  all2.addEventListener('click', () => { const r = rec(); for (let a = sh.from; a <= sh.to; a++) { r.s[a] = 2; updRow(a); } changed(); });
+  $('#r-sdate').addEventListener('change', e => { rec().date = e.target.value || today(); changed(); });
+  $('#absent').addEventListener('click', e => {
+    const r = rec(); r.absent = !r.absent;
+    if (r.absent && !r.date) r.date = $('#r-sdate').value || today();
+    e.currentTarget.setAttribute('aria-pressed', String(r.absent));
+    $('#ayat').classList.toggle('dim', r.absent);
+    changed();
+  });
+  $('#all2').addEventListener('click', () => { const r = rec(); for (let a = sh.from; a <= sh.to; a++) { r.s[a] = 2; updRow(a); } stamp(); clearAbsent(); changed(); });
   $('#clr').addEventListener('click', e => arm(e.currentTarget, () => { delete sh.recs[S.ui.student]; save(true); rRecite(); toast('مُسح تسميع الطالب'); }));
+
   const ay = $('#ayat');
   ay.addEventListener('click', e => {
     const b = e.target.closest('.seg button'); if (!b) return;
-    const a = +b.closest('li').dataset.a, val = +b.dataset.v, r = rec();
-    if (r.s[a] === val) delete r.s[a]; else r.s[a] = val;
-    updRow(a); changed();
+    setScore(+b.closest('li').dataset.a, +b.dataset.v, true);
   });
-  ay.addEventListener('input', e => {
-    const inp = e.target.closest('.err input'); if (!inp) return;
-    const a = +inp.dataset.a, r = rec();
-    if (inp.value.trim()) r.e[a] = inp.value; else delete r.e[a];
-    updRow(a); changed();
-  });
+  ay.addEventListener('input', e => { const inp = e.target.closest('.einp'); if (inp) syncErr(+inp.dataset.a); });
+  ay.addEventListener('keydown', onKey);
+}
+function bindStudentPick(sh) {
+  if (!sh) return;
+  const studs = cls(sh.classId).students, idx = studs.findIndex(s => s.id === S.ui.student);
+  const pick = id => { S.ui.student = id; save(); rRecite(); const sp = $('.sheet'); if (sp && sp.getBoundingClientRect().top < 0) window.scrollTo(0, sp.getBoundingClientRect().top + window.scrollY - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 0) - 12); const s1 = $('#ayat .seg'); if (s1 && !matchMedia('(max-width:900px)').matches) s1.focus({ preventScroll: true }); };
+  const ro = $('#roster'); if (ro) ro.addEventListener('click', e => { const li = e.target.closest('li[data-s]'); if (li) pick(li.dataset.s); });
+  const rs = $('#r-stu'); if (rs) rs.addEventListener('change', e => pick(e.target.value));
+  const pv = $('#prev'), nx = $('#next');
+  if (pv) pv.addEventListener('click', () => idx > 0 && pick(studs[idx - 1].id));
+  if (nx) nx.addEventListener('click', () => idx < studs.length - 1 && pick(studs[idx + 1].id));
 }
 function chipsHtml(cid) {
-  const list = S.sheets.filter(s => s.classId === cid).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const list = S.sheets.filter(s => s.classId === cid);
   if (!list.length) return '<span>لا توجد كشوف محفوظة لهذه الشعبة بعد.</span>';
-  return '<span>كشوف محفوظة:</span>' + list.map(s => `<button type="button" class="chip${s.id === S.ui.sheet ? ' on' : ''}" data-sheet="${s.id}">${sname(s.surah)}${fullRange(s) ? '' : ' ' + s.from + '–' + s.to} · ${s.date}</button>`).join('');
+  return '<span>كشوف محفوظة:</span>' + list.map(s => `<button type="button" class="chip${s.id === S.ui.sheet ? ' on' : ''}" data-sheet="${s.id}">${esc(sheetShort(s))}</button>`).join('');
 }
 function bindChips() {
   $$('#r-chips [data-sheet]').forEach(b => b.addEventListener('click', () => { S.ui.sheet = b.dataset.sheet; S.ui.student = null; save(); rRecite(); }));
@@ -582,53 +661,118 @@ function openSheet() {
   let from = Math.min(Math.max(parseInt($('#r-from').value, 10) || 1, 1), t);
   let to = Math.min(Math.max(parseInt($('#r-to').value, 10) || t, 1), t);
   if (from > to) [from, to] = [to, from];
-  const date = $('#r-date').value || today();
-  let sh = S.sheets.find(x => x.classId === cid && x.surah === su && x.from === from && x.to === to && x.date === date);
+  let sh = S.sheets.find(x => x.classId === cid && x.surah === su && x.from === from && x.to === to);
   const isNew = !sh;
-  if (!sh) { sh = { id: uid(), classId: cid, surah: su, from, to, date, recs: {} }; S.sheets.push(sh); }
+  if (!sh) { sh = { id: uid(), classId: cid, surah: su, from, to, date: today(), recs: {} }; S.sheets.push(sh); }
   S.ui.sheet = sh.id; S.ui.lastClass = cid; S.ui.lastSurah = su; S.ui.student = null;
   save(true); rRecite();
   toast(isNew ? 'فُتح كشف جديد: سورة ' + sname(su) : 'فُتح الكشف المحفوظ');
 }
-function rec() { const sh = cur(); return sh.recs[S.ui.student] || (sh.recs[S.ui.student] = { s: {}, e: {} }); }
+const rec = () => { const sh = cur(); return sh.recs[S.ui.student] || (sh.recs[S.ui.student] = { s: {}, e: {} }); };
+const stamp = () => { const r = rec(); if (!r.date) r.date = ($('#r-sdate') && $('#r-sdate').value) || today(); };
+const clearAbsent = () => { const r = rec(); if (r.absent) { r.absent = false; $('#absent').setAttribute('aria-pressed', 'false'); $('#ayat').classList.remove('dim'); } };
+const doneTxt = (sh, studs) => { let d = 0, ab = 0; studs.forEach(s => { const k = calc(sh, s.id); if (k.absent) ab++; else if (k.touched) d++; }); return 'سُمِّع ' + d + ' من ' + studs.length + (ab ? ' · لم يسمِّع ' + ab : ''); };
+
+const erowHtml = (a, i, val) => `<div class="erow${String(val).trim() ? ' filled' : ''}"><span>${i ? 'خطأ آخر' : 'خطأ النطق'}</span><input class="einp" id="e-${a}-${i}" data-a="${a}" value="${esc(val)}" autocomplete="off" placeholder="${i ? 'اكتب خطأً آخر' : 'اكتب الخطأ إن وُجد'}" aria-label="خطأ النطق في الآية ${a}"></div>`;
 function ayahRow(sh, r, a) {
-  const v = r.s[a], e = r.e[a] || '';
+  const v = r.s[a], errs = errList(r, a);
   const lbl = ['لم يسمع', 'مع تذكير', 'بلا تذكير'];
-  return `<li class="ayah${e.trim() ? ' has-err' : ''}" data-a="${a}">
+  return `<li class="ayah" data-a="${a}">
     <p class="atext">${esc(Q[sh.surah - 1][1][a - 1])} <span class="anum">﴿${ar(a)}﴾</span></p>
     <div class="ctrl">
-      <div class="seg" role="group" aria-label="درجة الآية ${a}">${[2, 1, 0].map(x => `<button type="button" data-v="${x}" aria-pressed="${v === x}"><b>${x}</b><span>${lbl[x]}</span></button>`).join('')}</div>
-      <label class="err"><span>خطأ النطق</span><input id="e-${a}" data-a="${a}" value="${esc(e)}" autocomplete="off" placeholder="اكتب الخطأ إن وُجد"></label>
+      <div class="seg" tabindex="0" role="radiogroup" aria-label="درجة الآية ${a}">${[2, 1, 0].map(x => `<button type="button" tabindex="-1" role="radio" data-v="${x}" aria-checked="${v === x}"><b>${x}</b><span>${lbl[x]}</span></button>`).join('')}</div>
+      <div class="errs">${(errs.length ? errs : ['']).map((e, i) => erowHtml(a, i, e)).join('')}</div>
     </div></li>`;
 }
+const liOf = a => $(`#ayat li[data-a="${a}"]`);
 function updRow(a) {
-  const li = $(`#ayat li[data-a="${a}"]`); if (!li) return;
-  const r = rec(), v = r.s[a];
-  $$('.seg button', li).forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.v === v)));
-  li.classList.toggle('has-err', !!(r.e[a] || '').trim());
+  const li = liOf(a); if (!li) return;
+  const v = rec().s[a];
+  $$('.seg button', li).forEach(b => b.setAttribute('aria-checked', String(+b.dataset.v === v)));
+  $$('.erow', li).forEach(row => row.classList.toggle('filled', !!row.querySelector('input').value.trim()));
+}
+function setScore(a, v, toggle) {
+  const r = rec();
+  if (toggle && r.s[a] === v) delete r.s[a]; else r.s[a] = v;
+  stamp(); clearAbsent(); updRow(a); changed();
+}
+function syncErr(a) {
+  const r = rec(), vals = $$('.einp', liOf(a)).map(i => i.value).filter(x => x.trim());
+  if (vals.length) r.e[a] = vals; else delete r.e[a];
+  if (vals.length) { stamp(); clearAbsent(); }
+  updRow(a); changed();
+}
+function prune(li) { if (!li) return; $$('.erow', li).forEach((row, i) => { if (i > 0 && !row.querySelector('input').value.trim()) row.remove(); }); }
+function focusSeg(a) { const li = liOf(a); if (li) li.querySelector('.seg').focus(); return !!li; }
+function focusErr(a, last) { const ins = $$('.einp', liOf(a)); const t = last ? ins[ins.length - 1] : ins[0]; if (t) t.focus(); }
+function goNextAyah(a) {
+  prune(liOf(a));
+  if (!focusSeg(a + 1)) { const nx = $('#next'); if (nx && !nx.disabled) { nx.focus(); toast('انتهت الآيات. اضغط Enter للانتقال إلى الطالب التالي'); } }
+}
+const DIG = { '2': 2, '1': 1, '0': 0, '٢': 2, '١': 1, '٠': 0 };
+function onKey(e) {
+  const seg = e.target.closest('.seg'), inp = e.target.closest('.einp');
+  if (seg) {
+    const li = seg.closest('li'), a = +li.dataset.a, r = rec();
+    if (e.key in DIG) { e.preventDefault(); setScore(a, DIG[e.key], false); focusErr(a); return; }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      const order = [2, 1, 0], i = order.indexOf(r.s[a]);
+      const n = e.key === 'ArrowLeft' ? (i < 0 ? 0 : Math.min(2, i + 1)) : (i < 0 ? 0 : Math.max(0, i - 1));
+      setScore(a, order[n], false); seg.focus(); return;
+    }
+    if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); focusErr(a); return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); const p = liOf(a - 1); if (p) { focusErr(a - 1, true); } return; }
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); if (r.s[a] != null) { delete r.s[a]; updRow(a); changed(); } return; }
+    if (e.key === ' ') { e.preventDefault(); return; }
+    return;
+  }
+  if (inp) {
+    const a = +inp.dataset.a, li = liOf(a), row = inp.closest('.erow'), rows = $$('.erow', li), i = rows.indexOf(row);
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (inp.value.trim()) {
+        const nextRow = rows[i + 1];
+        if (nextRow && !nextRow.querySelector('input').value.trim()) { nextRow.querySelector('input').focus(); return; }
+        row.insertAdjacentHTML('afterend', erowHtml(a, rows.length, ''));
+        row.nextElementSibling.querySelector('input').focus();
+      } else goNextAyah(a);
+      return;
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); goNextAyah(a); return; }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (i > 0) { rows[i - 1].querySelector('input').focus(); if (!inp.value.trim()) row.remove(); }
+      else li.querySelector('.seg').focus();
+      return;
+    }
+    if (e.key === 'Backspace' && !inp.value && i > 0) { e.preventDefault(); rows[i - 1].querySelector('input').focus(); row.remove(); }
+  }
 }
 function changed() {
   const sh = cur(), studs = cls(sh.classId).students;
-  $('#stats').innerHTML = statsHtml(calc(sh, S.ui.student));
-  const i = studs.findIndex(s => s.id === S.ui.student);
+  const st = studs.find(s => s.id === S.ui.student), i = studs.indexOf(st);
+  $('#sbar').innerHTML = barHtml(st, calc(sh, st.id));
   const li = $(`#roster li[data-s="${S.ui.student}"]`);
-  if (li) li.outerHTML = rosterItem(sh, studs[i], i);
-  $('#r-done').textContent = 'سُمِّع ' + studs.filter(s => calc(sh, s.id).touched).length + ' من ' + studs.length;
+  if (li) li.outerHTML = rosterItem(sh, st, i);
+  $('#r-done').textContent = doneTxt(sh, studs);
   save();
 }
-function rosterItem(sh, s, i) {
-  const k = calc(sh, s.id);
-  return `<li data-s="${s.id}"${s.id === S.ui.student ? ' class="on"' : ''}><button type="button"><span class="n">${i + 1}</span><span class="nm">${esc(s.name)}</span>${k.touched ? `<span class="pill ${band(k.fin)}">${fmt(k.fin)}</span>` : '<span class="pill">—</span>'}</button></li>`;
+function pillHtml(k) {
+  if (k.absent) return '<span class="pill g-none">لم يسمِّع</span>';
+  if (!k.touched) return '<span class="pill">—</span>';
+  return `<span class="pill ${gcls(k.g)}">${fmt(k.fin)}</span>`;
 }
-function statsHtml(k) {
-  return [
-    ['المجموع', `${k.sum}<i> / ${2 * k.n}</i>`],
-    ['النسبة', '<span dir="ltr">' + fmt(k.pct) + '<i>%</i></span>'],
-    ['أخطاء النطق', k.err ? '<span dir="ltr">−' + k.err + '</span>' : '0'],
-    ['الدرجة النهائية', fmt(k.fin)],
-    ['درجة الشفوي', `${k.oral}<i> / 6</i>`]
-  ].map(([l, v], i) => `<div class="st${i === 3 ? ' key' : ''}"><span>${l}</span><b>${v}</b></div>`).join('') +
-    `<div class="prog"><div class="track"><span style="width:${k.n ? k.done / k.n * 100 : 0}%"></span></div><small>قُيِّمت ${k.done} من ${k.n} آية · ${k.c2} بلا تذكير · ${k.c1} مع تذكير · ${k.c0} لم يسمع</small></div>`;
+function rosterItem(sh, s, i) {
+  return `<li data-s="${s.id}"${s.id === S.ui.student ? ' class="on"' : ''}><button type="button"><span class="n">${i + 1}</span><span class="nm">${esc(s.name)}</span>${pillHtml(calc(sh, s.id))}</button></li>`;
+}
+function barHtml(st, k) {
+  const gc = k.ev ? gcls(k.g) : 'g-none';
+  const fin = k.ev ? fmt(k.fin) : '—', lab = k.absent ? 'لم يسمِّع' : k.ev ? k.g.label : '—', oral = k.ev ? `${k.oral}<i> / 6</i>` : '—';
+  return `<div class="sb-name"><small>الطالب</small><b>${esc(st.name)}</b>
+      <div class="prog"><div class="track"><span style="width:${k.n ? k.done / k.n * 100 : 0}%"></span></div><small class="muted">قُيِّمت ${k.done} من ${k.n} آية</small></div></div>
+    <div class="sb-cell sb-err"><small>أخطاء النطق</small><b>${k.err}</b></div>
+    <div class="sb-grade ${gc}"><div><small>الدرجة النهائية</small><b>${fin}</b></div><div><small>التقدير</small><b>${lab}</b></div><div><small>درجة الشفوي</small><b>${oral}</b></div></div>`;
 }
 
 /* ---------- view: results ---------- */
@@ -641,10 +785,9 @@ function rResults() {
   const rk = rankMap(sh, studs);
   let rows = studs.map((s, i) => ({ s, i, k: calc(sh, s.id) }));
   if (S.ui.resSort === 'rank') rows.sort((a, b) => (rk[a.s.id] || 1e9) - (rk[b.s.id] || 1e9) || a.i - b.i);
-  const ev = rows.filter(x => x.k.touched);
+  const ev = rows.filter(x => x.k.ev), ab = rows.filter(x => x.k.absent).length;
   const avg = ev.length ? ev.reduce((t, x) => t + x.k.fin, 0) / ev.length : 0;
   const best = ev.length ? Math.max(...ev.map(x => x.k.fin)) : 0;
-  const errs = ev.reduce((t, x) => t + x.k.err, 0);
   const labels = Q[sh.surah - 1][2];
   let ah = '';
   for (let a = sh.from; a <= sh.to; a++) ah += `<th class="ay" title="${esc(labels[a - 1])}">${a}<small>${esc(labels[a - 1])}</small></th>`;
@@ -653,25 +796,26 @@ function rResults() {
     const r = sh.recs[s.id] || { s: {}, e: {} };
     let cells = '';
     for (let a = sh.from; a <= sh.to; a++) {
-      const x = r.s[a], e = (r.e[a] || '').trim();
-      cells += `<td class="c${x != null ? ' c' + x : ''}${e ? ' e' : ''}"${e ? ` title="خطأ النطق: ${esc(e)}"` : ''}>${x != null ? x : ''}</td>`;
+      const x = r.s[a], e = errList(r, a);
+      cells += `<td class="c${x != null ? ' c' + x : ''}${e.length ? ' e' : ''}"${e.length ? ` data-n="${e.length > 1 ? '−' + e.length : '−1'}" title="خطأ النطق: ${esc(e.join('، '))}"` : ''}>${x != null ? x : ''}</td>`;
     }
-    const t = k.touched;
+    const t = k.ev, gc = t ? gcls(k.g) : 'g-none';
     return `<tr${t ? '' : ' class="nt"'}><td>${i + 1}</td><td class="nm"><button type="button" data-open="${s.id}">${esc(s.name)}</button></td>${cells}
-      <td class="sum">${t ? k.sum : '—'}</td><td>${t ? fmt(k.pct) + '%' : '—'}</td><td>${t ? k.c2 : ''}</td><td>${t ? k.c1 : ''}</td><td>${t ? k.c0 : ''}</td><td>${t ? k.err : ''}</td>
-      <td class="fin">${t ? fmt(k.fin) : '—'}</td><td>${t ? k.oral : '—'}</td><td class="rank">${rk[s.id] || ''}</td></tr>`;
+      <td class="sum">${t ? k.sum : '—'}</td><td>${t ? fmt(k.pct) + '%' : '—'}</td><td>${t ? k.c2 : ''}</td><td>${t ? k.c1 : ''}</td><td>${t ? k.c0 : ''}</td><td class="err">${t ? k.err : ''}</td>
+      <td class="gr ${t ? gc : ''}">${t ? fmt(k.fin) : '—'}</td><td class="gr ${k.absent ? 'g-none' : t ? gc : ''}">${k.absent ? 'لم يسمِّع' : t ? k.g.label : '—'}</td><td class="gr ${t ? gc : ''}">${t ? k.oral : '—'}</td>
+      <td class="rank">${rk[s.id] || ''}</td><td>${k.date || ''}</td></tr>`;
   }).join('');
 
-  const log = rows.filter(x => Object.values((sh.recs[x.s.id] || { e: {} }).e).some(e => (e || '').trim()))
-    .map(({ s }) => {
-      const e = sh.recs[s.id].e;
-      const items = Object.keys(e).map(Number).filter(a => a >= sh.from && a <= sh.to && (e[a] || '').trim()).sort((a, b) => a - b);
-      return items.length ? `<div><b>${esc(s.name)}</b><ul>${items.map(a => `<li>الآية ${a}: ${esc(e[a])}</li>`).join('')}</ul></div>` : '';
-    }).join('');
+  const log = rows.map(({ s }) => {
+    const r = sh.recs[s.id]; if (!r) return '';
+    const items = [];
+    for (let a = sh.from; a <= sh.to; a++) errList(r, a).forEach(e => items.push(`<li>الآية ${a}: ${esc(e)}</li>`));
+    return items.length ? `<div><b>${esc(s.name)}</b><ul>${items.join('')}</ul></div>` : '';
+  }).join('');
 
   v.innerHTML = `
     <section class="panel bar">
-      <label class="fld grow"><span>الكشف</span><select id="x-sheet">${S.sheets.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).map(s => `<option value="${s.id}"${s.id === sh.id ? ' selected' : ''}>${esc(sheetLabel(s))}</option>`).join('')}</select></label>
+      <label class="fld grow"><span>الكشف</span><select id="x-sheet">${S.sheets.map(s => `<option value="${s.id}"${s.id === sh.id ? ' selected' : ''}>${esc(sheetLabel(s))}</option>`).join('')}</select></label>
       <label class="fld"><span>ترتيب الجدول</span><select id="x-sort"><option value="list"${S.ui.resSort === 'list' ? ' selected' : ''}>حسب القائمة</option><option value="rank"${S.ui.resSort === 'rank' ? ' selected' : ''}>حسب أفضل تسميع</option></select></label>
       <button class="btn primary" id="x-xlsx">تصدير إلى Excel</button>
       <button class="btn ghost" id="x-edit">فتح في التسميع</button>
@@ -679,14 +823,15 @@ function rResults() {
     </section>
     <div class="tiles">
       <div class="tile"><span>المسمَّعون</span><b>${ev.length} / ${studs.length}</b></div>
-      <div class="tile"><span>متوسط الدرجة النهائية</span><b>${ev.length ? fmt(avg) : '—'}</b></div>
+      <div class="tile"><span>لم يسمِّع</span><b>${ab}</b></div>
+      <div class="tile ${ev.length ? gcls(grade(avg)) : ''}"><span style="color:inherit">متوسط الدرجة النهائية</span><b>${ev.length ? fmt(avg) : '—'}</b></div>
       <div class="tile"><span>أعلى درجة</span><b>${ev.length ? fmt(best) : '—'}</b></div>
-      <div class="tile"><span>أخطاء النطق في الشعبة</span><b>${errs}</b></div>
     </div>
     <div class="tscroll"><table class="res">
-      <thead><tr><th>م</th><th class="nm">اسم الطالب</th>${ah}<th class="sum">المجموع</th><th>النسبة</th><th>بلا تذكير</th><th>مع تذكير</th><th>لم يسمع</th><th>أخطاء النطق</th><th>الدرجة النهائية</th><th>درجة الشفوي</th><th>الترتيب</th></tr></thead>
+      <thead><tr><th>م</th><th class="nm">اسم الطالب</th>${ah}<th class="sum">المجموع</th><th>النسبة</th><th>بلا تذكير</th><th>مع تذكير</th><th>لم يسمع</th><th>أخطاء النطق</th><th>الدرجة النهائية</th><th>التقدير</th><th>درجة الشفوي</th><th>الترتيب</th><th>تاريخ التقييم</th></tr></thead>
       <tbody>${body}</tbody></table></div>
-    <p class="hint" style="margin:0">الدرجة النهائية = النسبة − عدد أخطاء النطق. درجة الشفوي من 6: ‎80 فأكثر = 6، ‎70 = 5، ‎60 = 4، ‎40 = 3، ‎20 = 2، أقل من ذلك = 1. النقطة الحمراء تعني خطأ نطق (مرّر المؤشر لقراءته).</p>
+    <div class="legend">${GRADES.slice().reverse().map(g => `<span class="${gcls(g)}">${g.label} ${g.min < 0 ? '0–19' : g.min + (g.min === 90 ? '–100' : '–' + (g.min + (g.min >= 80 ? 9 : 19)))}</span>`).join('')}</div>
+    <p class="hint" style="margin:0">الدرجة النهائية = النسبة − عدد أخطاء النطق. درجة الشفوي من 6: ‎80 فأكثر = 6، ‎70 = 5، ‎60 = 4، ‎40 = 3، ‎20 = 2، أقل من ذلك = 1. الرقم الأحمر الصغير في خانة الآية يعني أخطاء نطق (مرّر المؤشر لقراءتها).</p>
     <section class="panel"><h2>سجل أخطاء النطق</h2>${log ? `<div class="errlog">${log}</div>` : '<p class="muted" style="margin:0">لا توجد أخطاء نطق مسجّلة في هذا الكشف.</p>'}</section>`;
 
   $('#x-sheet').addEventListener('change', e => { S.ui.resSheet = e.target.value; save(); rResults(); });
@@ -701,34 +846,88 @@ function rResults() {
   $$('[data-open]', v).forEach(b => b.addEventListener('click', () => { S.ui.sheet = sh.id; S.ui.student = b.dataset.open; S.ui.tab = 'recite'; save(); render(); window.scrollTo(0, 0); }));
 }
 
+/* ---------- view: class statistics ---------- */
+function rStats() {
+  const v = $('#v-stats');
+  if (!S.sheets.length) { v.innerHTML = '<section class="panel"><p class="empty">لا توجد كشوف بعد. افتح كشفاً من تبويب «التسميع».</p></section>'; return; }
+  const surahs = [...new Set(S.sheets.map(s => s.surah))].sort((a, b) => a - b);
+  if (S.ui.statSurah !== 'all' && !surahs.includes(+S.ui.statSurah)) S.ui.statSurah = 'all';
+  const sel = S.ui.statSurah;
+  const sheets = S.sheets.filter(s => sel === 'all' || s.surah === +sel);
+  const blank = () => ({ n: 0, sum: 0, ab: 0, dist: { exc: 0, vgood: 0, good: 0, mid: 0, acc: 0, weak: 0 }, sheets: 0 });
+  const per = {}, all = blank(), exc = [];
+  sheets.forEach(sh => {
+    const c = cls(sh.classId); if (!c) return;
+    const p = per[c.id] || (per[c.id] = blank()); p.sheets++;
+    c.students.forEach(s => {
+      const k = calc(sh, s.id);
+      if (k.absent) { p.ab++; all.ab++; return; }
+      if (!k.ev) return;
+      [p, all].forEach(x => { x.n++; x.sum += k.fin; x.dist[k.g.key]++; });
+      if (k.g.key === 'exc') exc.push({ s, c, sh, k });
+    });
+  });
+  const order = ['exc', 'vgood', 'good', 'mid', 'acc', 'weak'];
+  const gl = key => GRADES.find(g => g.key === key);
+  const row = (name, p, students, foot) => {
+    const avg = p.n ? p.sum / p.n : 0, g = grade(avg);
+    return `<tr><td class="nm">${name}</td><td>${students}</td><td>${p.n}</td><td>${p.ab}</td>
+      <td class="gr ${p.n ? gcls(g) : ''}">${p.n ? fmt(avg) + '%' : '—'}</td><td class="gr ${p.n ? gcls(g) : ''}">${p.n ? g.label : '—'}</td>
+      <td><span class="meter"><span style="width:${avg}%"></span></span></td>
+      <td><div class="dist">${order.map(k => `<span class="${p.dist[k] ? 'g-' + k : ''}" title="${gl(k).label}">${p.dist[k]}</span>`).join('')}</div></td></tr>`;
+  };
+  const classRows = S.classes.filter(c => per[c.id]).map(c => row(`${esc(cname(c))}${c.demo ? ' <span class="tag">مثال</span>' : ''}`, per[c.id], c.students.length)).join('');
+  const studentsTotal = S.classes.filter(c => per[c.id]).reduce((t, c) => t + c.students.length, 0);
+  exc.sort((a, b) => b.k.fin - a.k.fin || cname(a.c).localeCompare(cname(b.c), 'ar'));
+
+  v.innerHTML = `
+    <section class="panel bar">
+      <label class="fld grow"><span>السورة</span><select id="st-surah"><option value="all">كل السور</option>${surahs.map(n => `<option value="${n}"${String(n) === String(sel) ? ' selected' : ''}>${n}. ${sname(n)}</option>`).join('')}</select></label>
+    </section>
+    <section class="panel"><h2>نِسب الشُّعب</h2>
+      <div class="tscroll"><table class="res">
+        <thead><tr><th class="nm">الشعبة</th><th>عدد الطلاب</th><th>التسميعات المقيَّمة</th><th>لم يسمِّع</th><th>متوسط الدرجة النهائية</th><th>التقدير</th><th></th><th>التوزيع: ${order.map(k => gl(k).label).join(' · ')}</th></tr></thead>
+        <tbody>${classRows || '<tr><td colspan="8" class="muted">لا توجد بيانات لهذه السورة.</td></tr>'}</tbody>
+        ${classRows ? `<tfoot>${row('جميع الشعب', all, studentsTotal).replace('<tr>', '<tr class="tot">')}</tfoot>` : ''}
+      </table></div>
+      <p class="hint">المتوسط محسوب من الطلاب الذين سمَّعوا فقط${sel === 'all' ? '، ويجمع كل كشوف الشعبة' : ''}. الطالب الذي لم يسمِّع لا يدخل في المتوسط.</p>
+    </section>
+    <section class="panel"><h2>الحاصلون على تقدير ممتاز (${exc.length})</h2>
+      ${exc.length ? `<div class="tscroll"><table class="res">
+        <thead><tr><th>م</th><th class="nm">اسم الطالب</th><th>الشعبة</th><th>السورة</th><th>تاريخ التقييم</th><th>الدرجة النهائية</th><th>التقدير</th><th>درجة الشفوي</th></tr></thead>
+        <tbody>${exc.map((x, i) => `<tr><td>${i + 1}</td><td class="nm">${esc(x.s.name)}</td><td>${esc(cname(x.c))}</td><td>${esc(sheetShort(x.sh))}</td><td>${x.k.date || ''}</td><td class="gr g-exc">${fmt(x.k.fin)}</td><td class="gr g-exc">ممتاز</td><td class="gr g-exc">${x.k.oral}</td></tr>`).join('')}</tbody>
+      </table></div>` : '<p class="muted" style="margin:0">لا يوجد طلاب بتقدير ممتاز بعد.</p>'}
+    </section>`;
+  $('#st-surah').addEventListener('change', e => { S.ui.statSurah = e.target.value; save(); rStats(); });
+}
+
 function exportXlsx(sh) {
   if (!window.XLSX) { toast('تعذّر تحميل مكتبة Excel، تحقق من الاتصال بالإنترنت', true); return; }
   const c = cls(sh.classId), studs = c.students, rk = rankMap(sh, studs), labels = Q[sh.surah - 1][2];
   const title = 'كشف تسميع سورة: {' + sname(sh.surah) + '} ' + cname(c);
-  const sum = [[title], ['تاريخ التقييم: ' + sh.date, '', 'الآيات: ' + sh.from + '–' + sh.to], [],
-    ['م', 'اسم الطالب', 'المجموع', 'النسبة %', 'بلا تذكير', 'مع تذكير', 'لم يسمع', 'أخطاء النطق', 'الدرجة النهائية', 'درجة الشفوي', 'الترتيب']];
-  studs.forEach((s, i) => { const k = calc(sh, s.id), t = k.touched;
-    sum.push([i + 1, s.name, t ? k.sum : '', t ? r1(k.pct) : '', t ? k.c2 : '', t ? k.c1 : '', t ? k.c0 : '', t ? k.err : '', t ? r1(k.fin) : '', t ? k.oral : '', rk[s.id] || '']); });
+  const sum = [[title], ['الآيات: ' + sh.from + '–' + sh.to], [],
+    ['م', 'اسم الطالب', 'المجموع', 'النسبة %', 'بلا تذكير', 'مع تذكير', 'لم يسمع', 'أخطاء النطق', 'الدرجة النهائية', 'التقدير', 'درجة الشفوي', 'الترتيب', 'تاريخ التقييم']];
+  studs.forEach((s, i) => { const k = calc(sh, s.id), t = k.ev;
+    sum.push([i + 1, s.name, t ? k.sum : '', t ? r1(k.pct) : '', t ? k.c2 : '', t ? k.c1 : '', t ? k.c0 : '', t ? k.err : '', t ? r1(k.fin) : '', k.absent ? 'لم يسمِّع' : t ? k.g.label : '', t ? k.oral : '', rk[s.id] || '', k.date]); });
 
   const det = [['م', 'اسم الطالب', 'عناوين', title]], merges = [];
   studs.forEach((s, i) => {
-    const r = sh.recs[s.id] || { s: {}, e: {} }, h = ['', '', 'الآية'], g = ['', '', 'الدرجة'], e = ['', '', 'خطأ النطق'];
-    for (let a = sh.from; a <= sh.to; a++) { h.push(a + labels[a - 1]); g.push(r.s[a] != null ? r.s[a] : ''); e.push((r.e[a] || '').trim()); }
-    h[0] = i + 1; h[1] = s.name;
+    const r = sh.recs[s.id] || { s: {}, e: {} }, h = [i + 1, s.name, 'الآية'], g = ['', '', 'الدرجة'], e = ['', '', 'خطأ النطق'];
+    for (let a = sh.from; a <= sh.to; a++) { h.push(a + labels[a - 1]); g.push(r.s[a] != null ? r.s[a] : ''); e.push(errList(r, a).join('، ')); }
     const row = det.length;
     det.push(h, g, e);
     merges.push({ s: { r: row, c: 0 }, e: { r: row + 2, c: 0 } }, { s: { r: row, c: 1 }, e: { r: row + 2, c: 1 } });
   });
   const wb = XLSX.utils.book_new();
   const w1 = XLSX.utils.aoa_to_sheet(sum);
-  w1['!cols'] = [{ wch: 5 }, { wch: 28 }].concat(Array(9).fill({ wch: 12 }));
+  w1['!cols'] = [{ wch: 5 }, { wch: 28 }].concat(Array(11).fill({ wch: 12 }));
   const w2 = XLSX.utils.aoa_to_sheet(det);
   w2['!merges'] = merges;
-  w2['!cols'] = [{ wch: 5 }, { wch: 26 }, { wch: 10 }].concat(Array(sh.to - sh.from + 1).fill({ wch: 13 }));
+  w2['!cols'] = [{ wch: 5 }, { wch: 26 }, { wch: 10 }].concat(Array(sh.to - sh.from + 1).fill({ wch: 14 }));
   XLSX.utils.book_append_sheet(wb, w1, 'النتائج');
   XLSX.utils.book_append_sheet(wb, w2, 'الكشف التفصيلي');
   wb.Workbook = { Views: [{ RTL: true }] };
-  try { XLSX.writeFile(wb, 'تسميع ' + sname(sh.surah) + ' ' + cname(c) + ' ' + sh.date + '.xlsx'); toast('نُزّل ملف Excel'); }
+  try { XLSX.writeFile(wb, 'تسميع ' + sname(sh.surah) + ' ' + cname(c) + '.xlsx'); toast('نُزّل ملف Excel'); }
   catch (err) { toast('تعذّر تنزيل الملف من هذه الصفحة', true); }
 }
 
