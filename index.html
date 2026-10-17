@@ -88,6 +88,9 @@ main{padding-block:18px 60px;display:grid;gap:16px}
 .empty{color:var(--muted);padding:24px 0;text-align:center}
 .tag{font-size:.72rem;background:var(--gm);color:var(--gmi);padding:1px 8px;border-radius:999px;font-weight:700}
 .tag.nh{background:var(--g0s);color:var(--g0);margin-inline-start:6px;vertical-align:middle}
+.namegrid{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr));gap:8px}
+.namegrid textarea{white-space:pre;overflow-x:hidden}
+.phcol{text-align:left;font-variant-numeric:tabular-nums}
 .clist{list-style:none;margin:0;padding:0;display:grid}
 .clist li{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
 .clist li:first-child{border-top:0}
@@ -231,10 +234,19 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .res sup{font-size:.6rem;margin-inline-start:2px}
 .btn.wa{background:#1fa855;color:#fff}
 .btn.wa:hover{background:#178a45}
+#wa-pick{position:fixed;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:12px;display:grid;gap:6px;width:min(320px,calc(100vw - 16px))}
+#wa-pick > b{font-size:.9rem}
+#wa-pick button{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:7px 10px;cursor:pointer;text-align:right}
+#wa-pick button:hover,#wa-pick button:focus-visible{border-color:#1fa855;background:var(--accent-soft)}
+#wa-pick .kn{width:22px;height:22px;border-radius:6px;background:#1fa855;color:#fff;display:grid;place-items:center;font-size:.8rem;font-weight:700;flex:none}
+#wa-pick .pn{margin-inline-start:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+#wa-pick .x{justify-content:center;background:transparent;color:var(--muted)}
 .wa-mini{border:1px solid #1fa855;background:transparent;color:#1fa855;border-radius:999px;width:30px;height:30px;display:inline-grid;place-items:center;cursor:pointer;padding:0}
 .wa-mini:hover{background:#1fa855;color:#fff}
 .wa-mini[data-nophone]{border-style:dashed;opacity:.65}
-.stu-tools #r-phone{text-align:left}
+.stu-tools .phones{width:auto}
+.stu-tools .phones > div{display:flex;gap:4px}
+.stu-tools .phones input{width:112px;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 8px}
 .legend{display:flex;gap:6px;flex-wrap:wrap;font-size:.8rem}
 .legend span{border-radius:6px;padding:1px 10px;font-weight:700}
 
@@ -249,6 +261,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 }
 @media (max-width:900px){
   .cols{grid-template-columns:1fr}
+  .namegrid{grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr))}
   .work{grid-template-columns:1fr}
   .roster{display:none}
   .mobile-only{display:block}
@@ -431,19 +444,26 @@ $$('.tab').forEach(b => b.addEventListener('click', () => { S.ui.tab = b.dataset
 
 /* ---------- names ---------- */
 const PHONE_RE = /^\+?[\d٠-٩][\d٠-٩ \-]{6,}$/;
-function parseNames(t) {
+const cleanPhone = x => String(x || '').trim().replace(/[\s\-]/g, '');
+const phonesOf = st => (st.phones || (st.phone ? [st.phone] : [])).concat(['', '', '']).slice(0, 3);
+/* names: one per line; phones[k]: matching lines (same line number) for number k+1 */
+function parseNames(t, cols) {
+  cols = cols || ['', '', ''];
+  const lines = t.split(/\r?\n/), pl = cols.map(c => c.split(/\r?\n/));
   const seen = new Set(), out = [];
-  t.split(/\r?\n/).forEach(l => {
-    let line = l.trim(), phone = '';
+  lines.forEach((l, i) => {
+    let line = l.trim(), inline = '';
     const m = line.match(/[\s,،\t\-:;|]+(\+?[\d٠-٩][\d٠-٩ \-]{6,})\s*$/);
-    if (m) { phone = m[1].replace(/[\s\-]/g, ''); line = line.slice(0, m.index); }
+    if (m) { inline = cleanPhone(m[1]); line = line.slice(0, m.index); }
     const name = line.replace(/^[\s\d٠-٩.\-)(:،,]+/, '').replace(/[\s,،\-:;|]+$/, '').replace(/\s+/g, ' ').trim();
     if (!name || /^(الاسم|اسم الطالب|الأسماء|أسماء الطلاب)$/.test(name) || seen.has(name)) return;
-    seen.add(name); out.push({ name, phone });
+    seen.add(name);
+    const phones = pl.map(c => cleanPhone(c[i]));
+    if (inline && !phones[0]) phones[0] = inline;
+    out.push({ name, phones });
   });
   return out;
 }
-const nameLine = s => s.name + (s.phone ? '، ' + s.phone : '');
 async function readNamesFile(f) {
   const ext = (f.name.split('.').pop() || '').toLowerCase();
   let rows = [];
@@ -459,8 +479,8 @@ async function readNamesFile(f) {
     const cell = r.map(x => String(x).trim())
       .filter(x => x && /[؀-ۿA-Za-z]/.test(x) && !/^[\d٠-٩]+$/.test(x) && !x.startsWith('='))
       .sort((a, b) => b.length - a.length)[0];
-    const ph = r.map(x => String(x).trim()).find(x => PHONE_RE.test(x) && x.replace(/\D/g, '').length >= 7);
-    if (cell) out.push(cell + (ph ? '، ' + ph.replace(/[\s\-]/g, '') : ''));
+    const ph = r.map(x => String(x).trim()).filter(x => PHONE_RE.test(x) && x.replace(/\D/g, '').length >= 7).map(cleanPhone);
+    if (cell) out.push({ name: cell, phones: [ph[0] || '', ph[1] || '', ph[2] || ''] });
   }
   return out;
 }
@@ -478,8 +498,11 @@ function rClasses() {
         <label class="fld"><span>الشعبة</span><input id="f-sec" value="${esc(ed ? ed.section : '')}" placeholder="5"></label>
       </div>
       <datalist id="grades"><option value="سابع"><option value="ثامن"><option value="تاسع"><option value="عاشر"><option value="حادي عشر"><option value="ثاني عشر"></datalist>
-      <label class="fld"><span>أسماء الطلاب <em>· اسم في كل سطر، ويمكن كتابة جوال ولي الأمر بعد الاسم: محمد أحمد، 55123456</em></span>
-        <textarea id="f-names" rows="12" placeholder="محمد أحمد، 55123456&#10;عبدالله خالد، 66123456&#10;يوسف علي">${esc(ed ? ed.students.map(nameLine).join('\n') : '')}</textarea></label>
+      <p class="hint" style="margin:0 0 6px">الصق الأسماء في الخانة الأولى، ثم الصق أرقام أولياء الأمور في الخانات المجاورة بالترتيب نفسه، كل رقم في سطر الطالب نفسه. اترك السطر فارغاً إن لم يوجد رقم.</p>
+      <div class="namegrid">
+        <label class="fld"><span>أسماء الطلاب</span><textarea id="f-names" rows="14" wrap="off" placeholder="محمد أحمد&#10;عبدالله خالد&#10;يوسف علي">${esc(ed ? ed.students.map(x => x.name).join('\n') : '')}</textarea></label>
+        ${[0, 1, 2].map(k => `<label class="fld"><span>الرقم ${['الأول', 'الثاني', 'الثالث'][k]}</span><textarea id="f-ph${k}" class="phcol" rows="14" wrap="off" dir="ltr" placeholder="${k ? '' : '55123456&#10;66123456'}">${esc(ed ? ed.students.map(x => phonesOf(x)[k]).join('\n') : '')}</textarea></label>`).join('')}
+      </div>
       <div class="filebar">
         <label class="btn ghost" for="f-file">رفع ملف أسماء (Excel أو CSV أو نص)</label>
         <input id="f-file" type="file" accept=".xlsx,.xls,.csv,.txt" hidden>
@@ -505,7 +528,7 @@ function rClasses() {
         <label class="fld"><span>رمز الدولة للأرقام المحلية</span><input id="w-cc" inputmode="numeric" value="${esc(waCfg().cc)}" placeholder="974"></label>
         <label class="fld"><span>التوقيع في آخر الرسالة</span><input id="w-sign" value="${esc(waCfg().sign)}" placeholder="معلم التربية الإسلامية"></label>
       </div>
-      <p class="hint" style="margin:0 0 18px">يُضاف رمز الدولة تلقائياً إلى الرقم المحلي (مثل 55123456). اكتب أرقام أولياء الأمور بعد أسماء الطلاب في نموذج الشعبة، أو من صفحة التسميع.</p>
+      <p class="hint" style="margin:0 0 18px">يُضاف رمز الدولة تلقائياً إلى الرقم المحلي (مثل 55123456). أضف أرقام أولياء الأمور (حتى ثلاثة أرقام لكل طالب) في نموذج الشعبة، أو من صفحة التسميع.</p>
       <h2>نسخة احتياطية</h2>
       <p class="hint" style="margin:0 0 4px">تُحفظ البيانات في هذا المتصفح على هذا الجهاز. نزّل نسخة احتياطية بين حين وآخر، ويمكنك استعادتها على أي جهاز آخر فتُضاف الشعب والكشوف إليه.</p>
       <div class="actions">
@@ -516,8 +539,11 @@ function rClasses() {
     </section>
   </div>`;
 
-  const ta = $('#f-names');
-  const upd = () => { const n = parseNames(ta.value).length; $('#f-count').textContent = n ? cnt(n, 'اسم واحد', 'اسمان', 'أسماء', 'اسماً') : ''; };
+  const ta = $('#f-names'), pcs = [0, 1, 2].map(k => $('#f-ph' + k));
+  const colsVal = () => pcs.map(x => x.value);
+  const all = [ta].concat(pcs);
+  all.forEach(t => t.addEventListener('scroll', () => all.forEach(o => { if (o !== t) o.scrollTop = t.scrollTop; })));
+  const upd = () => { const n = parseNames(ta.value, colsVal()).length; $('#f-count').textContent = n ? cnt(n, 'اسم واحد', 'اسمان', 'أسماء', 'اسماً') : ''; };
   ta.addEventListener('input', upd); upd();
 
   $('#f-file').addEventListener('change', async e => {
@@ -525,7 +551,10 @@ function rClasses() {
     try {
       const names = await readNamesFile(f);
       if (!names.length) { toast('لم أجد أسماء في الملف', true); return; }
-      ta.value = (ta.value.trim() ? ta.value.trim() + '\n' : '') + names.join('\n');
+      const base = parseNames(ta.value, colsVal());
+      const merged = base.concat(names);
+      ta.value = merged.map(x => x.name).join('\n');
+      pcs.forEach((x, k) => x.value = merged.map(m => m.phones[k] || '').join('\n'));
       upd(); toast('أُضيفت ' + cnt(names.length, 'اسم واحد', 'اسمان', 'أسماء', 'اسماً') + ' من الملف. راجعها ثم احفظ.');
     } catch (err) { toast(err.message === 'nolib' ? 'تعذّر تحميل قارئ Excel، تحقق من الاتصال بالإنترنت' : 'تعذّرت قراءة الملف', true); }
     e.target.value = '';
@@ -533,18 +562,18 @@ function rClasses() {
 
   $('#f-save').addEventListener('click', () => {
     const grade_ = $('#f-grade').value.trim(), sec = $('#f-sec').value.trim();
-    const names = parseNames(ta.value);
+    const names = parseNames(ta.value, colsVal());
     if (!grade_ && !sec) { toast('اكتب الصف والشعبة', true); return; }
     if (!names.length) { toast('أضف اسماً واحداً على الأقل', true); return; }
     if (ed) {
       const by = {}; ed.students.forEach(s => by[s.name] = s);
-      ed.students = names.map(n => { const st = by[n.name] || { id: uid(), name: n.name }; st.phone = n.phone; return st; });
+      ed.students = names.map(n => { const st = by[n.name] || { id: uid(), name: n.name }; st.phones = n.phones; delete st.phone; return st; });
       ed.grade = grade_; ed.section = sec;
       S.ui.editClass = null;
       toast('حُفظت تعديلات ' + cname(ed));
     } else {
       if (S.classes.some(c => c.grade === grade_ && c.section === sec)) { toast('هذه الشعبة موجودة، استخدم «تعديل»', true); return; }
-      const c = { id: uid(), grade: grade_, section: sec, students: names.map(n => ({ id: uid(), name: n.name, phone: n.phone })) };
+      const c = { id: uid(), grade: grade_, section: sec, students: names.map(n => ({ id: uid(), name: n.name, phones: n.phones })) };
       S.classes.push(c); S.ui.lastClass = c.id;
       toast('حُفظت شعبة ' + cname(c) + ' (' + cnt(names.length, 'طالب واحد', 'طالبان', 'طلاب', 'طالباً') + ')');
     }
@@ -626,7 +655,7 @@ function rRecite() {
             <div class="nav"><button class="btn ghost" id="prev"${idx <= 0 ? ' disabled' : ''}>→ السابق</button><button class="btn ghost" id="next"${idx >= studs.length - 1 ? ' disabled' : ''}>التالي ←</button></div></div>
           <div class="stu-tools">
             <label class="fld"><span>تاريخ تقييم الطالب</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
-            <label class="fld"><span>جوال ولي الأمر</span><input id="r-phone" type="tel" inputmode="tel" dir="ltr" value="${esc(st.phone || '')}" placeholder="55123456"></label>
+            <div class="fld phones"><span>أرقام ولي الأمر (الأول، الثاني، الثالث)</span><div>${phonesOf(st).map((p_, k) => `<input class="r-ph" data-k="${k}" type="tel" inputmode="tel" dir="ltr" value="${esc(p_)}" placeholder="${k + 1}" aria-label="الرقم ${k + 1}">`).join('')}</div></div>
             <button class="btn ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button>
             <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>
           </div>
@@ -659,7 +688,7 @@ function rRecite() {
   bindStudentPick(sh);
 
   $('#r-sdate').addEventListener('change', e => { rec().date = e.target.value || today(); changed(); });
-  $('#r-phone').addEventListener('input', e => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); st.phone = e.target.value.trim(); save(); });
+  $$('.r-ph').forEach(inp => inp.addEventListener('input', e => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); const ph = phonesOf(st); ph[+e.target.dataset.k] = cleanPhone(e.target.value); st.phones = ph; delete st.phone; save(); }));
   $('#r-wa').addEventListener('click', () => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); sendWA(st, sheetReport(sh, st)); });
   $('#absent').addEventListener('click', e => {
     const r = rec(); r.absent = !r.absent;
@@ -901,38 +930,36 @@ function waPhone(p) {
   return d.length >= 8 ? d : '';
 }
 function sheetReport(sh, s) {
-  const k = calc(sh, s.id), r = sh.recs[s.id] || { s: {}, e: {} }, L = [];
-  L.push('السلام عليكم ورحمة الله وبركاته', 'ولي أمر الطالب: *' + s.name + '* المحترم', '');
+  const k = calc(sh, s.id), L = [];
+  L.push('السلام عليكم ورحمة الله وبركاته', 'السيد الفاضل ولي أمر الطالب: *' + s.name + '* حفظه الله', '🔵🔵');
   L.push('نفيدكم بنتيجة تسميع *سورة ' + sname(sh.surah) + '*' + (fullRange(sh) ? '' : ' (الآيات ' + sh.from + '–' + sh.to + ')') + ':');
-  if (k.date) L.push('📅 تاريخ التقييم: ' + k.date);
+  if (k.date) L.push('🗓️ تاريخ التقييم: ' + k.date);
   if (!k.ev) L.push('⏳ لم يُسمِّع الطالب هذه السورة بعد.');
   else {
     L.push('📊 الدرجة النهائية: *' + fmt(k.fin) + '* من 100');
     L.push('🏅 التقدير: *' + k.g.label + '*');
     L.push('🎤 درجة الشفوي: ' + k.oral + ' من 6');
-    L.push('📖 عدد الآيات ' + k.n + ': بلا تذكير ' + k.c2 + '، مع تذكير ' + k.c1 + '، لم يسمعها ' + (k.n - k.c2 - k.c1));
-    L.push('🗣️ أخطاء النطق: ' + k.err);
-    for (let a = sh.from; a <= sh.to; a++) errList(r, a).forEach(e => L.push('    • الآية ' + a + ': ' + e));
-    if (k.absent) L.push('⚠️ ملاحظة: الطالب لم يحفظ السورة، نرجو متابعته في حفظها.');
+    if (k.absent) L.push('⚠️ ملاحظة: الطالب لم يحفظ السورة.');
   }
-  L.push('', 'مع تحيات ' + waCfg().sign);
+  L.push('🔵🔵', '💡الدرجة قابلة للتعديل إذا تم التسميع مرةً أخرى.', '🌴مع تحيات ' + waCfg().sign);
   return L.join('\n');
 }
 function classReport(c, s) {
-  const sheets = S.sheets.filter(x => x.classId === c.id), L = [];
-  L.push('السلام عليكم ورحمة الله وبركاته', 'ولي أمر الطالب: *' + s.name + '* المحترم', '', 'نفيدكم بنتائج تسميع الطالب في السور:');
-  const evs = [];
+  const sheets = S.sheets.filter(x => x.classId === c.id), L = [], evs = [];
+  L.push('السلام عليكم ورحمة الله وبركاته', 'السيد الفاضل ولي أمر الطالب: *' + s.name + '* حفظه الله', '🔵🔵', 'نفيدكم بنتائج تسميع الطالب في السور:');
   sheets.forEach(sh => {
     const k = calc(sh, s.id), nm = 'سورة ' + sname(sh.surah) + (fullRange(sh) ? '' : ' (' + sh.from + '–' + sh.to + ')');
-    if (k.ev) { evs.push(k.fin); L.push('• ' + nm + ': *' + fmt(k.fin) + '* (' + k.g.label + ')' + (k.absent ? ' ⚠️ لم يحفظ' : '')); }
-    else L.push('• ' + nm + ': لم يُقيَّم بعد');
+    if (k.ev) { evs.push(k.fin); L.push('📖 ' + nm + ': *' + fmt(k.fin) + '* من 100 (' + k.g.label + ')' + (k.absent ? ' ⚠️ لم يحفظ' : '')); }
+    else L.push('📖 ' + nm + ': لم يُقيَّم بعد');
   });
-  if (evs.length) { const avg = evs.reduce((t, x) => t + x, 0) / evs.length; L.push('', '📊 متوسط الطالب: *' + fmt(avg) + '* (' + grade(avg).label + ')'); }
-  L.push('', 'مع تحيات ' + waCfg().sign);
+  if (evs.length) { const avg = evs.reduce((t, x) => t + x, 0) / evs.length; L.push('📊 متوسط الطالب: *' + fmt(avg) + '* من 100', '🏅 التقدير: *' + grade(avg).label + '*'); }
+  L.push('🔵🔵', '💡الدرجة قابلة للتعديل إذا تم التسميع مرةً أخرى.', '🌴مع تحيات ' + waCfg().sign);
   return L.join('\n');
 }
-function sendWA(s, text) {
-  const ph = waPhone(s.phone), q = 'text=' + encodeURIComponent(text);
+let lastBtn = null;
+document.addEventListener('click', e => { const b = e.target.closest('button'); if (b && !b.closest('#wa-pick')) lastBtn = b; }, true);
+function openWA(ph, text) {
+  const q = 'text=' + encodeURIComponent(text);
   const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const url = mobile ? 'https://wa.me/' + ph + '?' + q : 'https://web.whatsapp.com/send?' + (ph ? 'phone=' + ph + '&' : '') + q;
   const a = document.createElement('a');
@@ -940,7 +967,41 @@ function sendWA(s, text) {
   document.body.appendChild(a); a.click(); a.remove();
   toast(ph ? 'فُتحت محادثة ولي الأمر، اضغط Enter في واتساب للإرسال' : 'لا يوجد رقم لولي الأمر، اختر المحادثة من واتساب');
 }
-const waBtn = (attr, s) => `<button type="button" class="wa-mini" ${attr} title="إرسال التقرير لولي أمر ${esc(s.name)}${s.phone ? '' : ' (لا يوجد رقم)'}"${s.phone ? '' : ' data-nophone="1"'}>${WA_ICON}</button>`;
+function closePick() { const m = $('#wa-pick'); if (m) m.remove(); document.removeEventListener('keydown', pickKeys, true); }
+function pickKeys(e) {
+  if (e.key === 'Escape') { closePick(); return; }
+  const n = { '1': 0, '2': 1, '3': 2, '١': 0, '٢': 1, '٣': 2 }[e.key];
+  if (n != null) { const b = $$('#wa-pick [data-ph]')[n]; if (b) { e.preventDefault(); b.click(); } }
+}
+function sendWA(s, text) {
+  closePick();
+  const nums = phonesOf(s).map((p_, k) => ({ k, raw: p_, ph: waPhone(p_) })).filter(x => x.ph);
+  const ord = ['الأول', 'الثاني', 'الثالث'];
+  const m = document.createElement('div');
+  m.id = 'wa-pick'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'اختيار رقم ولي الأمر');
+  m.innerHTML = `<b>إرسال تقرير ${esc(s.name)} إلى:</b>
+    ${nums.length ? nums.map((x, i) => `<button type="button" data-ph="${x.ph}"><span class="kn">${i + 1}</span><span>الرقم ${ord[x.k]}</span><span dir="ltr" class="pn">${esc(x.raw)}</span></button>`).join('') : '<p class="muted" style="margin:0">لا توجد أرقام محفوظة لهذا الطالب.</p>'}
+    <button type="button" data-ph=""><span class="kn">${nums.length + 1}</span><span>اختيار المحادثة من واتساب</span></button>
+    <button type="button" class="x">إلغاء</button>`;
+  document.body.appendChild(m);
+  const r = lastBtn && lastBtn.isConnected ? lastBtn.getBoundingClientRect() : { left: innerWidth / 2, right: innerWidth / 2, bottom: innerHeight / 3, top: innerHeight / 3 };
+  const w = m.offsetWidth, h = m.offsetHeight;
+  let left = Math.min(Math.max(8, r.right - w), innerWidth - w - 8), top = r.bottom + 6;
+  if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 6);
+  m.style.left = left + 'px'; m.style.top = top + 'px';
+  m.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.classList.contains('x')) { closePick(); return; }
+    closePick(); openWA(b.dataset.ph, text);
+  });
+  setTimeout(() => {
+    document.addEventListener('keydown', pickKeys, true);
+    const f = m.querySelector('[data-ph]'); if (f) f.focus();
+    document.addEventListener('mousedown', function out(e) { if (!m.contains(e.target)) { closePick(); document.removeEventListener('mousedown', out, true); } }, true);
+  }, 0);
+}
+const hasPhone = s => phonesOf(s).some(x => x);
+const waBtn = (attr, s) => `<button type="button" class="wa-mini" ${attr} title="إرسال التقرير لولي أمر ${esc(s.name)}${hasPhone(s) ? '' : ' (لا يوجد رقم)'}"${hasPhone(s) ? '' : ' data-nophone="1"'}>${WA_ICON}</button>`;
 
 /* ---------- results: every surah for one class ---------- */
 const modeBar = () => `<div class="modes" role="tablist" aria-label="طريقة العرض">
