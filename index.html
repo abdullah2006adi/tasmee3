@@ -932,10 +932,9 @@ function rResults() {
   $$('[data-open]', v).forEach(b => b.addEventListener('click', () => { S.ui.sheet = sh.id; S.ui.student = b.dataset.open; S.ui.tab = 'recite'; save(); render(); window.scrollTo(0, 0); }));
 }
 
-/* ---------- cloud sync (Firebase project of the «استعداد» platform) ---------- */
+/* ---------- cloud sync (the separate «tasmee3» Firebase project) ---------- */
 const FB_BASE = window.TASMEE3_FB_BASE || 'https://www.gstatic.com/firebasejs/10.12.2/';
-const FB_CFG = { apiKey: 'AIzaSyAhLiI0JcQ2bv2O_Sie9S5jmaPNVY6dhTA', authDomain: 'iste3dad.firebaseapp.com', projectId: 'iste3dad', storageBucket: 'iste3dad.firebasestorage.app', messagingSenderId: '554024504423', appId: '1:554024504423:web:641bc771edfa677e74d8c2' };
-const LOGIN_DOMAIN = 'iste3dad-students.com';
+const FB_CFG = { apiKey: 'AIzaSyCSC9ZNWNNbD7mBjQVY7Gn-JrYuaavUvGw', authDomain: 'tasmee3-5c661.firebaseapp.com', projectId: 'tasmee3-5c661', storageBucket: 'tasmee3-5c661.firebasestorage.app', messagingSenderId: '600444483772', appId: '1:600444483772:web:e6a21ea05c1300b84678b9' };
 const SY = { fb: null, user: null, H: {}, timer: null, busy: false, again: false, state: 'off', msg: '', last: null, unsub: [], pending: false, ready: false };
 const clone = o => JSON.parse(JSON.stringify(o));
 const demoIds = () => new Set(S.classes.filter(c => c.demo).map(c => c.id));
@@ -946,7 +945,7 @@ function markDel(id) { S.deleted = S.deleted || {}; S.deleted[id] = Date.now(); 
 async function fbLoad() {
   if (SY.fb) return SY.fb;
   const [A, AU, FS] = await Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'].map(f => import(FB_BASE + f)));
-  const app = A.getApps && A.getApps().length ? A.getApps()[0] : A.initializeApp(FB_CFG);
+  const app = (A.getApps ? A.getApps() : []).find(x => x.name === 'tasmee3') || A.initializeApp(FB_CFG, 'tasmee3');
   SY.fb = { AU, FS, auth: AU.getAuth(app), db: FS.getFirestore(app) };
   return SY.fb;
 }
@@ -955,13 +954,13 @@ function syncUI() {
   const t = { off: 'تفعيل المزامنة', wait: 'جارٍ المزامنة…', ok: 'متزامن', err: 'تعذّرت المزامنة', na: 'المزامنة غير متاحة' }[SY.state];
   b.dataset.state = SY.state;
   b.querySelector('span').textContent = t;
-  b.title = SY.user ? 'الحساب: ' + SY.user.email + (SY.msg ? '\n' + SY.msg : '') : 'سجّل الدخول بحساب منصة استعداد لمزامنة البيانات بين أجهزتك';
+  b.title = SY.user ? 'الحساب: ' + SY.user.email + (SY.msg ? '\n' + SY.msg : '') : 'سجّل الدخول لمزامنة البيانات بين أجهزتك';
   const p = $('#sync-panel'); if (p && !p.hidden) syncPanel();
 }
 function setSync(state, msg) { SY.state = state; SY.msg = msg || ''; syncUI(); }
 function fbErr(e) {
   const c = (e && e.code) || '';
-  if (c.includes('permission-denied')) return 'قاعدة البيانات رفضت الحفظ: أضف قاعدة كشف التسميع في إعدادات Firebase (انظر التعليمات).';
+  if (c.includes('permission-denied')) return 'قاعدة البيانات رفضت الحفظ: تأكد من قواعد Firestore في مشروع tasmee3.';
   if (c.includes('invalid-credential') || c.includes('wrong-password') || c.includes('user-not-found') || c.includes('invalid-email')) return 'اسم المستخدم أو كلمة المرور غير صحيحة.';
   if (c.includes('too-many-requests')) return 'محاولات كثيرة، انتظر قليلاً ثم أعد المحاولة.';
   if (c.includes('network') || c.includes('unavailable')) return 'لا يوجد اتصال بالإنترنت. ستُرفع التعديلات عند عودة الاتصال.';
@@ -1091,8 +1090,8 @@ function syncPanel() {
     p.innerHTML = `<h3>المزامنة بين الأجهزة</h3><p class="muted">${esc(SY.msg)}</p><div class="actions"><button class="btn ghost" data-close>إغلاق</button></div>`;
   } else if (!SY.user) {
     p.innerHTML = `<h3>المزامنة بين الأجهزة</h3>
-      <p class="muted" style="margin:0 0 10px">سجّل الدخول بحساب المعلم نفسه الذي تدخل به منصة «استعداد». تُحفظ الشعب والدرجات في حسابك، وتظهر في كل جهاز تسجّل الدخول منه.</p>
-      <label class="fld"><span>البريد أو اسم المستخدم</span><input id="sy-u" autocomplete="username" dir="ltr"></label>
+      <p class="muted" style="margin:0 0 10px">سجّل الدخول بالبريد وكلمة المرور اللذين أنشأتهما لكشف التسميع. تُحفظ الشعب والدرجات في حسابك، وتظهر في كل جهاز تسجّل الدخول منه.</p>
+      <label class="fld"><span>البريد الإلكتروني</span><input id="sy-u" type="email" autocomplete="username" dir="ltr"></label>
       <label class="fld" style="margin-top:8px"><span>كلمة المرور</span><input id="sy-p" type="password" autocomplete="current-password" dir="ltr"></label>
       <p id="sy-e" class="err-msg" hidden></p>
       <div class="actions"><button class="btn primary" id="sy-in">دخول</button><button class="btn ghost" data-close>إغلاق</button></div>`;
@@ -1100,7 +1099,7 @@ function syncPanel() {
       const u = $('#sy-u').value.trim(), pw = $('#sy-p').value, er = $('#sy-e');
       if (!u || !pw) return;
       $('#sy-in').disabled = true; er.hidden = true;
-      try { await SY.fb.AU.signInWithEmailAndPassword(SY.fb.auth, u.includes('@') ? u : u + '@' + LOGIN_DOMAIN, pw); closeSync(); toast('تم الدخول، جارٍ جلب بياناتك…'); }
+      try { await SY.fb.AU.signInWithEmailAndPassword(SY.fb.auth, u, pw); closeSync(); toast('تم الدخول، جارٍ جلب بياناتك…'); }
       catch (e) { er.textContent = fbErr(e); er.hidden = false; $('#sy-in').disabled = false; }
     };
     $('#sy-in').addEventListener('click', go);
