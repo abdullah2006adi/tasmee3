@@ -1044,13 +1044,16 @@ document.addEventListener('focusout', () => setTimeout(() => {
   if (!(a && a.closest && a.closest('main') && /INPUT|TEXTAREA|SELECT/.test(a.tagName))) { SY.pending = false; render(); }
 }, 400));
 
-async function startSync(user) {
-  SY.user = user; SY.ready = false; setSync('wait');
+async function startSync(user, quiet) {
+  const first = !SY.ready || !SY.user || SY.user.uid !== user.uid;
+  if (!first && SY.refreshing) return;
+  SY.user = user; SY.refreshing = true;
+  if (first) { SY.ready = false; setSync('wait'); } else collectDirty(); /* local edits not pushed yet keep priority */
   const { FS, db } = SY.fb, uid = user.uid;
   try {
     const [m, list] = await Promise.all([FS.getDoc(FS.doc(db, 'tasmee3', uid)), FS.getDocs(FS.collection(db, 'tasmee3', uid, 'sheets'))]);
-    SY.H = {};
-    mergeRemote(m.exists() ? m.data() : null, list.docs.map(x => x.data()), true);
+    if (first) SY.H = {};
+    mergeRemote(m.exists() ? m.data() : null, list.docs.map(x => x.data()), first);
     SY.ready = true;
     applyRemote();
     await pushNow();
@@ -1058,18 +1061,25 @@ async function startSync(user) {
     SY.unsub.push(FS.onSnapshot(FS.doc(db, 'tasmee3', uid), snap => {
       if (snap.metadata && snap.metadata.hasPendingWrites) return;
       if (!snap.exists()) return;
-      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && JSON.stringify(d.deleted || {}) === JSON.stringify(S.deleted || {})) return;
+      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && JSON.stringify(d.deleted || {}) === JSON.stringify(S.deleted || {}) && JSON.stringify(d.wa || null) === JSON.stringify(S.wa || null)) return;
       collectDirty(); mergeRemote(d, [], false); applyRemote(); syncSchedule();
     }, e => setSync('err', fbErr(e))));
     SY.unsub.push(FS.onSnapshot(FS.collection(db, 'tasmee3', uid, 'sheets'), snap => {
-      if (snap.metadata && snap.metadata.hasPendingWrites) return;
-      const ch = snap.docChanges().filter(c => c.type !== 'removed').map(c => c.doc.data())
+      /* skip only this device's own pending docs, so another device's change arriving meanwhile is not lost */
+      const ch = snap.docChanges().filter(c => c.type !== 'removed' && !(c.doc.metadata && c.doc.metadata.hasPendingWrites)).map(c => c.doc.data())
         .filter(rs => { const ls = S.sheets.find(x => x.id === rs.id); return !ls || JSON.stringify(ls) !== JSON.stringify(rs); });
       if (!ch.length) return;
       collectDirty(); mergeRemote(null, ch, false); applyRemote(); syncSchedule();
     }, e => setSync('err', fbErr(e))));
-    SY.last = new Date(); if (SY.state === 'wait') setSync('ok');
-  } catch (e) { SY.ready = false; setSync('err', fbErr(e)); }
+    SY.last = new Date(); SY.lastRefresh = Date.now(); if (SY.state === 'wait' || SY.state === 'err') setSync('ok');
+  } catch (e) { if (first) SY.ready = false; setSync('err', fbErr(e)); }
+  SY.refreshing = false;
+}
+/* automatic refresh: when the page comes back (iPhone/iPad tab reopened, laptop woken) and every minute while open */
+function autoRefresh(force) {
+  if (!SY.user || !SY.fb || document.hidden || !navigator.onLine) return;
+  if (!force && SY.lastRefresh && Date.now() - SY.lastRefresh < 15000) return;
+  startSync(SY.user, true);
 }
 function stopSync() { SY.unsub.forEach(f => f()); SY.unsub = []; SY.user = null; SY.ready = false; SY.H = {}; setSync('off'); }
 
@@ -1079,8 +1089,11 @@ async function initSync() {
     fb.AU.onAuthStateChanged(fb.auth, u => { if (u && (!SY.user || SY.user.uid !== u.uid)) startSync({ uid: u.uid, email: u.email }); else if (!u && SY.user) stopSync(); else if (!u) setSync('off'); });
   } catch (e) { setSync('na', 'المزامنة تعمل في موقعك على GitHub، ولا تعمل في هذه المعاينة.'); }
 }
-window.addEventListener('online', () => syncSchedule());
-document.addEventListener('visibilitychange', () => { if (!document.hidden && SY.user && SY.state === 'err') startSync(SY.user); });
+window.addEventListener('online', () => { syncSchedule(); autoRefresh(true); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { if (SY.user && SY.ready) { clearTimeout(SY.timer); pushNow(); } } else autoRefresh(); });
+window.addEventListener('pageshow', e => { if (e.persisted) autoRefresh(true); });
+window.addEventListener('focus', () => autoRefresh());
+setInterval(() => autoRefresh(true), 60000);
 
 function syncPanel() {
   let p = $('#sync-panel');
@@ -1108,11 +1121,10 @@ function syncPanel() {
   } else {
     p.innerHTML = `<h3>المزامنة بين الأجهزة</h3>
       <p style="margin:0">الحساب: <b dir="ltr">${esc(SY.user.email)}</b></p>
-      <p class="muted" style="margin:4px 0 0">${SY.state === 'ok' ? 'كل التعديلات محفوظة في حسابك' + (SY.last ? '، آخر مزامنة ' + SY.last.toLocaleTimeString('ar') : '') + '.' : SY.state === 'wait' ? 'جارٍ المزامنة…' : ''}</p>
+      <p class="muted" style="margin:4px 0 0">${SY.state === 'ok' ? 'المزامنة تلقائية: كل تعديل يُحفظ في حسابك فوراً ويظهر في أجهزتك الأخرى دون أن تضغط شيئاً' + (SY.last ? '. آخر مزامنة ' + SY.last.toLocaleTimeString('ar') : '') + '.' : SY.state === 'wait' ? 'جارٍ المزامنة…' : ''}</p>
       ${SY.state === 'err' ? `<p class="err-msg">${esc(SY.msg)}</p>` : ''}
-      <div class="actions"><button class="btn ghost" id="sy-now">مزامنة الآن</button><button class="btn ghost" id="sy-out">تسجيل الخروج</button><button class="btn danger" id="sy-wipe" data-msg="اضغط مجدداً للتأكيد">خروج ومسح البيانات من هذا الجهاز</button><button class="btn ghost" data-close>إغلاق</button></div>
+      <div class="actions"><button class="btn ghost" id="sy-out">تسجيل الخروج</button><button class="btn danger" id="sy-wipe" data-msg="اضغط مجدداً للتأكيد">خروج ومسح البيانات من هذا الجهاز</button><button class="btn ghost" data-close>إغلاق</button></div>
       <p class="hint">«خروج ومسح البيانات» مناسب لجهاز مشترك مثل لابتوب المدرسة. بياناتك تبقى محفوظة في حسابك.</p>`;
-    $('#sy-now').addEventListener('click', () => startSync(SY.user));
     $('#sy-out').addEventListener('click', async () => { await SY.fb.AU.signOut(SY.fb.auth); closeSync(); toast('تم تسجيل الخروج'); });
     $('#sy-wipe').addEventListener('click', e => arm(e.currentTarget, async () => { await SY.fb.AU.signOut(SY.fb.auth); try { localStorage.removeItem(KEY); } catch (er) {} location.reload(); }));
   }
