@@ -59,7 +59,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 #sync{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
 #sync i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
-#sync[data-state="ok"]{color:var(--g2);border-color:var(--g2)} #sync[data-state="ok"] i{background:var(--g2)}
+#sync[data-state="ok"],#sync[data-state="wait"]{color:var(--g2);border-color:transparent;background:transparent;font-weight:600} #sync[data-state="ok"] i{background:var(--g2)}
+body:has(#sync[data-state="ok"]) #saved,body:has(#sync[data-state="wait"]) #saved{display:none}
 #sync[data-state="wait"] i{background:var(--g1);animation:pulse 1s infinite}
 #sync[data-state="err"]{color:var(--g0);border-color:var(--g0)} #sync[data-state="err"] i{background:var(--g0)}
 #sync[data-state="off"]{color:var(--accent);border-color:var(--accent)} #sync[data-state="off"] i{background:var(--accent)}
@@ -951,7 +952,7 @@ async function fbLoad() {
 }
 function syncUI() {
   const b = $('#sync'); if (!b) return;
-  const t = { off: 'تفعيل المزامنة', wait: 'جارٍ المزامنة…', ok: 'متزامن', err: 'تعذّرت المزامنة', na: 'المزامنة غير متاحة' }[SY.state];
+  const t = { off: 'تسجيل الدخول للمزامنة', wait: 'جارٍ الحفظ في حسابك…', ok: 'محفوظ في حسابك', err: 'تعذّرت المزامنة', na: 'المزامنة غير متاحة' }[SY.state];
   b.dataset.state = SY.state;
   b.querySelector('span').textContent = t;
   b.title = SY.user ? 'الحساب: ' + SY.user.email + (SY.msg ? '\n' + SY.msg : '') : 'سجّل الدخول لمزامنة البيانات بين أجهزتك';
