@@ -59,7 +59,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 #sync{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
 #sync i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
-#sync[data-state="ok"],#sync[data-state="wait"]{color:var(--g2);border-color:transparent;background:transparent;font-weight:600} #sync[data-state="ok"] i{background:var(--g2)}
+#sync[data-state="ok"],#sync[data-state="wait"]{display:none}
 body:has(#sync[data-state="ok"]) #saved,body:has(#sync[data-state="wait"]) #saved{display:none}
 #sync[data-state="wait"] i{background:var(--g1);animation:pulse 1s infinite}
 #sync[data-state="err"]{color:var(--g0);border-color:var(--g0)} #sync[data-state="err"] i{background:var(--g0)}
@@ -544,6 +544,9 @@ function rClasses() {
         <label class="fld"><span>التوقيع في آخر الرسالة</span><input id="w-sign" value="${esc(waCfg().sign)}" placeholder="معلم التربية الإسلامية"></label>
       </div>
       <p class="hint" style="margin:0 0 18px">يُضاف رمز الدولة تلقائياً إلى الرقم المحلي (مثل 55123456). أضف أرقام أولياء الأمور (حتى ثلاثة أرقام لكل طالب) في نموذج الشعبة، أو من صفحة التسميع.</p>
+      <h2>حساب المزامنة</h2>
+      <p class="hint" style="margin:0 0 4px">تُحفظ الشعب والدرجات في حسابك تلقائياً وتظهر في كل أجهزتك. من هنا يمكنك تسجيل الخروج من هذا الجهاز.</p>
+      <div class="actions" style="margin-bottom:18px"><button class="btn ghost" id="acc-open">إدارة الحساب</button></div>
       <h2>نسخة احتياطية</h2>
       <p class="hint" style="margin:0 0 4px">تُحفظ البيانات في هذا المتصفح على هذا الجهاز. نزّل نسخة احتياطية بين حين وآخر، ويمكنك استعادتها على أي جهاز آخر فتُضاف الشعب والكشوف إليه.</p>
       <div class="actions">
@@ -611,6 +614,7 @@ function rClasses() {
 
   $('#w-cc').addEventListener('input', e => { S.wa = Object.assign(waCfg(), { cc: e.target.value.replace(/\D/g, '') }); save(); });
   $('#w-sign').addEventListener('input', e => { S.wa = Object.assign(waCfg(), { sign: e.target.value }); save(); });
+  $('#acc-open').addEventListener('click', () => syncPanel());
   $('#b-export').addEventListener('click', () => {
     download(new Blob([JSON.stringify({ app: 'tasmee3', v: 2, classes: S.classes, sheets: S.sheets }, null, 1)], { type: 'application/json' }), 'نسخة-كشف-التسميع-' + today() + '.json');
   });
