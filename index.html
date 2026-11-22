@@ -213,7 +213,7 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .stu-head h2::before{display:none}
 .stu-title{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
 .nav{display:flex;gap:8px}
-.stu-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 12px;padding:16px;border-radius:18px;background:var(--sunk);border:1px solid var(--line)}
+.stu-tools{display:grid;grid-template-columns:minmax(150px,1fr) auto;align-items:end;gap:14px 12px;padding:16px;border-radius:18px;background:var(--sunk);border:1px solid var(--line)}
 .stu-tools .fld{min-width:0}
 .stu-tools .fld > span{display:flex;align-items:center;gap:6px;font-size:.84rem;white-space:nowrap}
 .stu-tools .fld > span svg{width:16px;height:16px;color:var(--gold);flex:none}
@@ -221,9 +221,9 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .stu-tools input[type=date]{-webkit-appearance:none;appearance:none;text-align:right;padding-inline:12px}
 .stu-tools input[type=date]::-webkit-date-and-time-value{text-align:right}
 .stu-tools input[type=tel]{text-align:left;direction:ltr;letter-spacing:.02em}
-.stu-acts{grid-column:1/-1;display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px dashed var(--line-2)}
+.stu-acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .stu-acts .btn{min-height:46px}
-.stu-acts .wa{margin-inline-start:auto}
+
 
 /* شريط الدرجة الثابت */
 .sbar{position:sticky;top:calc(var(--hdr) + 8px);z-index:4;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:stretch;margin:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh2);overflow:hidden}
@@ -434,8 +434,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   .panel{padding:18px 16px;border-radius:18px}
   .stu-head{padding:18px 16px 14px}
   .stu-head h2{font-size:1.6rem}
-  .stu-tools{padding:12px;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}
-  .stu-tools .f-date{grid-column:1/-1}
+  .stu-tools{padding:12px;grid-template-columns:minmax(0,1fr);gap:12px}
   .stu-acts .btn{flex:1}
   .sbar{margin:0 10px;border-radius:16px}
   .mushaf{margin:12px 8px 14px;padding:10px 4px 4px;border-radius:16px}
@@ -860,7 +859,6 @@ function rRecite() {
             <div class="nav"><button class="btn ghost" id="prev"${idx <= 0 ? ' disabled' : ''}>→ السابق</button><button class="btn ghost" id="next"${idx >= studs.length - 1 ? ' disabled' : ''}>التالي ←</button></div></div>
           <div class="stu-tools">
             <label class="fld f-date"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>تاريخ التقييم</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
-            ${phonesOf(st).map((p_, k) => `<label class="fld"><span>${k ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9 12 5l9.5 4-9.5 4z"/><path d="M6.5 11v4.5c1.5 1.5 3.5 2.3 5.5 2.3s4-.8 5.5-2.3V11"/></svg>رقم الطالب' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.9-5 5.5-5s4.9 1.8 5.5 5"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.3c1.7.6 2.8 2.2 3 4.7"/></svg>رقم ولي الأمر'}</span><input class="r-ph" data-k="${k}" type="tel" inputmode="tel" dir="ltr" value="${esc(p_)}" placeholder="${k ? '66123456' : '55123456'}"></label>`).join('')}
             <div class="stu-acts"><button class="btn ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button>
             <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button></div>
           </div>
@@ -893,7 +891,6 @@ function rRecite() {
   bindStudentPick(sh);
 
   $('#r-sdate').addEventListener('change', e => { rec().date = e.target.value || today(); changed(); });
-  $$('.r-ph').forEach(inp => inp.addEventListener('input', e => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); const ph = phonesOf(st); ph[+e.target.dataset.k] = cleanPhone(e.target.value); st.phones = ph; delete st.phone; save(); }));
   $('#r-wa').addEventListener('click', () => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); sendWA(st, sheetReport(sh, st)); });
   $('#absent').addEventListener('click', e => {
     const r = rec(); r.absent = !r.absent;
