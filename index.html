@@ -374,6 +374,9 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .res td.go{cursor:pointer}
 .res td.go:hover{outline:2px solid var(--accent);outline-offset:-2px}
 .res sup{font-size:.6rem;margin-inline-start:2px}
+.res small.or{display:block;font-size:.72rem;font-weight:600;line-height:1.25;opacity:.85}
+.res th.sep,.res td.sep{border-inline-end:2px solid var(--line-2)}
+.res td.e::after,.ebtn em{direction:ltr;unicode-bidi:isolate}
 .legend{display:flex;gap:8px;flex-wrap:wrap;font-size:.82rem}
 .legend span{border-radius:999px;padding:2px 12px;font-weight:700}
 
@@ -455,6 +458,164 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 @media (max-width:520px){ #saved{display:none} .atext{font-size:24px} .sb-grade{grid-template-columns:repeat(3,minmax(0,1fr))} .sb-grade > div{padding:8px 8px} .sb-cell{padding:8px 12px} .tile b{font-size:1.7rem} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{.side,.top,.bar,.tools,.roster,.no-print{display:none!important} .shell{display:block} body{background:#fff}}
+/* ===== تقرير PDF: يُرسم خارج الشاشة بألوان ثابتة ثم يُحوَّل إلى صفحات (بلا ظلال box-shadow لأن أداة التحويل لا ترسمها بدقة) ===== */
+.btn.pdf{background:linear-gradient(180deg,#FFFDF6,#F5EBD2);border:1.5px solid #D6B25E;color:#74540F;box-shadow:inset 0 1px 0 #FFFFFF,0 3px 0 #E0C886}
+.btn.pdf:hover{background:linear-gradient(180deg,#FFF8E4,#EFDDB2)}
+.btn.pdf:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #FFFFFF,0 1px 0 #E0C886}
+.btn.pdf svg{width:19px;height:19px}
+.btn.pdf.busy{cursor:progress;opacity:.75}
+:root[data-mode="dark"] .btn.pdf{background:linear-gradient(180deg,#2B2616,#1F1B0F);border-color:#8C7130;color:#EBCB7A;box-shadow:0 3px 0 #4A3C18}
+#rep-stage{position:absolute;top:0;left:-40000px;width:794px;direction:rtl;pointer-events:none}
+#rep-stage .rp{position:relative;z-index:0;width:794px;height:1123px;overflow:hidden;background:#FBF9F4;color:#1D2B28;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;font-size:14px;font-weight:400;font-style:normal;line-height:1.55;letter-spacing:0;text-align:right}
+#rep-stage .rp *{box-sizing:border-box;letter-spacing:0;font-style:normal;box-shadow:none;transition:none}
+#rep-stage .rp + .rp{margin-top:24px}
+.rp-hero{position:relative;height:198px;padding:30px 42px 0;color:#FFFFFF;background-color:#0D5D51;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cg fill='none' stroke='%23F2D68E' stroke-opacity='.14' stroke-width='1.2'%3E%3Crect x='23' y='23' width='30' height='30'/%3E%3Crect x='23' y='23' width='30' height='30' transform='rotate(45 38 38)'/%3E%3Ccircle cx='38' cy='38' r='7'/%3E%3Cpath d='M0 0l15 15M76 0L61 15M0 76l15-15M76 76L61 61'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(135deg,#093F37 0%,#0E6655 55%,#17866F 100%);background-size:76px 76px,100% 100%;background-repeat:repeat,no-repeat}
+.rp-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:linear-gradient(90deg,#9C7120 0%,#E9CD84 25%,#B98C2E 50%,#F2DA98 75%,#9C7120 100%)}
+.rp-hero.sm{height:104px;padding-top:20px}
+.rp-hin{position:relative;display:flex;align-items:flex-start;gap:20px}
+.rp-logo{flex:none;display:block;width:88px;height:88px;border-radius:24px;border:3px solid rgba(255,255,255,.28)}
+.rp-hero.sm .rp-logo{width:62px;height:62px;border-radius:18px}
+.rp-tt{flex:1;min-width:0;padding-top:2px}
+.rp-tt small{display:block;font-size:13px;font-weight:500;color:#CBE6DC}
+.rp-tt h1{margin:0;font-size:34px;font-weight:700;line-height:1.3;color:#FFFFFF;text-shadow:0 2px 6px rgba(0,0,0,.25)}
+.rp-hero.sm .rp-tt h1{font-size:25px;white-space:nowrap;overflow:hidden}
+.rp-sur{display:block;font-family:"Amiri Quran","Amiri",serif;font-weight:400;font-size:25px;line-height:1.6;color:#F2D68E}
+.rp-date{flex:none;min-width:178px;text-align:center;padding:11px 16px 12px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.28);border-bottom:4px solid rgba(0,0,0,.18)}
+.rp-date span{display:block;font-size:12.5px;font-weight:600;color:#F2D68E}
+.rp-date b{display:block;font-size:21px;font-weight:700;color:#FFFFFF;line-height:1.45}
+.rp-date i{display:block;font-size:13px;color:#D3EBE3}
+.rp-hero.sm .rp-date{min-width:150px;padding:8px 14px 9px}
+.rp-hero.sm .rp-date .rp-sur{font-size:22px;line-height:1.5}
+.rp-bd{position:relative;padding:0 40px}
+.rp-card,.rp-kpi{position:relative;border-radius:22px;background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F1 100%);border:1px solid #E9E2D1;border-bottom:5px solid #E2D9C3}
+.rp-card{margin-top:20px;padding:15px 20px 15px}
+.rp-card::before,.rp-kpi::before{content:"";position:absolute;left:22px;right:22px;bottom:-18px;height:26px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(25,50,44,.20) 0%,rgba(25,50,44,.08) 45%,rgba(25,50,44,0) 72%);z-index:-1}
+.rp-h{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.rp-h > i{flex:none;width:7px;height:22px;border-radius:4px;background:linear-gradient(180deg,#E8C977,#A97B21)}
+.rp-h > b{font-size:18px;font-weight:700;color:#14302A}
+.rp-h > span{margin-inline-start:auto;font-size:12.5px;font-weight:500;color:#7B8A85}
+.rp-h > em{margin-inline-start:auto;font-size:13px;font-weight:700;color:#A8281C;background:#FCE6E1;border-radius:999px;padding:3px 12px;border-bottom:2px solid #F1C3B9}
+.rp-id{margin-top:-30px;padding:16px 22px 12px}
+.rp-idr{display:flex;align-items:center;gap:16px}
+.rp-av{flex:none;width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#FFFFFF;background:radial-gradient(circle at 34% 28%,#3CB596 0%,#0F6E5E 58%,#0A4A40 100%);border:4px solid #F0E2BC}
+.rp-nm{flex:1;min-width:0}
+.rp-nm small{display:block;font-size:12.5px;font-weight:600;color:#7B8A85}
+.rp-nm h2{margin:0;font-size:27px;font-weight:700;line-height:1.3;color:#14302A}
+.rp-tags{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.rp-tag{font-size:12.5px;font-weight:700;line-height:1;padding:7px 12px;border-radius:999px;background:#E4F1EC;color:#0E6B5C;border-bottom:2px solid #C8E2D8}
+.rp-tag.nh{background:#FBE2DC;color:#B33C28;border-bottom-color:#F1C3B9}
+.rp-tag.gd{background:#F6EBCF;color:#8A6416;border-bottom-color:#E8D6A6}
+.rp-facts{display:flex;margin-top:12px;padding-top:11px;border-top:1px dashed #E2D9C4}
+.rp-facts > div{flex:1;text-align:center;padding:0 8px;border-inline-start:1px solid #EEE7D7}
+.rp-facts > div:first-child{border-inline-start:0}
+.rp-facts small{display:block;font-size:12px;font-weight:600;color:#7B8A85}
+.rp-facts b{display:block;font-size:17px;font-weight:700;color:#14302A;line-height:1.45}
+.rp-kpis{display:flex;gap:16px;margin-top:24px}
+.rp-kpi{flex:1;height:142px;padding:13px 18px;border-bottom-width:6px}
+.rp-kpi.fin{flex:1.22}
+.rp-kpi > small{position:relative;display:block;font-size:13px;font-weight:700;color:#6E7F7A}
+.rp-big{position:relative;display:flex;align-items:baseline;gap:8px}
+.rp-big b{font-size:52px;font-weight:700;line-height:1.12;color:#14302A}
+.rp-big span{font-size:15px;font-weight:600;color:#6E7F7A}
+.rp-bar{position:absolute;right:18px;left:18px;bottom:15px;height:11px;border-radius:6px;background:rgba(255,255,255,.7);border:1px solid rgba(0,0,0,.07)}
+.rp-bar i{position:absolute;top:-1px;bottom:-1px;right:-1px;border-radius:6px}
+.rp-lbl{position:relative;font-size:35px;font-weight:700;line-height:1.35;margin-top:4px}
+.rp-sub{position:relative;font-size:13px;font-weight:600;color:#6E7F7A}
+.rp-dots{position:relative;display:flex;gap:6px;margin-top:9px}
+.rp-dots i{width:21px;height:21px;border-radius:50%;background:linear-gradient(180deg,#EFEADF,#E2DACA);border-bottom:2px solid #CFC5AF}
+.rp-dots i.on{background:radial-gradient(circle at 35% 30%,#58CDA9 0%,#0E6B5C 70%);border-bottom-color:#08433A}
+.rp-ico{position:absolute;left:14px;top:12px;width:50px;height:50px}
+.rp-ico svg{display:block;width:50px;height:50px}
+.rp-ch{display:flex;align-items:center;gap:20px}
+.rp-dn{position:relative;flex:none;width:300px;height:236px}
+.rp-dn img{display:block;width:300px;height:236px}
+.rp-ctr{position:absolute;left:0;right:0;text-align:center;line-height:1.1}
+.rp-ctr b{display:block;font-size:30px;font-weight:700;color:#14302A}
+.rp-ctr span{display:block;font-size:11.5px;font-weight:600;color:#6E7F7A;margin-top:4px}
+.rp-lg{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.rp-li{display:flex;align-items:center;gap:12px;padding:7px 14px;border-radius:14px;background:linear-gradient(180deg,#FFFFFF,#F7F3EA);border:1px solid #ECE5D5;border-bottom:3px solid #E4DCC8}
+.rp-li > i{flex:none;width:20px;height:20px;border-radius:7px;border-bottom:3px solid rgba(0,0,0,.25)}
+.rp-li > span{font-size:14.5px;font-weight:600;color:#2E3F3A}
+.rp-li > b{margin-inline-start:auto;font-size:22px;font-weight:700;color:#14302A;line-height:1.2}
+.rp-li.z > b,.rp-li.z > span{color:#A3AEAA}
+.rp-mk{display:flex;gap:14px;margin-inline-start:auto}
+.rp-mk span{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#5E6F6A}
+.rp-mk i{width:12px;height:12px;border-radius:4px}
+.rp-map{display:flex;flex-wrap:wrap}
+.rp-am{position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;color:#FFFFFF;border-bottom:3px solid #18703F}
+.rp-am.v2,.rp-ach.v2{background:linear-gradient(180deg,#4CC98A,#23955A);border-bottom-color:#18703F}
+.rp-am.v1,.rp-ach.v1{background:linear-gradient(180deg,#6A9CF0,#2F67CC);border-bottom-color:#214C99}
+.rp-am.v0,.rp-ach.v0{background:linear-gradient(180deg,#EE7A63,#C9432D);border-bottom-color:#96301F}
+.rp-am.vu,.rp-ach.vu{background:linear-gradient(180deg,#F7F9F8,#E2E8E6);color:#71807B;border:1px solid #D9E0DD;border-bottom:3px solid #C4CDCA}
+.rp-am.tn{border-bottom-width:2px}
+.rp-ed{position:absolute;top:-3px;left:-3px;width:9px;height:9px;border-radius:50%;background:#E6A324;border:1.5px solid #FFFFFF}
+.rp-eb{position:absolute;top:-8px;left:-8px;min-width:21px;height:21px;padding:0 5px;border-radius:11px;background:linear-gradient(180deg,#F6C04E,#E09A12);color:#3A2600;font-size:11px;font-weight:700;line-height:17px;text-align:center;border:2px solid #FFFFFF}
+.rp-tw{display:flex;gap:12px;align-items:flex-start}
+.rp-tw > table{flex:1;min-width:0}
+.rp-tb{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;border:1px solid #E5DDCA;border-bottom-width:3px}
+.rp-tb th{padding:9px 8px;font-size:12.5px;font-weight:700;color:#FFFFFF;text-align:center;background:linear-gradient(180deg,#137766,#0C5B4F);white-space:nowrap}
+.rp-tb td{padding:3px 8px;text-align:center;vertical-align:middle;border-top:1px solid #EFE9DC;font-size:14px;font-weight:600;color:#2E3F3A;background:#FFFFFF}
+.rp-tb tr:nth-child(even) td{background:#FBF8F1}
+.rp-tb td.qw,.rp-tb td.sw{font-family:"Amiri Quran","Amiri",serif;font-weight:400;font-size:20px;line-height:1.65;color:#14302A}
+.rp-tb td.sw{color:#B5382A}
+.rp-tb td.nt{font-size:13px;color:#B5382A}
+.rp-tb td.mu{color:#A3AEAA}
+.rp-num,.rp-dd{direction:ltr;unicode-bidi:isolate}
+.rp-dd{display:inline-block;min-width:40px;padding:2px 9px;border-radius:999px;background:linear-gradient(180deg,#FDECE8,#F8D5CE);color:#A8281C;font-weight:700;font-size:13px;border-bottom:2px solid #EBB9B0}
+.rp-an{display:inline-block;min-width:30px;padding:2px 8px;border-radius:9px;background:#E6F2EE;color:#0E6B5C;font-weight:700;border-bottom:2px solid #C8E2D8}
+.rp-tb.cmp td{padding:2px 6px;font-size:12.5px}
+.rp-tb.cmp td.qw,.rp-tb.cmp td.sw{font-size:17px;line-height:1.6}
+.rp-tb.cmp th{padding:7px 6px;font-size:12px}
+.rp-more{margin:8px 0 0;font-size:12.5px;font-weight:600;color:#7B8A85;text-align:center}
+.rp-none{display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:16px;background:linear-gradient(180deg,#EEF9F2,#DDF1E5);border:1px solid #C5E6D2;border-bottom:3px solid #B5DBC4}
+.rp-none svg{flex:none;display:block}
+.rp-none.nil{background:linear-gradient(180deg,#F8F6F0,#EEEBE2);border-color:#E2DDD0;border-bottom-color:#D6D0C1}
+.rp-none.nil b{color:#5E6F6A}
+.rp-none.nil span{color:#7B8A85}
+.rp-none b{display:block;font-size:19px;font-weight:700;color:#14592A}
+.rp-none span{display:block;font-size:13px;font-weight:500;color:#3F7A52}
+.rp-msg{margin:0 0 12px;font-size:15px;font-weight:500;line-height:1.85;color:#2E3F3A}
+.rp-msg.ok{color:#14592A;font-weight:600}
+.rp-rec{display:flex;flex-direction:column;gap:9px}
+.rp-rc{display:flex;align-items:flex-start;gap:12px}
+.rp-rc > span{flex:none;width:162px;padding-top:4px;font-size:13.5px;font-weight:700;color:#2E3F3A}
+.rp-rc > div{flex:1;display:flex;flex-wrap:wrap;gap:6px}
+.rp-ach{display:flex;align-items:center;justify-content:center;min-width:32px;height:30px;padding:0 8px;border-radius:9px;font-size:13.5px;font-weight:700;color:#FFFFFF;border-bottom:3px solid #18703F}
+.rp-calc{display:flex;align-items:stretch;gap:6px}
+.rp-cc{flex:1;text-align:center;padding:8px 4px 7px;border-radius:14px;background:linear-gradient(180deg,#FFFFFF,#F5F0E4);border:1px solid #E9E1CE;border-bottom:3px solid #E2D9C3}
+.rp-cc small{display:block;font-size:11.5px;font-weight:600;color:#6E7F7A}
+.rp-cc b{display:block;font-size:19px;font-weight:700;color:#14302A;line-height:1.35;white-space:nowrap}
+.rp-cc.wd{flex:1.3}
+.rp-cc.neg b{color:#B5382A}
+.rp-ca{flex:none;align-self:center;font-size:19px;font-weight:700;color:#C2A35A}
+.rp-sc{position:relative;margin-top:14px;padding-top:42px}
+.rp-trk{display:flex;height:16px;border-radius:9px;overflow:hidden;border-bottom:2px solid rgba(0,0,0,.12)}
+.rp-trk i{display:block;height:16px}
+.rp-lb{display:flex;margin-top:7px}
+.rp-lb span{display:block;font-size:11px;font-weight:700;text-align:center;color:#5E6F6A;white-space:nowrap;overflow:hidden}
+.rp-pin{position:absolute;top:0;width:64px;text-align:center}
+.rp-pin b{display:block;height:27px;line-height:24px;border-radius:13px;font-size:13px;font-weight:700;color:#FFFFFF;background:linear-gradient(180deg,#178270,#0C5B4F);border-bottom:3px solid #07392F}
+.rp-pin i{display:block;width:3px;height:15px;margin:0 auto;border-radius:2px;background:#0C5B4F}
+.rp.p2 .rp-card{margin-top:16px}
+.rp-cmp{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:1px dashed #E2D9C4}
+.rp-cmp > b{flex:none;width:112px;font-size:14px;font-weight:700;color:#2E3F3A}
+.rp-cmp .rp-mini{flex:1}
+.rp-mini{display:flex;gap:8px}
+.rp-mn{flex:1;text-align:center;padding:6px 4px 5px;border-radius:14px;background:linear-gradient(180deg,#FFFFFF,#F5F0E4);border:1px solid #E9E1CE;border-bottom:3px solid #E2D9C3}
+.rp-mn small{display:block;font-size:11.5px;font-weight:600;color:#6E7F7A}
+.rp-mn b{display:block;font-size:19px;font-weight:700;color:#14302A;line-height:1.35}
+.rp-note{display:flex;align-items:center;gap:16px;padding:16px 22px;background:linear-gradient(180deg,#FFFDF6,#F7EED8);border-color:#EBDDB5;border-bottom-color:#E0CC96}
+.rp-nico{flex:none;display:block;width:58px;height:58px}
+.rp-nico svg{display:block}
+.rp-note b{display:block;font-size:16px;font-weight:700;color:#7A5712}
+.rp-note p{margin:2px 0 0;font-size:15px;font-weight:500;line-height:1.85;color:#2E3F3A}
+.rp-sig{display:flex;gap:60px;margin-top:20px;padding:0 24px}
+.rp-sig > div{flex:1;text-align:center}
+.rp-sig > div > i{display:block;height:40px;border-bottom:1.5px dotted #BFB399}
+.rp-sig > div > span{display:block;margin-top:6px;font-size:12.5px;font-weight:600;color:#6E7F7A}
+.rp-ft{position:absolute;right:40px;left:40px;bottom:14px;display:flex;align-items:center;gap:8px;padding-top:9px;border-top:1px solid #E6DECB;font-size:11.5px;font-weight:500;color:#8A9893}
+.rp-ft b{font-weight:700;color:#0E6B5C}
+.rp-ft .pg{margin-inline-start:auto;font-weight:700;color:#A57A22}
 </style>
 <script>(function(){var m;try{m=localStorage.getItem('tasmee3-theme')}catch(e){}if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;var d=m?m==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.mode=d?'dark':'light'})()</script>
 </head>
@@ -527,6 +688,7 @@ const GRADES = [
   { min: 100, key: 'top', label: 'فائق', range: '100' }, { min: 90, key: 'exc', label: 'ممتاز', range: '90–99' }, { min: 80, key: 'vgood', label: 'جيد جداً', range: '80–89' }, { min: 60, key: 'good', label: 'جيد', range: '60–79' },
   { min: 40, key: 'mid', label: 'متوسط', range: '40–59' }, { min: 20, key: 'acc', label: 'مقبول', range: '20–39' }, { min: -1, key: 'weak', label: 'ضعيف', range: '0–19' }];
 const grade = f => GRADES.find(g => r1(f) >= g.min);
+const oralOf = f => { const x = r1(f); return x >= 80 ? 6 : x >= 70 ? 5 : x >= 60 ? 4 : x >= 40 ? 3 : x >= 20 ? 2 : x >= 1 ? 1 : 0; };
 const gcls = g => 'g-' + g.key;
 
 /* ---------- state ---------- */
@@ -606,7 +768,7 @@ function calc(sh, sid) {
   const touched = (c2 + c1 + c0 + err) > 0, absent = !!r.absent;
   const pct = n ? sum * 100 / (2 * n) : 0;
   const fin = Math.max(0, pct - err);
-  const oral = fin >= 80 ? 6 : fin >= 70 ? 5 : fin >= 60 ? 4 : fin >= 40 ? 3 : fin >= 20 ? 2 : fin >= 1 ? 1 : 0;
+  const oral = oralOf(fin);
   return { n, sum, c2, c1, c0, err, pct, fin, oral, touched, absent, ev: touched || absent, done: c2 + c1 + c0, date: r.date || '', g: grade(fin) };
 }
 function rankMap(sh, studs) {
@@ -867,7 +1029,7 @@ function rRecite() {
           <div class="stu-tools">
             <label class="fld f-date"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>تاريخ التقييم</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
             <div class="stu-acts">
-            <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>${sentBtn(sh, S.ui.student)}</div>
+            <button class="btn pdf" id="r-pdf" title="تقرير تفصيلي عن تسميع الطالب في صفحتين">${PDF_ICON} تقرير PDF</button><button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>${sentBtn(sh, S.ui.student)}</div>
           </div>
         </div>
         <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
@@ -899,6 +1061,7 @@ function rRecite() {
 
   $('#r-sdate').addEventListener('change', e => { rec().date = e.target.value || today(); changed(); });
   $('#r-wa').addEventListener('click', () => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); sendWA(st, sheetReport(sh, st)); });
+  $('#r-pdf').addEventListener('click', e => reportPDF(sh, S.ui.student, e.currentTarget));
   $('#absent').addEventListener('click', e => {
     const r = rec(); r.absent = !r.absent;
     if (r.absent && !r.date) r.date = $('#r-sdate').value || today();
@@ -1155,9 +1318,9 @@ function rResults() {
       cells += `<td class="c${x != null ? ' c' + x : ''}${e.length ? ' e' : ''}"${e.length ? ` data-n="${'−' + en}" title="خطأ النطق: ${esc(e.join('، '))}"` : ''}>${x != null ? x : ''}</td>`;
     }
     const t = k.ev, gc = t ? gcls(k.g) : 'g-none';
-    return `<tr${t ? '' : ' class="nt"'}><td>${i + 1}</td><td class="nm"><button type="button" data-open="${s.id}">${esc(s.name)}</button>${k.absent ? '<span class="tag nh">لم يحفظ</span>' : ''}</td>${cells}
+    return `<tr${t ? '' : ' class="nt"'}><td>${i + 1}</td><td class="nm"><button type="button" data-open="${s.id}">${esc(s.name)}</button>${k.absent ? '<span class="tag nh">لم يحفظ</span>' : ''}</td>
+      <td class="gr ${t ? gc : ''}">${t ? fmt(k.fin) : '—'}</td><td class="gr ${t ? gc : ''}">${t ? k.g.label : '—'}</td><td class="gr sep ${t ? gc : ''}">${t ? k.oral : '—'}</td>${cells}
       <td class="sum">${t ? k.sum : '—'}</td><td>${t ? fmt(k.pct) + '%' : '—'}</td><td>${t ? k.c2 : ''}</td><td>${t ? k.c1 : ''}</td><td>${t ? k.c0 : ''}</td><td class="err">${t ? k.err : ''}</td>
-      <td class="gr ${t ? gc : ''}">${t ? fmt(k.fin) : '—'}</td><td class="gr ${t ? gc : ''}">${t ? k.g.label : '—'}</td><td class="gr ${t ? gc : ''}">${t ? k.oral : '—'}</td>
       <td class="rank">${rk[s.id] || ''}</td><td>${k.date || ''}</td><td>${waBtn('data-wa="' + s.id + '"', s)}</td></tr>`;
   }).join('');
 
@@ -1183,7 +1346,7 @@ function rResults() {
       <div class="tile"><span>أعلى درجة</span><b>${ev.length ? fmt(best) : '—'}</b></div>
     </div>
     <div class="tscroll"><table class="res">
-      <thead><tr><th>م</th><th class="nm">اسم الطالب</th>${ah}<th class="sum">المجموع</th><th>النسبة</th><th>بلا تذكير</th><th>مع تذكير</th><th>لم يسمع</th><th>أخطاء النطق</th><th>الدرجة النهائية</th><th>التقدير</th><th>درجة الشفوي</th><th>الترتيب</th><th>تاريخ التقييم</th><th>واتساب</th></tr></thead>
+      <thead><tr><th>م</th><th class="nm">اسم الطالب</th><th>الدرجة النهائية</th><th>التقدير</th><th class="sep">درجة الشفوي</th>${ah}<th class="sum">المجموع</th><th>النسبة</th><th>بلا تذكير</th><th>مع تذكير</th><th>لم يسمع</th><th>أخطاء النطق</th><th>الترتيب</th><th>تاريخ التقييم</th><th>واتساب</th></tr></thead>
       <tbody>${body}</tbody></table></div>
     <div class="legend">${GRADES.slice().reverse().map(g => `<span class="${gcls(g)}">${g.label} ${g.range}</span>`).join('')}</div>
     <p class="hint" style="margin:0">الدرجة النهائية = النسبة − عدد أخطاء النطق. درجة الشفوي من 6: ‎80 فأكثر = 6، ‎70 = 5، ‎60 = 4، ‎40 = 3، ‎20 = 2، أقل من ذلك = 1. الرقم الأحمر الصغير في خانة الآية يعني أخطاء نطق (مرّر المؤشر لقراءتها).</p>
@@ -1508,12 +1671,14 @@ function classSummary(c) {
     const ks = sheets.map(sh => calc(sh, s.id));
     const evs = ks.filter(k => k.ev);
     const avg = evs.length ? evs.reduce((t, k) => t + k.fin, 0) / evs.length : null;
-    return { s, i, ks, avg, cnt: evs.length };
+    return { s, i, ks, avg, oral: avg == null ? null : oralOf(avg), cnt: evs.length };
   });
-  const colAvg = sheets.map((sh, j) => { const ev = rows.map(r => r.ks[j]).filter(k => k.ev); return ev.length ? ev.reduce((t, k) => t + k.fin, 0) / ev.length : null; });
+  const mean = (a, f) => a.length ? a.reduce((t, x) => t + f(x), 0) / a.length : null;
+  const colAvg = sheets.map((sh, j) => mean(rows.map(r => r.ks[j]).filter(k => k.ev), k => k.fin));
+  const colOral = sheets.map((sh, j) => mean(rows.map(r => r.ks[j]).filter(k => k.ev), k => k.oral));
   const allEv = rows.filter(r => r.avg != null);
-  const total = allEv.length ? allEv.reduce((t, r) => t + r.avg, 0) / allEv.length : null;
-  return { sheets, rows, colAvg, total };
+  const total = mean(allEv, r => r.avg), totalOral = mean(allEv, r => r.oral);
+  return { sheets, rows, colAvg, colOral, total, totalOral };
 }
 function rResultsClass() {
   const v = $('#v-results');
@@ -1527,10 +1692,10 @@ function rResultsClass() {
   const gcell = (val, extra) => val == null ? `<td class="gr">—</td>` : `<td class="gr ${gcls(grade(val))}"${extra || ''}>${fmt(val)}</td>`;
   const head = sm.sheets.map(sh => `<th class="sv">${sname(sh.surah)}${fullRange(sh) ? '' : `<small>${sh.from}–${sh.to}</small>`}${dupOf(sh) && sh.date ? `<small>${sh.date}</small>` : ''}</th>`).join('');
   const body = rows.map(r => `<tr><td>${r.i + 1}</td><td class="nm">${esc(r.s.name)}</td>${r.ks.map((k, j) => k.ev
-      ? `<td class="gr ${gcls(k.g)} go" data-sh="${sm.sheets[j].id}" data-st="${r.s.id}" title="${esc(sname(sm.sheets[j].surah))}: ${k.g.label}${k.absent ? ' · لم يحفظ' : ''}${k.date ? ' · ' + k.date : ''}">${fmt(k.fin)}${k.absent ? '<sup>✕</sup>' : ''}</td>`
+      ? `<td class="gr ${gcls(k.g)} go" data-sh="${sm.sheets[j].id}" data-st="${r.s.id}" title="${esc(sname(sm.sheets[j].surah))}: ${k.g.label} · درجة الشفوي ${k.oral} من 6${k.absent ? ' · لم يحفظ' : ''}${k.date ? ' · ' + k.date : ''}">${fmt(k.fin)}${k.absent ? '<sup>✕</sup>' : ''}<small class="or">شفوي ${k.oral}</small></td>`
       : `<td class="go" data-sh="${sm.sheets[j].id}" data-st="${r.s.id}" title="لم يُقيَّم بعد">—</td>`).join('')}
-    <td class="sum"></td>${gcell(r.avg)}<td class="gr ${r.avg != null ? gcls(grade(r.avg)) : ''}">${r.avg != null ? grade(r.avg).label : '—'}</td><td>${r.cnt} / ${sm.sheets.length}</td><td>${waBtn('data-wac="' + r.s.id + '"', r.s)}</td></tr>`).join('');
-  const foot = `<tr><td></td><td class="nm">متوسط الشعبة</td>${sm.colAvg.map(a => gcell(a)).join('')}<td class="sum"></td>${gcell(sm.total)}<td class="gr ${sm.total != null ? gcls(grade(sm.total)) : ''}">${sm.total != null ? grade(sm.total).label : '—'}</td><td></td><td></td></tr>`;
+    <td class="sum"></td>${gcell(r.avg)}<td class="gr ${r.avg != null ? gcls(grade(r.avg)) : ''}">${r.avg != null ? grade(r.avg).label : '—'}</td><td class="gr ${r.avg != null ? gcls(grade(r.avg)) : ''}">${r.oral != null ? r.oral : '—'}</td><td>${r.cnt} / ${sm.sheets.length}</td><td>${waBtn('data-wac="' + r.s.id + '"', r.s)}</td></tr>`).join('');
+  const foot = `<tr><td></td><td class="nm">متوسط الشعبة</td>${sm.colAvg.map((a, j) => a == null ? '<td class="gr">—</td>' : `<td class="gr ${gcls(grade(a))}">${fmt(a)}<small class="or">شفوي ${fmt(sm.colOral[j])}</small></td>`).join('')}<td class="sum"></td>${gcell(sm.total)}<td class="gr ${sm.total != null ? gcls(grade(sm.total)) : ''}">${sm.total != null ? grade(sm.total).label : '—'}</td><td class="gr ${sm.total != null ? gcls(grade(sm.total)) : ''}">${sm.totalOral != null ? fmt(sm.totalOral) : '—'}</td><td></td><td></td></tr>`;
 
   v.innerHTML = `${modeBar()}
     <section class="panel bar">
@@ -1539,10 +1704,10 @@ function rResultsClass() {
       <button class="btn primary" id="xc-xlsx">تصدير إلى Excel</button>
     </section>
     <div class="tscroll"><table class="res">
-      <thead><tr><th>م</th><th class="nm">اسم الطالب</th>${head}<th class="sum"></th><th>متوسط الطالب</th><th>التقدير</th><th>السور المقيَّمة</th><th>واتساب</th></tr></thead>
+      <thead><tr><th>م</th><th class="nm">اسم الطالب</th>${head}<th class="sum"></th><th>متوسط الطالب</th><th>التقدير</th><th>درجة الشفوي</th><th>السور المقيَّمة</th><th>واتساب</th></tr></thead>
       <tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
     <div class="legend">${GRADES.slice().reverse().map(g => `<span class="${gcls(g)}">${g.label} ${g.range}</span>`).join('')}</div>
-    <p class="hint" style="margin:0">كل خانة هي الدرجة النهائية للطالب في تلك السورة. العلامة ✕ تعني أنه «لم يحفظ». اضغط أي خانة لفتح تسميع الطالب في تلك السورة.</p>`;
+    <p class="hint" style="margin:0">كل خانة هي الدرجة النهائية للطالب في تلك السورة، وتحتها درجة الشفوي فيها. درجة الشفوي في آخر الجدول محسوبة من متوسط الطالب. العلامة ✕ تعني أنه «لم يحفظ». اضغط أي خانة لفتح تسميع الطالب في تلك السورة.</p>`;
 
   bindModes();
   $('#xc-class').addEventListener('change', e => { S.ui.resClass = e.target.value; save(); rResultsClass(); });
@@ -1553,38 +1718,48 @@ function rResultsClass() {
 }
 function exportClassXlsx(c) {
   if (!window.XLSX) { toast('تعذّر تحميل مكتبة Excel، تحقق من الاتصال بالإنترنت', true); return; }
-  const sm = classSummary(c);
+  const sm = classSummary(c), NS = sm.sheets.length;
   let rows = sm.rows.slice();
   if (S.ui.resSort === 'rank') rows.sort((a, b) => (b.avg ?? -1) - (a.avg ?? -1) || a.i - b.i);
-  const H = ['م', 'اسم الطالب'].concat(sm.sheets.map(sh => sname(sh.surah) + (fullRange(sh) ? '' : ' ' + sh.from + '–' + sh.to))).concat(['متوسط الطالب', 'التقدير', 'السور المقيَّمة']);
-  const W = H.length;
+  const W = 2 + NS * 2 + 4;
   const fill = (row, o) => { while (row.length < W) row.push(xlCell('', o)); return row; };
-  const gc = (val, z) => val == null ? xlCell('—', z) : xlCell(r1(val), Object.assign({}, z, { bg: XL_GRADE[grade(val).key][0], fc: XL_GRADE[grade(val).key][1], b: true }), '0.0');
+  const band = (f, z, extra) => f == null ? Object.assign({}, z) : Object.assign({}, z, { bg: XL_GRADE[grade(f).key][0], fc: XL_GRADE[grade(f).key][1], b: true }, extra || {});
+  const gc = (val, z) => val == null ? xlCell('—', z) : xlCell(r1(val), band(val, z), '0.0');
+  const H = { b: true, bg: '0E4F44', fc: 'FFFFFF', wrap: true, sz: 13 }, H2 = { b: true, bg: '24705F', fc: 'FFFFFF', sz: 12 };
   const A = [];
   A.push(fill([xlCell('درجات الطلاب في السور — ' + cname(c), { sz: 22, b: true, bg: '0B6656', fc: 'FFFFFF', nb: true })], { bg: '0B6656', nb: true }));
-  A.push(fill([xlCell('عدد الطلاب ' + c.students.length + '  ·  عدد السور ' + sm.sheets.length + (sm.total != null ? '  ·  متوسط الشعبة ' + r1(sm.total) + '% (' + grade(sm.total).label + ')' : '') + '  ·  تاريخ التصدير ' + today(), { sz: 13, bg: 'D3E9E2', nb: true })], { bg: 'D3E9E2', nb: true }));
+  A.push(fill([xlCell('عدد الطلاب ' + c.students.length + '  ·  عدد السور ' + NS + (sm.total != null ? '  ·  متوسط الشعبة ' + r1(sm.total) + '% (' + grade(sm.total).label + ')' : '') + '  ·  تاريخ التصدير ' + today(), { sz: 13, bg: 'D3E9E2', nb: true })], { bg: 'D3E9E2', nb: true }));
   A.push(fill([xlCell('', { nb: true })], { nb: true }));
-  A.push(H.map(h => xlCell(h, { b: true, bg: '0E4F44', fc: 'FFFFFF', wrap: true, sz: 13 })));
+  const h1 = [xlCell('م', H), xlCell('اسم الطالب', H)], h2 = [xlCell('', H), xlCell('', H)];
+  sm.sheets.forEach(sh => { h1.push(xlCell(sname(sh.surah) + (fullRange(sh) ? '' : ' ' + sh.from + '–' + sh.to), H), xlCell('', H)); h2.push(xlCell('الدرجة', H2), xlCell('الشفوي', H2)); });
+  ['متوسط الطالب', 'التقدير', 'درجة الشفوي', 'السور المقيَّمة'].forEach(t => { h1.push(xlCell(t, H)); h2.push(xlCell('', H)); });
+  const HR = A.length;
+  A.push(h1, h2);
   rows.forEach((r, n) => {
     const z = { bg: n % 2 ? 'F3F7F5' : 'FFFFFF' };
     const row = [xlCell(r.i + 1, z), xlCell(r.s.name, Object.assign({ h: 'right', b: true }, z))];
-    r.ks.forEach(k => row.push(k.ev ? gc(k.fin, z) : xlCell('—', z)));
-    row.push(gc(r.avg, z), r.avg != null ? xlCell(grade(r.avg).label, Object.assign({}, z, { bg: XL_GRADE[grade(r.avg).key][0], fc: XL_GRADE[grade(r.avg).key][1], b: true })) : xlCell('—', z), xlCell(r.cnt + ' / ' + sm.sheets.length, z));
+    r.ks.forEach(k => { if (k.ev) row.push(gc(k.fin, z), xlCell(k.oral, band(k.fin, z))); else row.push(xlCell('—', z), xlCell('', z)); });
+    row.push(gc(r.avg, z), r.avg != null ? xlCell(grade(r.avg).label, band(r.avg, z)) : xlCell('—', z), r.oral != null ? xlCell(r.oral, band(r.avg, z)) : xlCell('—', z), xlCell(r.cnt + ' / ' + NS, z));
     A.push(row);
   });
   const z = { bg: 'E1E9E6', b: true };
   const f = [xlCell('', z), xlCell('متوسط الشعبة', Object.assign({ h: 'right' }, z))];
-  sm.colAvg.forEach(a => f.push(gc(a, z)));
-  f.push(gc(sm.total, z), sm.total != null ? xlCell(grade(sm.total).label, { b: true, bg: XL_GRADE[grade(sm.total).key][0], fc: XL_GRADE[grade(sm.total).key][1] }) : xlCell('—', z), xlCell('', z));
+  sm.colAvg.forEach((a, j) => f.push(gc(a, z), sm.colOral[j] == null ? xlCell('—', z) : xlCell(r1(sm.colOral[j]), band(a, z), '0.0')));
+  f.push(gc(sm.total, z), sm.total != null ? xlCell(grade(sm.total).label, band(sm.total, z)) : xlCell('—', z), sm.totalOral == null ? xlCell('—', z) : xlCell(r1(sm.totalOral), band(sm.total, z), '0.0'), xlCell('', z));
   A.push(f);
   A.push(fill([xlCell('', { nb: true })], { nb: true }));
   const leg = [xlCell('', { nb: true }), xlCell('مفتاح التقديرات', { b: true, nb: true, h: 'right' })];
   GRADES.slice().reverse().forEach(g => leg.push(xlCell(g.label + '\n' + g.range, { b: true, sz: 12, wrap: true, bg: XL_GRADE[g.key][0], fc: XL_GRADE[g.key][1] })));
   A.push(leg);
+  A.push([xlCell('', { nb: true }), xlCell('درجة الشفوي من 6: ‎80 فأكثر = 6، ‎70 = 5، ‎60 = 4، ‎40 = 3، ‎20 = 2، أقل من ذلك = 1. درجة الشفوي في آخر الجدول محسوبة من متوسط الطالب.', { sz: 12, fc: '566D67', nb: true, h: 'right' })]);
   const ws = XLSX.utils.aoa_to_sheet(A);
-  ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(W, leg.length) - 1 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: Math.max(W, leg.length) - 1 } }];
-  ws['!cols'] = [{ wch: 6 }, { wch: 30 }].concat(Array(Math.max(W, leg.length) - 2).fill({ wch: 12 }));
-  ws['!rows'] = A.map((_, r) => ({ hpt: r === 0 ? 40 : r === 1 ? 26 : r === 2 ? 8 : r === 3 ? 36 : r === A.length - 1 ? 36 : 24 }));
+  const WW = Math.max(W, leg.length), last = A.length - 1;
+  const merges = [{ s: { r: 0, c: 0 }, e: { r: 0, c: WW - 1 } }, { s: { r: 1, c: 0 }, e: { r: 1, c: WW - 1 } }, { s: { r: last, c: 1 }, e: { r: last, c: WW - 1 } }];
+  [0, 1, W - 4, W - 3, W - 2, W - 1].forEach(col => merges.push({ s: { r: HR, c: col }, e: { r: HR + 1, c: col } }));
+  for (let j = 0; j < NS; j++) merges.push({ s: { r: HR, c: 2 + j * 2 }, e: { r: HR, c: 3 + j * 2 } });
+  ws['!merges'] = merges;
+  ws['!cols'] = [{ wch: 6 }, { wch: 30 }].concat(...sm.sheets.map(() => [{ wch: 11 }, { wch: 8 }])).concat([{ wch: 12 }, { wch: 11 }, { wch: 11 }, { wch: 12 }]);
+  ws['!rows'] = A.map((_, r) => ({ hpt: r === 0 ? 40 : r === 1 ? 26 : r === 2 ? 8 : r === HR ? 32 : r === HR + 1 ? 22 : r === last - 1 ? 36 : 24 }));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'درجات السور');
   wb.Workbook = { Views: [{ RTL: true }] };
@@ -1747,6 +1922,336 @@ function exportXlsx(sh) {
   wb.Workbook = { Views: [{ RTL: true }] };
   try { XLSX.writeFile(wb, 'تسميع ' + sname(sh.surah) + ' ' + cname(c) + '.xlsx'); toast('نُزّل ملف Excel'); }
   catch (err) { toast('تعذّر تنزيل الملف من هذه الصفحة', true); }
+}
+
+/* ---------- تقرير PDF للطالب: صفحتان A4 تُرسمان خارج الشاشة ثم تُحوَّلان إلى صور داخل ملف PDF ---------- */
+const PDF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 16.5h4.5"/></svg>';
+const REP_H = 1123, REP_FOOT = 52;
+const REP_COL = { 2: '#34B270', 1: '#3F7FE0', 0: '#DA5A41', e: '#E6A324', u: '#B3BEBA' };
+const REP_BAND = {
+  top: { b1: '#3D2E92', b2: '#1C1446', bd: '#D9B04A', edge: '#120C30', ink: '#F6D77E', sub: '#DCCB98', bar: '#F6D77E', ink2: '#3A2A86' },
+  exc: { b1: '#C4F7D6', b2: '#63D996', bd: '#86E2AC', edge: '#2FA866', ink: '#05391A', sub: '#1B6A3D', bar: '#13864A', ink2: '#0E8A45' },
+  vgood: { b1: '#E6F6EA', b2: '#BFE7C8', bd: '#B5DFBF', edge: '#94CFA2', ink: '#14592A', sub: '#3F7A52', bar: '#2E8C4C', ink2: '#1D6E37' },
+  good: { b1: '#EBF4FD', b2: '#CBE2F8', bd: '#C2DAF2', edge: '#9DC3EA', ink: '#0C4A7D', sub: '#3D6C95', bar: '#2D74B8', ink2: '#0C4A7D' },
+  mid: { b1: '#FFF0DF', b2: '#FCD3A6', bd: '#F5C995', edge: '#E8AE70', ink: '#853E00', sub: '#9A5F2A', bar: '#D9782A', ink2: '#A04E07' },
+  acc: { b1: '#FFF8D6', b2: '#FAE896', bd: '#F0DE8C', edge: '#E0C95E', ink: '#5F4C00', sub: '#7D6A1E', bar: '#B39613', ink2: '#7A6200' },
+  weak: { b1: '#FDEAE7', b2: '#F6C8C2', bd: '#F0BDB6', edge: '#E09B92', ink: '#8C1D13', sub: '#9E4A40', bar: '#C9453A', ink2: '#A8281C' }
+};
+const aNum = (x, nom) => x === 1 ? 'آية واحدة' : x === 2 ? (nom ? 'آيتان' : 'آيتين') : x <= 10 ? x + ' آيات' : x + ' آية';
+const eNum = (x, nom) => x === 1 ? 'خطأ واحد' : x === 2 ? (nom ? 'خطآن' : 'خطأين') : x <= 10 ? x + ' أخطاء' : x + ' خطأً';
+let h2cP = null;
+function loadH2C() {
+  if (window.html2canvas) return Promise.resolve(window.html2canvas);
+  return h2cP || (h2cP = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'vendor/html2canvas.min.js';
+    s.onload = () => window.html2canvas ? res(window.html2canvas) : rej(new Error('html2canvas'));
+    s.onerror = () => { h2cP = null; s.remove(); rej(new Error('html2canvas')); };
+    document.head.appendChild(s);
+  }));
+}
+function repDate(d) {
+  const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(d || '');
+  const dt = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date();
+  try { return { wd: dt.toLocaleDateString('ar-QA-u-nu-latn', { weekday: 'long' }), d: dt.toLocaleDateString('ar-QA-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }) }; }
+  catch (e) { return { wd: '', d: d || today() }; }
+}
+function repData(sh, sid) {
+  const c = cls(sh.classId), studs = c ? c.students : [], st = studs.find(s => s.id === sid);
+  const r = sh.recs[sid] || { s: {}, e: {} }, k = calc(sh, sid);
+  const errs = [], by = { 2: [], 1: [], 0: [], u: [] };
+  for (let a = sh.from; a <= sh.to; a++) {
+    const v = r.s[a];
+    (v == null ? by.u : by[v]).push(a);
+    oldErrs(r, a).forEach(x => errs.push({ a, w: '', x: String(x).trim(), n: 1 }));
+    marksOf(r, a).forEach(m => errs.push({ a, w: m.w, x: String(m.x || '').trim(), n: mLen(m) }));
+  }
+  const rk = rankMap(sh, studs), evs = studs.map(s => calc(sh, s.id)).filter(x => x.ev);
+  const avg = evs.length ? evs.reduce((t, x) => t + x.fin, 0) / evs.length : null;
+  const best = evs.length ? Math.max(...evs.map(x => x.fin)) : null;
+  return { c, st, r, k, errs, by, un: by.u.length, rank: rk[sid], evN: evs.length, avg, best };
+}
+function shade(hex, p) {
+  const n = parseInt(hex.slice(1), 16), f = p < 0 ? 0 : 255, t = Math.abs(p);
+  const ch = v => Math.round(v + (f - v) * t);
+  return 'rgb(' + ch(n >> 16) + ',' + ch(n >> 8 & 255) + ',' + ch(n & 255) + ')';
+}
+/* دائرة مجسّمة قليلاً (مائلة بعمق خفيف)، تُرسم على لوحة ثم تُدرج صورةً في التقرير */
+function repDonut(parts, W, H) {
+  const K = 3, cv = document.createElement('canvas');
+  cv.width = W * K; cv.height = H * K;
+  const g = cv.getContext('2d'); g.scale(K, K);
+  const T = 0.72, D = 16, R = Math.min(W / 2 - 10, (H - D - 14) / (2 * T)), r = R * 0.56;
+  const cx = W / 2, cy = 6 + R * T;
+  const tot = parts.reduce((t, p) => t + p.v, 0);
+  let a0 = -Math.PI / 2;
+  const segs = tot ? parts.filter(p => p.v > 0).map(p => { const s = { v: p.v, c: p.c, a0, a1: a0 + p.v / tot * Math.PI * 2 }; a0 = s.a1; return s; })
+    : [{ v: 0, c: '#D9DFDD', a0, a1: a0 + Math.PI * 2 }];
+  const ring = (s, e) => { g.beginPath(); g.arc(0, 0, R, s, e); g.arc(0, 0, r, e, s, true); g.closePath(); };
+  const at = (dy, f) => { g.save(); g.translate(cx, cy + dy); g.scale(1, T); f(); g.restore(); };
+  at(D + 7, () => {
+    const sg = g.createRadialGradient(0, 0, 0, 0, 0, R * 1.16), q = r / (R * 1.16);
+    sg.addColorStop(0, 'rgba(20,45,40,0)'); sg.addColorStop(q * 0.92, 'rgba(20,45,40,0)'); sg.addColorStop(Math.min(0.9, q + 0.2), 'rgba(20,45,40,0.22)'); sg.addColorStop(1, 'rgba(20,45,40,0)');
+    g.fillStyle = sg; g.beginPath(); g.arc(0, 0, R * 1.16, 0, Math.PI * 2); g.fill();
+  });
+  for (let d = D; d >= 1; d--) segs.forEach(s => at(d, () => { ring(s.a0, s.a1); g.fillStyle = shade(s.c, d === D ? -0.46 : -0.30 - 0.08 * d / D); g.fill(); }));
+  segs.forEach(s => at(0, () => {
+    ring(s.a0, s.a1);
+    const gr = g.createLinearGradient(0, -R, 0, R);
+    gr.addColorStop(0, shade(s.c, 0.26)); gr.addColorStop(0.55, s.c); gr.addColorStop(1, shade(s.c, -0.12));
+    g.fillStyle = gr; g.fill();
+  }));
+  g.strokeStyle = '#FBF9F4'; g.lineWidth = 2.4; g.lineCap = 'butt';
+  if (segs.length > 1) segs.forEach(s => {
+    at(0, () => { g.beginPath(); g.moveTo(Math.cos(s.a0) * r, Math.sin(s.a0) * r); g.lineTo(Math.cos(s.a0) * R, Math.sin(s.a0) * R); });
+    g.stroke();
+    const sy = Math.sin(s.a0);
+    if (sy > 0.03) { const x = cx + Math.cos(s.a0) * R, y = cy + sy * R * T; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + D); g.stroke(); }
+  });
+  at(0, () => { ring(0, Math.PI * 2); g.clip(); const sh = g.createLinearGradient(0, -R, 0, R * 0.25); sh.addColorStop(0, 'rgba(255,255,255,0.42)'); sh.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = sh; g.fillRect(-R, -R, 2 * R, 2 * R); });
+  at(0, () => { g.beginPath(); g.arc(0, 0, R - 0.5, 0, Math.PI * 2); });
+  g.strokeStyle = 'rgba(255,255,255,0.6)'; g.lineWidth = 1; g.stroke();
+  g.font = '700 17px "IBM Plex Sans Arabic", Tahoma, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (tot) segs.forEach(s => {
+    if (s.a1 - s.a0 < 0.3) return;
+    const m = (s.a0 + s.a1) / 2, rr = (R + r) / 2, x = cx + Math.cos(m) * rr, y = cy + Math.sin(m) * rr * T;
+    g.fillStyle = 'rgba(0,0,0,0.28)'; g.fillText(String(s.v), x, y + 1.5);
+    g.fillStyle = '#FFFFFF'; g.fillText(String(s.v), x, y);
+  });
+  return { url: cv.toDataURL('image/png'), cy };
+}
+const REP_SVG = {
+  medal: '<span class="rp-ico"><svg viewBox="0 0 48 48" width="50" height="50"><defs><linearGradient id="rpgm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DD8E"/><stop offset="1" stop-color="#B8862A"/></linearGradient></defs><path d="M14 3h8l4 13h-8z" fill="#2F8E78"/><path d="M34 3h-8l-4 13h8z" fill="#0E6B5C"/><circle cx="24" cy="30" r="14" fill="url(#rpgm)" stroke="#9C7120" stroke-width="1.5"/><circle cx="24" cy="30" r="9.5" fill="none" stroke="#FFF3C9" stroke-opacity=".85" stroke-width="1.5"/><path d="M24 23.3l2.1 4.2 4.6.7-3.3 3.2.8 4.6-4.2-2.2-4.2 2.2.8-4.6-3.3-3.2 4.6-.7z" fill="#FFF7DA"/></svg></span>',
+  mic: '<span class="rp-ico"><svg viewBox="0 0 48 48" width="50" height="50"><defs><linearGradient id="rpgc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#45BE9F"/><stop offset="1" stop-color="#0B5A4D"/></linearGradient></defs><rect x="17" y="4" width="14" height="25" rx="7" fill="url(#rpgc)"/><path d="M20 11h8M20 16h8M20 21h8" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="1.6" stroke-linecap="round"/><path d="M11 22a13 13 0 0 0 26 0" fill="none" stroke="#B08325" stroke-width="3" stroke-linecap="round"/><path d="M24 35v7M17 42.5h14" stroke="#B08325" stroke-width="3" stroke-linecap="round"/></svg></span>',
+  book: '<svg viewBox="0 0 64 64" width="58" height="58"><defs><linearGradient id="rpgb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3D98F"/><stop offset="1" stop-color="#B8862A"/></linearGradient></defs><path d="M32 18C26 13 17 11.5 8 12.5v34c9-1 18 .5 24 5.5 6-5 15-6.5 24-5.5v-34C47 11.5 38 13 32 18z" fill="#0E6B5C"/><path d="M32 18C26 13 17 11.5 8 12.5v34c9-1 18 .5 24 5.5z" fill="#127A68"/><path d="M12 16.5c7-.3 13.5 1 18 4.5v25.5c-5-3-11-4.2-18-4z" fill="#FBF6E8"/><path d="M52 16.5c-7-.3-13.5 1-18 4.5v25.5c5-3 11-4.2 18-4z" fill="#F4ECD6"/><path d="M15 24c4.5 0 8 .8 11.5 2.6M15 30c4.5 0 8 .8 11.5 2.6M15 36c4.5 0 8 .8 11.5 2.6M49 24c-4.5 0-8 .8-11.5 2.6M49 30c-4.5 0-8 .8-11.5 2.6M49 36c-4.5 0-8 .8-11.5 2.6" stroke="#C9A85A" stroke-width="1.6" stroke-linecap="round"/><circle cx="32" cy="9" r="5" fill="url(#rpgb)"/></svg>',
+  ok: '<svg width="46" height="46" viewBox="0 0 46 46"><defs><linearGradient id="rpgo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#48C985"/><stop offset="1" stop-color="#1E8C52"/></linearGradient></defs><circle cx="23" cy="24" r="20" fill="#17703F"/><circle cx="23" cy="22" r="20" fill="url(#rpgo)"/><path d="M14 22.5l6 6 12-13" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+function repHero(D, sh, p) {
+  const sign = esc(waCfg().sign || 'معلم التربية الإسلامية');
+  if (p === 1) {
+    const dt = repDate(D.k.date || today());
+    return `<header class="rp-hero"><div class="rp-hin"><img class="rp-logo" src="icon-192.png" alt="">
+      <div class="rp-tt"><small>كشف التسميع · ${sign}</small><h1>تقرير التسميع</h1><div class="rp-sur">سورة ${esc(sname(sh.surah))}</div></div>
+      <div class="rp-date"><span>تاريخ التقييم</span><b>${esc(dt.d)}</b><i>${esc(dt.wd)}</i></div></div></header>`;
+  }
+  return `<header class="rp-hero sm"><div class="rp-hin"><img class="rp-logo" src="icon-192.png" alt="">
+    <div class="rp-tt"><small>تقرير التسميع · تتمة</small><h1>${esc(D.st.name)}</h1></div>
+    <div class="rp-date"><div class="rp-sur">سورة ${esc(sname(sh.surah))}</div><i>${esc(cname(D.c))}</i></div></div></header>`;
+}
+function repFoot(p) {
+  return `<footer class="rp-ft"><b>كشف التسميع</b><span>·</span><span>أُعدّ التقرير في ${esc(repDate(today()).d)}</span><span class="pg">صفحة ${p} من 2</span></footer>`;
+}
+function repP1(D, sh, cell) {
+  const k = D.k, n = k.n, B = REP_BAND[k.g.key];
+  const tag = k.absent ? '<span class="rp-tag nh">لم يحفظ</span>' : D.un ? '<span class="rp-tag gd">تقييم جزئي حتى الآن</span>' : '<span class="rp-tag">التقييم مكتمل</span>';
+  const rg = k.g.range.split('–'), gl = rg.length < 2 ? 'الدرجة الكاملة' : 'من ' + rg[0] + ' إلى ' + rg[1];
+  const legend = D.parts.map(p => `<div class="rp-li${p.v ? '' : ' z'}"><i style="background:linear-gradient(180deg,${shade(p.c, 0.25)},${p.c});border-bottom-color:${shade(p.c, -0.4)}"></i><span>${p.t}</span><b>${p.v}</b></div>`).join('');
+  let cells = '';
+  for (let a = sh.from; a <= sh.to; a++) {
+    const v = D.r.s[a], e = errCount(D.r, a);
+    const tiny = cell.s < 19;
+    cells += `<div class="rp-am v${v == null ? 'u' : v}${tiny ? ' tn' : ''}" style="width:${cell.s}px;height:${cell.s}px;font-size:${cell.f}px;border-radius:${cell.rad}px">${tiny ? '' : a}${e ? (tiny || cell.s < 24 ? '<span class="rp-ed"></span>' : `<span class="rp-eb">${e}</span>`) : ''}</div>`;
+  }
+  const mk = [[REP_COL[2], 'دون تذكير'], [REP_COL[1], 'مع تذكير'], [REP_COL[0], 'لم يسمّعها']].concat(D.un ? [[REP_COL.u, 'لم تُقيَّم']] : []).concat(D.errs.length ? [[REP_COL.e, 'أخطاء النطق']] : []);
+  return `<section class="rp">${repHero(D, sh, 1)}<div class="rp-bd">
+    <div class="rp-card rp-id"><div class="rp-idr"><div class="rp-av">${esc((D.st.name.trim()[0]) || '؟')}</div>
+      <div class="rp-nm"><small>اسم الطالب</small><h2>${esc(D.st.name)}</h2></div><div class="rp-tags">${tag}</div></div>
+      <div class="rp-facts"><div><small>الصف والشعبة</small><b>${esc(cname(D.c))}</b></div><div><small>السورة</small><b>${esc(sname(sh.surah))}</b></div>
+        <div><small>نطاق التسميع</small><b>${fullRange(sh) ? 'السورة كاملة' : 'من ' + sh.from + ' إلى ' + sh.to}</b></div><div><small>الآيات المقيَّمة</small><b>${k.done} من ${n}</b></div></div></div>
+    <div class="rp-kpis">
+      <div class="rp-kpi fin" style="background:linear-gradient(180deg,${B.b1},${B.b2});border-color:${B.bd};border-bottom-color:${B.edge}">
+        <small style="color:${B.sub}">الدرجة النهائية</small><div class="rp-big"><b style="color:${B.ink}">${fmt(k.fin)}</b><span style="color:${B.sub}">من 100</span></div>
+        <div class="rp-bar"><i style="width:${Math.max(0, Math.min(100, k.fin))}%;background:linear-gradient(180deg,${shade(B.bar, 0.25)},${B.bar})"></i></div></div>
+      <div class="rp-kpi">${REP_SVG.medal}<small>التقدير</small><div class="rp-lbl" style="color:${B.ink2}">${k.g.label}</div><div class="rp-sub">${gl}</div></div>
+      <div class="rp-kpi">${REP_SVG.mic}<small>درجة الشفوي المستحقة</small><div class="rp-big"><b>${k.oral}</b><span>من 6</span></div>
+        <div class="rp-dots">${[0, 1, 2, 3, 4, 5].map(i => `<i${i < k.oral ? ' class="on"' : ''}></i>`).join('')}</div></div>
+    </div>
+    <div class="rp-card"><div class="rp-h"><i></i><b>توزيع التسميع</b><span>عدد الآيات في المقرَّر ${n}</span></div>
+      <div class="rp-ch"><div class="rp-dn"><img src="${D.donut.url}" alt=""><div class="rp-ctr" style="top:${Math.round(D.donut.cy - 24)}px"><b>${fmt(k.fin)}</b><span>الدرجة النهائية</span></div></div>
+      <div class="rp-lg">${legend}</div></div></div>
+    <div class="rp-card"><div class="rp-h"><i></i><b>خريطة الآيات</b><div class="rp-mk">${mk.map(m => `<span><i style="background:${m[0]}"></i>${m[1]}</span>`).join('')}</div></div>
+      <div class="rp-map" style="gap:${cell.g + 5}px ${cell.g}px;padding-top:4px">${cells}</div></div>
+  </div>${repFoot(1)}</section>`;
+}
+function repSummary(D) {
+  const k = D.k, n = k.n;
+  if (k.absent) return { ok: false, t: 'لم يحفظ الطالب السورة في هذا التقييم، فلم تُحتسب له درجات على آياتها.' };
+  if (k.c2 === n && !k.err) return { ok: true, t: 'ما شاء الله! سمّع الطالب جميع آيات المقرَّر دون تذكير ودون أخطاء نطق. بارك الله فيه.' };
+  const p = [];
+  p.push(k.c2 ? 'سمّع الطالب ' + aNum(k.c2) + ' دون تذكير' : 'لم يسمّع الطالب أي آية دون تذكير');
+  if (k.c1) p.push('و' + aNum(k.c1) + ' مع تذكير');
+  if (k.c0) p.push('ولم يسمّع ' + aNum(k.c0));
+  let t = p.join('، ');
+  if (D.un) t += '، وبقيت ' + aNum(D.un, true) + ' لم تُقيَّم بعد';
+  t += k.err ? '، وسُجّل عليه ' + eNum(k.err, true) + ' في النطق.' : '، ولم يُسجَّل عليه أي خطأ في النطق.';
+  if (k.c0 || k.c1) t += ' نوصي بمراجعة الآيات المذكورة أدناه قبل التسميع القادم.';
+  return { ok: false, t };
+}
+const REP_MSG = {
+  top: 'تهانينا! أتقن الطالب حفظ السورة كاملةً دون أي خطأ. نسأل الله أن يجعل القرآن ربيع قلبه، وأن يرفعه به درجات.',
+  exc: 'ما شاء الله! حفظٌ متقن وأداء ممتاز. نوصي بمواصلة المراجعة اليومية لتبقى السورة راسخةً في صدره، نفع الله به.',
+  vgood: 'أداء جيد جداً، وبقليل من المراجعة للآيات المذكورة يصل إلى الامتياز بإذن الله.',
+  good: 'أداء جيد، ونوصي بمراجعة الآيات التي احتاج فيها الطالب إلى تذكير، وقراءتها على مسمع أحد أفراد الأسرة قبل التسميع القادم.',
+  mid: 'يحتاج الطالب إلى مزيد من المراجعة اليومية للسورة، ونوصي بتقسيمها إلى مقاطع قصيرة وتكرار كل مقطع حتى يثبت حفظه.',
+  weak: 'نوصي بإعادة حفظ السورة على مقاطع قصيرة مع متابعة يومية من الأسرة، ثم إعادة تسميعها، وبالعزيمة والمراجعة يتحسن الحفظ بإذن الله.',
+  part: 'لم يكتمل تقييم السورة بعد، وستتغير الدرجة بعد تسميع بقية الآيات بإذن الله.'
+};
+REP_MSG.acc = REP_MSG.weak;
+function repP2(D, sh, o) {
+  const k = D.k, n = k.n, B = REP_BAND[k.g.key], sign = esc(waCfg().sign || 'معلم التربية الإسلامية');
+  let eh;
+  if (!D.errs.length) eh = k.c2 + k.c1
+    ? `<div class="rp-none">${REP_SVG.ok}<div><b>لا توجد أخطاء نطق</b><span>أتقن الطالب نطق كلمات الآيات التي سمّعها.</span></div></div>`
+    : `<div class="rp-none nil"><div><b>لا توجد أخطاء نطق مسجّلة</b><span>لم يسمّع الطالب آيات في هذا التقييم.</span></div></div>`;
+  else {
+    const list = D.errs.slice(0, o.max), rest = D.errs.length - list.length, two = o.cols === 2 && list.length > 1;
+    const row = (e, i) => `<tr><td>${i + 1}</td><td><span class="rp-an">${e.a}</span></td>${e.w
+      ? `<td class="qw">${esc(e.w)}</td><td class="${e.x ? 'sw' : 'mu'}">${e.x ? esc(e.x) : '—'}</td>`
+      : `<td class="mu">—</td><td class="nt">${esc(e.x)}</td>`}<td><span class="rp-dd">−${e.n}</span></td></tr>`;
+    const hd = two ? ['م', 'الآية', 'في المصحف', 'كما قرأها', 'الخصم'] : ['م', 'الآية', 'الكلمة كما في المصحف', 'كما قرأها الطالب', 'الخصم'];
+    const tbl = (rows, off) => `<table class="rp-tb${o.cmp ? ' cmp' : ''}"><thead><tr>${hd.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e, i) => row(e, i + off)).join('')}</tbody></table>`;
+    if (two) { const h = Math.ceil(list.length / 2); eh = `<div class="rp-tw">${tbl(list.slice(0, h), 0)}${tbl(list.slice(h), h)}</div>`; }
+    else eh = tbl(list, 0);
+    if (rest > 0) eh += `<p class="rp-more">عدد الأخطاء غير المعروضة هنا ${rest}، وتجدها كاملةً في كشف التسميع.</p>`;
+  }
+  const sm = repSummary(D);
+  const CM = o.chipMax || 44, chips = (arr, v) => arr.slice(0, CM).map(a => `<span class="rp-ach v${v}">${a}</span>`).join('') + (arr.length > CM ? `<span class="rp-ach vu rp-num">+${arr.length - CM}</span>` : '');
+  let rec = '';
+  if (!k.absent) {
+    if (D.by[0].length) rec += `<div class="rp-rc"><span>آيات لم يسمّعها</span><div>${chips(D.by[0], 0)}</div></div>`;
+    if (D.by[1].length) rec += `<div class="rp-rc"><span>آيات سمّعها مع تذكير</span><div>${chips(D.by[1], 1)}</div></div>`;
+    if (D.by.u.length) rec += `<div class="rp-rc"><span>آيات لم تُقيَّم بعد</span><div>${chips(D.by.u, 'u')}</div></div>`;
+  }
+  const seg = [['ضعيف', 20, '#F0A99F'], ['مقبول', 20, '#F4DC6E'], ['متوسط', 20, '#F6B877'], ['جيد', 20, '#9FC8F0'], ['جيد جداً', 10, '#93D4A3'], ['ممتاز', 6, '#3ED27C'], ['فائق', 4, '#3A2A86']];
+  const f = k.fin, pos = f < 90 ? f : f < 100 ? 90 + (f - 90) * 0.6 : 98;
+  const cmp = o.noCmp ? '' : `<div class="rp-cmp"><b>مقارنة بالشعبة</b><div class="rp-mini">
+      <div class="rp-mn"><small>ترتيبه بين المقيَّمين</small><b>${D.rank ? D.rank + ' من ' + D.evN : '—'}</b></div>
+      <div class="rp-mn"><small>متوسط الشعبة</small><b>${D.avg == null ? '—' : fmt(D.avg)}</b></div>
+      <div class="rp-mn"><small>أعلى درجة في الشعبة</small><b>${D.best == null ? '—' : fmt(D.best)}</b></div></div></div>`;
+  return `<section class="rp p2">${repHero(D, sh, 2)}<div class="rp-bd">
+    <div class="rp-card"><div class="rp-h"><i></i><b>جدول أخطاء النطق</b>${D.errs.length ? `<em>مجموع الخصم <span class="rp-num">−${k.err}</span></em>` : '<span>كل كلمة خطأ تُخصم درجة من النسبة المئوية</span>'}</div>${eh}</div>
+    <div class="rp-card"><div class="rp-h"><i></i><b>ملخص الأداء</b></div><p class="rp-msg${sm.ok ? ' ok' : ''}"${rec ? '' : ' style="margin:0"'}>${sm.t}</p>${rec ? `<div class="rp-rec">${rec}</div>` : ''}</div>
+    <div class="rp-card"><div class="rp-h"><i></i><b>كيف حُسبت الدرجة؟</b></div>
+      <div class="rp-calc"><div class="rp-cc wd"><small>مجموع درجات الآيات</small><b>${k.sum} من ${2 * n}</b></div><span class="rp-ca">←</span>
+        <div class="rp-cc"><small>النسبة المئوية</small><b>${fmt(k.pct)}%</b></div><span class="rp-ca">←</span>
+        <div class="rp-cc neg"><small>خصم أخطاء النطق</small><b class="rp-num">${k.err ? '−' + k.err : '0'}</b></div><span class="rp-ca">←</span>
+        <div class="rp-cc" style="background:linear-gradient(180deg,${B.b1},${B.b2});border-color:${B.bd};border-bottom-color:${B.edge}"><small style="color:${B.sub}">الدرجة النهائية</small><b style="color:${B.ink}">${fmt(k.fin)}</b></div><span class="rp-ca">←</span>
+        <div class="rp-cc"><small>درجة الشفوي</small><b>${k.oral} من 6</b></div></div>
+      <div class="rp-sc"><div class="rp-pin" style="right:clamp(0px,calc(${pos}% - 32px),calc(100% - 64px))"><b>${fmt(f)}</b><i></i></div>
+        <div class="rp-trk">${seg.map(s => `<i style="width:${s[1]}%;background:linear-gradient(180deg,${shade(s[2], 0.25)},${s[2]})"></i>`).join('')}</div>
+        <div class="rp-lb">${seg.map(s => `<span style="width:${s[1]}%">${s[0]}</span>`).join('')}</div></div>${cmp}</div>
+    ${o.msg ? `<div class="rp-card rp-note"><span class="rp-nico">${REP_SVG.book}</span><div><b>رسالة المعلم</b><p>${REP_MSG[k.absent ? 'weak' : D.un ? 'part' : k.g.key]}</p></div></div>` : ''}
+    ${o.sig ? `<div class="rp-sig"><div><i></i><span>توقيع ${sign}</span></div><div><i></i><span>توقيع ولي الأمر</span></div></div>` : ''}
+  </div>${repFoot(2)}</section>`;
+}
+const repOver = pg => {
+  const top = pg.getBoundingClientRect().top, kids = $$('.rp-bd > *', pg);
+  return kids.length && Math.max(...kids.map(e => e.getBoundingClientRect().bottom - top)) > REP_H - REP_FOOT;
+};
+async function repFonts() {
+  if (!document.fonts || !document.fonts.load) return;
+  const L = ['400', '500', '600', '700'].map(w => document.fonts.load(w + ' 20px "IBM Plex Sans Arabic"', 'تقرير التسميع 0123456789%')).concat(document.fonts.load('400 24px "Amiri Quran"', 'سورة ٱللَّهِ'));
+  await Promise.race([Promise.all(L).catch(() => {}), new Promise(r => setTimeout(r, 6000))]);
+}
+const repBlob = cv => new Promise((res, rej) => {
+  if (cv.toBlob) cv.toBlob(b => b ? res(b) : rej(new Error('jpeg')), 'image/jpeg', 0.92);
+  else { const u = cv.toDataURL('image/jpeg', 0.92), s = atob(u.split(',')[1]), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); res(new Blob([a], { type: 'image/jpeg' })); }
+});
+const blobBytes = b => b.arrayBuffer ? b.arrayBuffer() : new Response(b).arrayBuffer();
+function pdfText16(s) {
+  let h = 'FEFF';
+  for (const ch of String(s)) {
+    const cp = ch.codePointAt(0);
+    if (cp > 0xFFFF) { const v = cp - 0x10000; h += (0xD800 + (v >> 10)).toString(16).padStart(4, '0') + (0xDC00 + (v & 1023)).toString(16).padStart(4, '0'); }
+    else h += cp.toString(16).padStart(4, '0');
+  }
+  return '<' + h.toUpperCase() + '>';
+}
+/* ملف PDF بسيط: كل صفحة صورة JPEG بمقاس A4 */
+function jpegPdf(imgs, title) {
+  const enc = new TextEncoder(), parts = [], offs = [];
+  let len = 0;
+  const put = x => { const b = typeof x === 'string' ? enc.encode(x) : x; parts.push(b); len += b.length; };
+  const obj = (id, f) => { offs[id] = len; put(id + ' 0 obj\n'); f(); put('\nendobj\n'); };
+  const W = 595.28, H = 841.89, N = imgs.length, total = 4 + N * 3;
+  put('%PDF-1.4\n%âãÏÓ\n');
+  obj(1, () => put('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2, () => put('<< /Type /Pages /Kids [' + imgs.map((_, i) => (4 + i * 3) + ' 0 R').join(' ') + '] /Count ' + N + ' >>'));
+  obj(3, () => put('<< /Title ' + pdfText16(title) + ' /Creator (tasmee3) /Producer (tasmee3) >>'));
+  imgs.forEach((im, i) => {
+    const p = 4 + i * 3, cs = 'q ' + W + ' 0 0 ' + H + ' 0 0 cm /I' + i + ' Do Q';
+    obj(p, () => put('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] /Resources << /XObject << /I' + i + ' ' + (p + 2) + ' 0 R >> /ProcSet [/PDF /ImageC] >> /Contents ' + (p + 1) + ' 0 R >>'));
+    obj(p + 1, () => put('<< /Length ' + cs.length + ' >>\nstream\n' + cs + '\nendstream'));
+    obj(p + 2, () => { put('<< /Type /XObject /Subtype /Image /Width ' + im.w + ' /Height ' + im.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + im.bytes.length + ' >>\nstream\n'); put(im.bytes); put('\nendstream'); });
+  });
+  const xref = len;
+  let t = 'xref\n0 ' + total + '\n0000000000 65535 f \n';
+  for (let i = 1; i < total; i++) t += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+  put(t + 'trailer\n<< /Size ' + total + ' /Root 1 0 R /Info 3 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+  return new Blob(parts, { type: 'application/pdf' });
+}
+async function reportPDF(sh, sid, btn) {
+  const D = repData(sh, sid);
+  if (!D.st) return;
+  if (!D.k.ev) { toast('لم يُقيَّم هذا الطالب بعد، سجّل تسميعه أولاً', true); return; }
+  if (btn.classList.contains('busy')) return;
+  const old = btn.innerHTML;
+  btn.classList.add('busy'); btn.innerHTML = PDF_ICON + ' جارٍ تجهيز التقرير…';
+  let stage = null;
+  try {
+    const h2c = await loadH2C();
+    stage = document.createElement('div');
+    stage.id = 'rep-stage'; stage.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(stage);
+    stage.innerHTML = '<div class="rp" style="font-weight:700">تقرير التسميع 0123 <span class="q">سورة ٱللَّهِ</span></div>';
+    await repFonts();
+    const k = D.k;
+    D.parts = [{ v: k.c2, c: REP_COL[2], t: 'آيات سمّعها دون تذكير' }, { v: k.c1, c: REP_COL[1], t: 'آيات سمّعها مع تذكير' }, { v: k.c0, c: REP_COL[0], t: 'آيات لم يسمّعها' }, { v: k.err, c: REP_COL.e, t: 'أخطاء النطق' }];
+    if (D.un) D.parts.push({ v: D.un, c: REP_COL.u, t: 'آيات لم تُقيَّم بعد' });
+    D.donut = repDonut(D.parts, 300, 236);
+    /* الصفحة الأولى: يصغر مربع الآية حتى تتسع خريطة الآيات */
+    const SIZES = [52, 46, 40, 35, 31, 27, 24, 21, 19, 16, 14, 12, 10];
+    let i1 = Math.max(0, SIZES.findIndex(s => Math.ceil(k.n / Math.floor(674 / (s + Math.round(s * 0.22)))) * (s + Math.round(s * 0.22) + 5) <= 300)), p1;
+    for (;;) {
+      const s = SIZES[i1], cell = { s, g: Math.round(s * 0.22), f: Math.max(10, Math.round(s * 0.36)), rad: Math.round(s * 0.24) };
+      stage.innerHTML = repP1(D, sh, cell);
+      p1 = stage.firstElementChild;
+      if (!repOver(p1) || i1 >= SIZES.length - 1) break;
+      i1++;
+    }
+    /* الصفحة الثانية: تُختصر تدريجياً حتى لا تتجاوز الصفحتين */
+    const steps = [{ cols: 1, sig: true, msg: true }, { cols: 1, sig: true }, { cols: 1 }, { cols: 2 }, { cols: 2, cmp: true }, { cols: 2, cmp: true, noCmp: true }];
+    let p2 = null, st = 0, max = D.errs.length;
+    for (;;) {
+      if (p2) p2.remove();
+      stage.insertAdjacentHTML('beforeend', repP2(D, sh, Object.assign({ max }, steps[st])));
+      p2 = stage.lastElementChild;
+      if (!repOver(p2)) break;
+      if (st < steps.length - 1) { st++; continue; }
+      if (max > 4) { max = Math.max(4, max - 2); continue; }
+      if (!steps[st].chipMax) { steps[st] = Object.assign({}, steps[st], { chipMax: 14 }); continue; }
+      break;
+    }
+    await Promise.all($$('img', stage).map(im => im.decode ? im.decode().catch(() => {}) : null));
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    const imgs = [];
+    for (const pg of $$('.rp', stage)) {
+      const cv = await h2c(pg, { scale: 2, backgroundColor: '#FBF9F4', logging: false, useCORS: true, imageTimeout: 15000, ignoreElements: el => el.parentNode === document.body && el !== stage });
+      imgs.push({ bytes: new Uint8Array(await blobBytes(await repBlob(cv))), w: cv.width, h: cv.height });
+    }
+    const clean = s => String(s).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const name = clean('تقرير تسميع ' + D.st.name + ' - سورة ' + sname(sh.surah));
+    const url = URL.createObjectURL(jpegPdf(imgs, name)), a = document.createElement('a');
+    a.href = url; a.download = name + '.pdf'; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 60000);
+    toast('نُزّل تقرير PDF');
+  } catch (e) {
+    console.error(e);
+    toast('تعذّر إنشاء التقرير، تحقق من الاتصال بالإنترنت ثم حاول مرة أخرى', true);
+  } finally {
+    if (stage) stage.remove();
+    btn.classList.remove('busy'); btn.innerHTML = old;
+  }
 }
 
 render();
