@@ -903,6 +903,12 @@ async function readNamesFile(f) {
 function rClasses() {
   const ed = S.ui.editClass && cls(S.ui.editClass);
   const v = $('#v-classes');
+  /* إعادة الرسم (بعد الحفظ أو المزامنة) لا تغيّر موضع القائمة ولا ما كُتب ولم يُحفظ */
+  const keep = v.dataset.ed === String(S.ui.editClass || '') ? {
+    list: ($('.slist', v) || {}).scrollTop, page: window.scrollY, open: !!$('details.paste[open]', v),
+    vals: ['f-grade', 'f-sec', 'f-names', 'f-ph0', 'f-ph1'].map(id => { const e = document.getElementById(id); return e && e.value !== e.defaultValue ? [id, e.value] : null; }).filter(Boolean)
+  } : null;
+  v.dataset.ed = String(S.ui.editClass || '');
   v.innerHTML = `
   <div class="cols">
     <section class="panel">
@@ -1001,6 +1007,12 @@ function rClasses() {
     save(true); render();
   });
   const cancel = $('#f-cancel'); if (cancel) cancel.addEventListener('click', () => { S.ui.editClass = null; save(); render(); });
+  if (keep) {
+    keep.vals.forEach(([id, val]) => { const e = document.getElementById(id); if (e) { e.value = val; e.dispatchEvent(new Event('input')); } });
+    const d = $('details.paste', v); if (d && keep.open) d.open = true;
+    const l = $('.slist', v); if (l && keep.list) l.scrollTop = keep.list;
+    if (Math.abs(window.scrollY - keep.page) > 2) window.scrollTo(0, keep.page);
+  }
   /* زر الدرجة بجانب كل طالب: فارغ ← 0 ← 1 ← 2 ← 3 ← 4 ← 5 ← فارغ */
   $$('.slist .mk', v).forEach(b => b.addEventListener('click', () => {
     const st = ed && ed.students.find(x => x.id === b.dataset.sid); if (!st) return;
