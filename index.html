@@ -374,6 +374,26 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .res td.go{cursor:pointer}
 .res td.go:hover{outline:2px solid var(--accent);outline-offset:-2px}
 .res sup{font-size:.6rem;margin-inline-start:2px}
+.sc-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 14px;font:inherit;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.sc-msg{width:100%;min-height:200px;border:1px solid var(--line-2);border-radius:14px;padding:10px 12px;background:var(--surface);color:var(--ink);font:inherit;line-height:1.7;resize:vertical}
+.sc-list li{gap:10px}
+.sc-list li.off .sl-nm{opacity:.45;text-decoration:line-through}
+.sc-list input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.sc-d{flex:none;max-width:150px;border:1px solid var(--line-2);border-radius:10px;padding:6px 8px;background:var(--surface);color:var(--ink);font:inherit;font-size:.85rem}
+.mk.lv{width:32px;height:28px;font-size:.95rem;cursor:default;display:inline-grid;place-items:center;border-style:solid}
+.sc-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sc-bar span{font-weight:700;color:var(--muted)}
+.sc-bar .btn{margin-inline-start:auto}
+.sc-day{border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden}
+.sc-day h3{margin:0;padding:10px 14px;background:var(--sunk);font-size:1rem;display:flex;align-items:center;gap:8px}
+.sc-day h3 small{font-size:.78rem;color:var(--muted);background:var(--surface);border-radius:999px;padding:1px 9px}
+.sc-day ul{list-style:none;margin:0;padding:0}
+.sc-day li{display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--line)}
+.tag.td{background:#FFF3C4;color:#7A5A00}
+.tag.ok{background:#DDF3E6;color:#14592A}
+.tag.snt{background:#E1EBFB;color:#1F57B9}
 .sl-h{display:flex;align-items:center;gap:8px;margin:4px 0 10px;font-size:1.05rem}
 .sl-h small{font-size:.8rem;color:var(--muted);background:var(--sunk);border-radius:999px;padding:2px 10px}
 .slist{list-style:none;margin:0 0 14px;padding:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;max-height:560px;overflow-y:auto}
@@ -676,6 +696,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
     <button class="tab" role="tab" data-tab="recite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5v13"/></svg><span>التسميع</span></button>
     <button class="tab" role="tab" data-tab="results"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M9.5 9.5v10M15 9.5v10"/></svg><span>النتائج</span></button>
     <button class="tab" role="tab" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6.5" rx="1"/><rect x="10.5" y="7" width="3" height="10.5" rx="1"/><rect x="15.5" y="13" width="3" height="4.5" rx="1"/></svg><span>إحصاء الشُّعب</span></button>
+    <button class="tab" role="tab" data-tab="sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg><span>المواعيد</span></button>
     <button class="tab" role="tab" data-tab="classes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.9-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.8 14.2c2.3.2 4 1.8 4.7 4.8"/></svg><span>الشُّعب</span></button>
   </nav>
   <div class="side-foot"><b>النص القرآني</b>بالرسم العثماني من مشروع تنزيل (tanzil.net)</div>
@@ -697,6 +718,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   <section id="v-recite" class="view" hidden></section>
   <section id="v-results" class="view" hidden></section>
   <section id="v-stats" class="view" hidden></section>
+  <section id="v-sched" class="view" hidden></section>
   <p class="foot">البيانات محفوظة في هذا المتصفح، وفي حسابك عند تفعيل المزامنة.</p>
 </main>
 </div>
@@ -849,9 +871,9 @@ function render() {
   $$('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === S.ui.tab)));
   $$('.view').forEach(v => v.hidden = v.id !== 'v-' + S.ui.tab);
   $('#demo-banner').hidden = !S.classes.some(c => c.demo);
-  const PG = { recite: ['التسميع', 'سجّل تسميع كل طالب آية آية'], results: ['النتائج', 'درجات الشعبة في كل سورة، والتصدير إلى Excel'], stats: ['إحصاء الشُّعب', 'نِسب الشعب والطلاب المتميزون'], classes: ['الشُّعب', 'الشعب وأسماء الطلاب وأرقام أولياء الأمور والإعدادات'] }[S.ui.tab];
+  const PG = { recite: ['التسميع', 'سجّل تسميع كل طالب آية آية'], results: ['النتائج', 'درجات الشعبة في كل سورة، والتصدير إلى Excel'], stats: ['إحصاء الشُّعب', 'نِسب الشعب والطلاب المتميزون'], sched: ['المواعيد', 'توزيع مواعيد التسميع على الطلاب حسب مستوياتهم وإبلاغهم بها'], classes: ['الشُّعب', 'الشعب وأسماء الطلاب وأرقام أولياء الأمور والإعدادات'] }[S.ui.tab];
   $('#pgTitle').textContent = PG[0]; $('#pgSub').textContent = PG[1];
-  ({ classes: rClasses, recite: rRecite, results: rResults, stats: rStats })[S.ui.tab]();
+  ({ classes: rClasses, recite: rRecite, results: rResults, stats: rStats, sched: rSched })[S.ui.tab]();
   setHdr();
 }
 $$('.tab').forEach(b => b.addEventListener('click', () => { S.ui.tab = b.dataset.tab; save(); render(); window.scrollTo(0, 0); }));
@@ -1366,7 +1388,7 @@ function pillHtml(k) {
   return `<span class="pill ${gcls(k.g)}">${fmt(k.fin)}</span>`;
 }
 function rosterItem(sh, s, i) {
-  return `<li data-s="${s.id}"${s.id === S.ui.student ? ' class="on"' : ''}><button type="button"><span class="av">${esc((s.name.trim()[0] || '؟'))}</span><span class="n">${i + 1}</span><span class="nm">${esc(s.name)}${calc(sh, s.id).absent ? ' <span class="tag nh">لم يحفظ</span>' : ''}</span>${pillHtml(calc(sh, s.id))}</button></li>`;
+  return `<li data-s="${s.id}"${s.id === S.ui.student ? ' class="on"' : ''}><button type="button"><span class="av">${esc((s.name.trim()[0] || '؟'))}</span><span class="n">${i + 1}</span><span class="nm">${esc(s.name)}${calc(sh, s.id).absent ? ' <span class="tag nh">لم يحفظ</span>' : ''}${S.sched && S.sched.plan && S.sched.plan[s.id] === today() ? ' <span class="tag td">موعده اليوم</span>' : ''}</span>${pillHtml(calc(sh, s.id))}</button></li>`;
 }
 function barHtml(st, k) {
   const gc = k.ev ? gcls(k.g) : 'g-none';
@@ -1500,6 +1522,8 @@ function mergeRemote(meta, sheets, full) {
     S.classes = [...map.values()];
     if (meta.wa && (meta.waU || 0) >= (S.waU || 0)) { S.wa = meta.wa; S.waU = meta.waU; }
     if (meta.wa) SY.H.wa = JSON.stringify(meta.wa);
+    if (meta.sched && (meta.schedU || 0) >= (S.schedU || 0)) { S.sched = meta.sched; S.schedU = meta.schedU; }
+    if (meta.sched) SY.H.sched = canon(meta.sched);
   }
   (sheets || []).forEach(rs => {
     SY.H['s:' + rs.id] = sheetHead(rs);
@@ -1518,10 +1542,12 @@ function mergeRemote(meta, sheets, full) {
 /* local → remote: stamp what changed since the last known cloud state */
 /* ترتيب المفاتيح لا يُعدّ تغييراً (Firestore يعيدها مرتبة) */
 const delKey = o => JSON.stringify(Object.keys(o || {}).sort().map(k => [k, o[k]]));
+const canon = o => JSON.stringify(o, (k, v) => v && typeof v === 'object' && !Array.isArray(v) ? Object.keys(v).sort().reduce((r, x) => (r[x] = v[x], r), {}) : v);
 function collectDirty() {
   const now = Date.now(), dIds = demoIds(), out = { meta: false, sheets: new Set() };
   S.classes.filter(c => !c.demo).forEach(c => { const h = strip(c); if (SY.H['c:' + c.id] !== h) { c.u = now; out.meta = true; } });
   if (S.wa && SY.H.wa !== JSON.stringify(S.wa)) { S.waU = now; out.meta = true; }
+  if (S.sched && SY.H.sched !== canon(S.sched)) { S.schedU = now; out.meta = true; }
   if (SY.H.del !== delKey(S.deleted)) out.meta = true;
   S.sheets.filter(sh => !dIds.has(sh.classId)).forEach(sh => {
     if (SY.H['s:' + sh.id] !== sheetHead(sh)) { sh.u = now; out.sheets.add(sh.id); }
@@ -1544,8 +1570,8 @@ async function pushNow() {
     if (d.meta) {
       /* ادمج ما في الحساب أولاً حتى لا يمحو جهاز قديم شعباً أُضيفت من جهاز آخر */
       try { const rs = await FS.getDoc(FS.doc(db, 'tasmee3', uid)); if (rs.exists()) { const before = JSON.stringify(S.classes); mergeRemote(rs.data(), null, false); if (JSON.stringify(S.classes) !== before) render(); } } catch (e) {}
-      const meta = clone({ classes: S.classes.filter(c => !c.demo), deleted: S.deleted || {}, wa: S.wa || null, waU: S.waU || 0, u: Date.now() });
-      jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid), meta).then(() => { meta.classes.forEach(c => SY.H['c:' + c.id] = strip(c)); SY.H.del = delKey(meta.deleted); if (meta.wa) SY.H.wa = JSON.stringify(meta.wa); }));
+      const meta = clone({ classes: S.classes.filter(c => !c.demo), deleted: S.deleted || {}, wa: S.wa || null, waU: S.waU || 0, sched: S.sched || null, schedU: S.schedU || 0, u: Date.now() });
+      jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid), meta).then(() => { meta.classes.forEach(c => SY.H['c:' + c.id] = strip(c)); SY.H.del = delKey(meta.deleted); if (meta.wa) SY.H.wa = JSON.stringify(meta.wa); if (meta.sched) SY.H.sched = canon(meta.sched); }));
     }
     await Promise.all(jobs);
     localStorage.setItem(KEY, JSON.stringify(S));
@@ -1585,7 +1611,7 @@ async function startSync(user, quiet) {
     SY.unsub.push(FS.onSnapshot(FS.doc(db, 'tasmee3', uid), snap => {
       if (snap.metadata && snap.metadata.hasPendingWrites) return;
       if (!snap.exists()) return;
-      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && delKey(d.deleted) === delKey(S.deleted) && JSON.stringify(d.wa || null) === JSON.stringify(S.wa || null)) return;
+      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && delKey(d.deleted) === delKey(S.deleted) && JSON.stringify(d.wa || null) === JSON.stringify(S.wa || null) && canon(d.sched || null) === canon(S.sched || null)) return;
       collectDirty(); mergeRemote(d, [], false); applyRemote(); syncSchedule();
     }, e => setSync('err', fbErr(e))));
     SY.unsub.push(FS.onSnapshot(FS.collection(db, 'tasmee3', uid, 'sheets'), snap => {
@@ -1713,13 +1739,13 @@ function pickKeys(e) {
   const n = { '1': 0, '2': 1, '١': 0, '٢': 1 }[e.key];
   if (n != null) { const b = $$('#wa-pick [data-ph]')[n]; if (b) { e.preventDefault(); b.click(); } }
 }
-function sendWA(s, text, onPick) {
+function sendWA(s, text, onPick, title) {
   closePick();
   const nums = phonesOf(s).map((p_, k) => ({ k, raw: p_, ph: waPhone(p_) })).filter(x => x.ph);
   const ord = ['رقم ولي الأمر', 'رقم الطالب'];
   const m = document.createElement('div');
   m.id = 'wa-pick'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'اختيار رقم ولي الأمر');
-  m.innerHTML = `<b>إرسال تقرير ${esc(s.name)} إلى:</b>
+  m.innerHTML = `<b>${esc(title || 'إرسال تقرير ' + s.name)} إلى:</b>
     ${nums.length ? nums.map((x, i) => `<button type="button" data-ph="${x.ph}"><span class="kn">${i + 1}</span><span>${ord[x.k]}</span><span dir="ltr" class="pn">${esc(x.raw)}</span></button>`).join('') : '<p class="muted" style="margin:0">لا توجد أرقام محفوظة لهذا الطالب.</p>'}
     <button type="button" data-ph=""><span class="kn">${nums.length + 1}</span><span>اختيار المحادثة من واتساب</span></button>
     <button type="button" class="x">إلغاء</button>`;
@@ -2008,6 +2034,94 @@ function exportXlsx(sh) {
   try { XLSX.writeFile(wb, 'تسميع ' + sname(sh.surah) + ' ' + cname(c) + '.xlsx'); toast('نُزّل ملف Excel'); }
   catch (err) { toast('تعذّر تنزيل الملف من هذه الصفحة', true); }
 }
+
+/* ---------- view: المواعيد (توزيع مواعيد التسميع حسب المستوى الأكاديمي) ---------- */
+const DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const pDate = d => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+const ymd = dt => dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+const dayName = d => DAYS[pDate(d).getDay()];
+const dShort = d => { try { return pDate(d).toLocaleDateString('ar-QA-u-nu-latn', { day: 'numeric', month: 'long' }); } catch (e) { return d; } };
+const SCHED_MSG = 'السلام عليكم ورحمة الله وبركاته\nالسيد الفاضل ولي أمر الطالب: *{الطالب}* حفظه الله\n\nنفيدكم بأن موعد إرسال التسجيل الصوتي لتسميع السورة هو:\n🗓️ يوم *{اليوم} {التاريخ}*\n\nنرجو إرسال التسجيل في موعده.\n🌴مع تحيات {التوقيع}';
+function schedCfg() {
+  const c = S.sched || (S.sched = {});
+  if (!c.from) { const d = new Date(); d.setDate(d.getDate() + 1); c.from = ymd(d); }
+  if (!c.to) { const d = pDate(c.from); d.setDate(d.getDate() + 7); c.to = ymd(d); }
+  if (!Array.isArray(c.days)) c.days = [0, 1, 2, 3, 4, 5, 6];
+  if (!Array.isArray(c.classIds)) c.classIds = S.classes.filter(k => !k.demo).map(k => k.id);
+  c.classIds = c.classIds.filter(id => cls(id));
+  ['off', 'plan', 'sent'].forEach(f => { if (!c[f] || typeof c[f] !== 'object') c[f] = {}; });
+  if (c.msg == null) c.msg = SCHED_MSG;
+  return c;
+}
+function schedStudents(c) {
+  const list = [];
+  S.classes.filter(k => c.classIds.includes(k.id)).forEach((k, ci) => k.students.forEach((st, i) => list.push({ st, k, ci, i })));
+  return list.sort((a, b) => (b.st.mark ?? -1) - (a.st.mark ?? -1) || a.ci - b.ci || a.i - b.i);
+}
+function schedDates(c) {
+  const out = [], e = pDate(c.to);
+  for (let d = pDate(c.from); d && e && d <= e && out.length < 400; d.setDate(d.getDate() + 1)) if (c.days.includes(d.getDay())) out.push(ymd(d));
+  return out;
+}
+const schedDone = (c, x) => S.sheets.some(sh => sh.classId === x.k.id && sh.recs[x.st.id] && (sh.recs[x.st.id].date || '') >= (c.made || '') && calc(sh, x.st.id).ev);
+const schedText = (c, x) => (c.msg || SCHED_MSG).replace(/{الطالب}/g, x.st.name).replace(/{اليوم}/g, dayName(c.plan[x.st.id])).replace(/{التاريخ}/g, dShort(c.plan[x.st.id])).replace(/{الشعبة}/g, cname(x.k)).replace(/{التوقيع}/g, waCfg().sign);
+function rSched() {
+  const v = $('#v-sched'), c = schedCfg(), ds = schedDates(c), L = schedStudents(c), inc = L.filter(x => !c.off[x.st.id]);
+  const auto = ds.length ? Math.ceil(inc.length / ds.length) : 0;
+  const planned = inc.filter(x => c.plan[x.st.id]).sort((a, b) => c.plan[a.st.id].localeCompare(c.plan[b.st.id]) || L.indexOf(a) - L.indexOf(b));
+  const sentN = planned.filter(x => c.sent[x.st.id]).length;
+  const lv = st => `<span class="mk lv"${st.mark != null ? ` data-v="${st.mark}"` : ''}>${st.mark != null ? st.mark : '–'}</span>`;
+  const dateOpts = sid => `<select class="sc-d" data-sid="${sid}" aria-label="الموعد"><option value="">—</option>${ds.concat(c.plan[sid] && !ds.includes(c.plan[sid]) ? [c.plan[sid]] : []).map(d => `<option value="${d}"${c.plan[sid] === d ? ' selected' : ''}>${dayName(d)} ${dShort(d)}</option>`).join('')}</select>`;
+  const byDay = {}; planned.forEach(x => (byDay[c.plan[x.st.id]] = byDay[c.plan[x.st.id]] || []).push(x));
+  const top = window.scrollY;
+  v.innerHTML = `<div class="cols">
+    <section class="panel"><h2>الإعداد</h2>
+      <div class="fld"><span>الشعب</span><div class="sc-chips">${S.classes.filter(k => !k.demo).map(k => `<button type="button" class="chip" data-cls="${k.id}" aria-pressed="${c.classIds.includes(k.id)}">${esc(cname(k))}</button>`).join('') || '<span class="muted">لا توجد شعب</span>'}</div></div>
+      <div class="row2"><label class="fld"><span>من تاريخ</span><input type="date" id="sc-from" value="${c.from}"></label><label class="fld"><span>إلى تاريخ</span><input type="date" id="sc-to" value="${c.to}"></label></div>
+      <div class="fld"><span>أيام التسميع</span><div class="sc-chips">${DAYS.map((d, i) => `<button type="button" class="chip" data-day="${i}" aria-pressed="${c.days.includes(i)}">${d}</button>`).join('')}</div></div>
+      <label class="fld"><span>عدد المسمِّعين في اليوم</span><input type="number" id="sc-per" min="1" inputmode="numeric" value="${c.perDay || ''}" placeholder="تلقائي: ${auto || '—'}"></label>
+      <p class="hint">${inc.length} طالباً مختاراً على ${ds.length} ${ds.length > 2 && ds.length < 11 ? 'أيام' : 'يوماً'}. الأعلى مستوىً يأتي أولاً، ومن لم يُحدَّد مستواه في الآخر، ثم بترتيب الأسماء.</p>
+      <div class="actions"><button class="btn primary" id="sc-go">توزيع المواعيد</button></div>
+      <h2 style="margin-top:22px">نص الرسالة</h2>
+      <textarea id="sc-msg" rows="10" class="sc-msg">${esc(c.msg)}</textarea>
+      <p class="hint">تُستبدل تلقائياً: {الطالب} {اليوم} {التاريخ} {الشعبة} {التوقيع}</p>
+      <div class="actions"><button class="btn ghost sm" id="sc-reset">استعادة النص الأصلي</button></div>
+    </section>
+    <section class="panel"><h2>الطلاب حسب المستوى <small class="muted">${inc.length} من ${L.length}</small></h2>
+      <p class="hint" style="margin-top:0">أزل علامة الاختيار عن الطالب الذي لا تريد تحديد موعد له.</p>
+      ${L.length ? `<ol class="slist sc-list">${L.map(x => `<li${c.off[x.st.id] ? ' class="off"' : ''}><input type="checkbox" class="sc-in" data-sid="${x.st.id}"${c.off[x.st.id] ? '' : ' checked'} aria-label="اختيار ${esc(x.st.name)}">${lv(x.st)}<span class="sl-nm">${esc(x.st.name)}<small>${esc(cname(x.k))}</small></span>${c.off[x.st.id] ? '' : dateOpts(x.st.id)}</li>`).join('')}</ol>` : '<p class="empty">اختر شعبة من الإعداد.</p>'}
+    </section>
+  </div>
+  <section class="panel"><h2>جدول المواعيد</h2>
+    ${planned.length ? `<div class="sc-bar"><span>أُرسل ${sentN} من ${planned.length}</span><button class="btn wa" id="sc-next"${sentN === planned.length ? ' disabled' : ''}>${WA_ICON} إرسال الموعد التالي</button></div>
+    ${Object.keys(byDay).sort().map(d => `<div class="sc-day"><h3>${dayName(d)} ${dShort(d)} <small>${byDay[d].length}</small>${d === today() ? ' <span class="tag td">اليوم</span>' : ''}</h3><ul>${byDay[d].map(x => `<li>${lv(x.st)}<span class="sl-nm">${esc(x.st.name)}<small>${esc(cname(x.k))}</small></span>${schedDone(c, x) ? '<span class="tag ok">سمّع</span>' : ''}${c.sent[x.st.id] ? '<span class="tag snt">أُرسل</span>' : ''}<button type="button" class="wa-mini" data-wa="${x.st.id}" title="إرسال الموعد">${WA_ICON}</button></li>`).join('')}</ul></div>`).join('')}`
+      : '<p class="empty">اضغط «توزيع المواعيد» ليظهر الجدول.</p>'}
+  </section>`;
+  window.scrollTo(0, top);
+  const redo = () => { save(); rSched(); };
+  $$('[data-cls]', v).forEach(b => b.addEventListener('click', () => { const id = b.dataset.cls; c.classIds = c.classIds.includes(id) ? c.classIds.filter(x => x !== id) : c.classIds.concat(id); redo(); }));
+  $$('[data-day]', v).forEach(b => b.addEventListener('click', () => { const d = +b.dataset.day; c.days = c.days.includes(d) ? c.days.filter(x => x !== d) : c.days.concat(d).sort(); redo(); }));
+  $('#sc-from').addEventListener('change', e => { c.from = e.target.value || c.from; if (c.to < c.from) c.to = c.from; redo(); });
+  $('#sc-to').addEventListener('change', e => { c.to = e.target.value || c.to; if (c.to < c.from) c.from = c.to; redo(); });
+  $('#sc-per').addEventListener('change', e => { c.perDay = Math.max(0, parseInt(e.target.value, 10) || 0) || ''; redo(); });
+  $('#sc-msg').addEventListener('input', e => { c.msg = e.target.value; save(); });
+  $('#sc-reset').addEventListener('click', () => { c.msg = SCHED_MSG; redo(); });
+  $$('.sc-in', v).forEach(b => b.addEventListener('change', () => { const id = b.dataset.sid; if (b.checked) delete c.off[id]; else { c.off[id] = 1; delete c.plan[id]; delete c.sent[id]; } redo(); }));
+  $$('.sc-d', v).forEach(sel => sel.addEventListener('change', () => { const id = sel.dataset.sid; if (sel.value) c.plan[id] = sel.value; else delete c.plan[id]; delete c.sent[id]; redo(); }));
+  $('#sc-go').addEventListener('click', () => {
+    if (!ds.length) { toast('لا توجد أيام تسميع في هذه الفترة', true); return; }
+    if (!inc.length) { toast('لم تختر أي طالب', true); return; }
+    const per = +c.perDay > 0 ? +c.perDay : auto;
+    c.plan = {}; c.sent = {}; c.made = today();
+    inc.forEach((x, i) => { c.plan[x.st.id] = ds[Math.min(Math.floor(i / per), ds.length - 1)]; });
+    toast(inc.length > per * ds.length ? 'وُزّعت المواعيد، وزاد اليوم الأخير عن العدد المحدد' : 'وُزّعت المواعيد على ' + Math.min(ds.length, Math.ceil(inc.length / per)) + ' أيام');
+    redo();
+  });
+  const send = x => sendWA(x.st, schedText(c, x), ph => { openWA(ph, schedText(c, x)); c.sent[x.st.id] = 1; redo(); }, 'إرسال موعد ' + x.st.name);
+  $$('[data-wa]', v).forEach(b => b.addEventListener('click', () => { const x = planned.find(y => y.st.id === b.dataset.wa); if (x) send(x); }));
+  const nx = $('#sc-next'); if (nx) nx.addEventListener('click', () => { const x = planned.find(y => !c.sent[y.st.id]); if (x) send(x); });
+}
+
 
 /* ---------- تقرير PDF للطالب: صفحتان A4 تُرسمان خارج الشاشة ثم تُحوَّلان إلى صور داخل ملف PDF ---------- */
 const PDF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 16.5h4.5"/></svg>';
