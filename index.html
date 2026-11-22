@@ -626,6 +626,19 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   html.rp-printing #rep-stage .rp{margin:0!important;break-after:page;page-break-after:always}
   html.rp-printing #rep-stage .rp:last-child{break-after:auto;page-break-after:auto}
 }
+#rep-menu{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(8,22,18,.46);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#rep-menu .rm-box{width:min(440px,100%);display:grid;gap:16px;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:26px;box-shadow:var(--sh2);padding:22px 20px 14px}
+#rep-menu .rm-box > b{font-size:1.1rem;color:var(--ink)}
+#rep-menu .rm-btns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#rep-menu .rm-btns.one{grid-template-columns:minmax(0,200px);justify-content:center}
+#rep-menu .rm-btns button{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:24px;border:1.5px solid #D6B25E;background:linear-gradient(180deg,#FFFDF6,#F3E7C8);color:#74540F;font:inherit;font-weight:700;font-size:1.12rem;cursor:pointer;box-shadow:0 6px 0 #DCC27F,0 14px 24px -14px rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s}
+#rep-menu .rm-btns button:active{transform:translateY(5px);box-shadow:0 1px 0 #DCC27F}
+#rep-menu .rm-btns button svg{width:52px;height:52px}
+#rep-menu .rm-btns button.wa{background:linear-gradient(180deg,#2DC66E,#19994F);border-color:#168546;color:#FFFFFF;box-shadow:0 6px 0 #0F6B37,0 14px 24px -14px rgba(0,0,0,.45)}
+#rep-menu .rm-btns button.wa:active{box-shadow:0 1px 0 #0F6B37}
+#rep-menu .rm-btns button:focus-visible{outline:3px solid var(--gold-2);outline-offset:3px}
+#rep-menu .x{border:0;background:none;color:var(--muted);font:inherit;font-weight:700;cursor:pointer;padding:6px}
+:root[data-mode="dark"] #rep-menu .rm-btns button:not(.wa){background:linear-gradient(180deg,#2B2616,#1F1B0F);border-color:#8C7130;color:#EBCB7A;box-shadow:0 6px 0 #4A3C18}
 /* ===== نهاية التقرير ===== */
 
 </style>
@@ -1073,7 +1086,7 @@ function rRecite() {
 
   $('#r-sdate').addEventListener('change', e => { rec().date = e.target.value || today(); changed(); });
   $('#r-wa').addEventListener('click', () => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); sendWA(st, sheetReport(sh, st)); });
-  $('#r-pdf').addEventListener('click', e => reportPDF(sh, S.ui.student, e.currentTarget));
+  $('#r-pdf').addEventListener('click', () => reportPDF(sh, S.ui.student));
   $('#absent').addEventListener('click', e => {
     const r = rec(); r.absent = !r.absent;
     if (r.absent && !r.date) r.date = $('#r-sdate').value || today();
@@ -1640,7 +1653,7 @@ function pickKeys(e) {
   const n = { '1': 0, '2': 1, '١': 0, '٢': 1 }[e.key];
   if (n != null) { const b = $$('#wa-pick [data-ph]')[n]; if (b) { e.preventDefault(); b.click(); } }
 }
-function sendWA(s, text) {
+function sendWA(s, text, onPick) {
   closePick();
   const nums = phonesOf(s).map((p_, k) => ({ k, raw: p_, ph: waPhone(p_) })).filter(x => x.ph);
   const ord = ['رقم ولي الأمر', 'رقم الطالب'];
@@ -1659,7 +1672,7 @@ function sendWA(s, text) {
   m.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.classList.contains('x')) { closePick(); return; }
-    closePick(); openWA(b.dataset.ph, text);
+    closePick(); if (onPick) onPick(b.dataset.ph); else openWA(b.dataset.ph, text);
   });
   setTimeout(() => {
     document.addEventListener('keydown', pickKeys, true);
@@ -2153,36 +2166,28 @@ async function repFonts() {
   const L = [].concat(['400', '500', '600', '700'].map(w => document.fonts.load(w + ' 20px "IBM Plex Sans Arabic"', 'تقرير التسميع 0123456789%')).concat(document.fonts.load('400 24px "Amiri Quran"', 'سورة ٱللَّهِ')));
   await Promise.race([Promise.all(L).catch(() => {}), new Promise(r => setTimeout(r, 6000))]);
 }
-async function reportPDF(sh, sid, btn) {
-  const D = repData(sh, sid);
-  if (!D.st) return;
-  if (!D.k.ev) { toast('لم يُقيَّم هذا الطالب بعد، سجّل تسميعه أولاً', true); return; }
-  if (btn.classList.contains('busy')) return;
+const repClean = x => String(x).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
+/* يبني صفحتي التقرير خارج الشاشة ويضبطهما حتى لا تتجاوزا صفحتين */
+async function repBuild(sh, sid) {
   $$('#rep-stage').forEach(x => x.remove()); document.documentElement.classList.remove('rp-printing');
-  const old = btn.innerHTML;
-  btn.classList.add('busy'); btn.innerHTML = PDF_ICON + ' جارٍ تجهيز التقرير…';
-  let stage = null;
+  const D = repData(sh, sid), stage = document.createElement('div');
+  stage.id = 'rep-stage'; stage.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(stage);
   try {
-    stage = document.createElement('div');
-    stage.id = 'rep-stage'; stage.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(stage);
     stage.innerHTML = '<div class="rp" style="font-weight:700">تقرير التسميع 0123 <span class="q">سورة ٱللَّهِ</span></div>';
     await repFonts();
     const k = D.k;
     D.parts = [{ v: k.c2, c: REP_COL[2], t: 'آيات سمّعها دون تذكير' }, { v: k.c1, c: REP_COL[1], t: 'آيات سمّعها مع تذكير' }, { v: k.c0, c: REP_COL[0], t: 'آيات لم يسمّعها' }, { v: k.err, c: REP_COL.e, t: 'أخطاء النطق' }];
     if (D.un) D.parts.push({ v: D.un, c: REP_COL.u, t: 'آيات لم تُقيَّم بعد' });
     D.donut = repDonut(D.parts, 300, 236);
-    /* الصفحة الأولى: يصغر مربع الآية حتى تتسع خريطة الآيات */
     const SIZES = [52, 46, 40, 35, 31, 27, 24, 21, 19, 16, 14, 12, 10];
-    let i1 = Math.max(0, SIZES.findIndex(s => Math.ceil(k.n / Math.floor(674 / (s + Math.round(s * 0.22)))) * (s + Math.round(s * 0.22) + 5) <= 300)), p1;
+    let i1 = Math.max(0, SIZES.findIndex(s => Math.ceil(k.n / Math.floor(674 / (s + Math.round(s * 0.22)))) * (s + Math.round(s * 0.22) + 5) <= 300));
     for (;;) {
       const s = SIZES[i1], cell = { s, g: Math.round(s * 0.22), f: Math.max(10, Math.round(s * 0.36)), rad: Math.round(s * 0.24) };
       stage.innerHTML = repP1(D, sh, cell);
-      p1 = stage.firstElementChild;
-      if (!repOver(p1) || i1 >= SIZES.length - 1) break;
+      if (!repOver(stage.firstElementChild) || i1 >= SIZES.length - 1) break;
       i1++;
     }
-    /* الصفحة الثانية: تُختصر تدريجياً حتى لا تتجاوز الصفحتين */
     const steps = [{ cols: 1, msg: true }, { cols: 1 }, { cols: 2 }, { cols: 2, cmp: true }, { cols: 2, cmp: true, noCmp: true }];
     let p2 = null, st = 0, max = D.errs.length;
     for (;;) {
@@ -2197,24 +2202,102 @@ async function reportPDF(sh, sid, btn) {
     }
     await Promise.all($$('img', stage).map(im => im.decode ? im.decode().catch(() => {}) : null));
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    /* الطباعة بمحرك المتصفح نفسه: نصوص حقيقية قابلة للتحديد، ثم «حفظ بتنسيق PDF» */
-    const clean = x => String(x).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
-    const oldTitle = document.title, root = document.documentElement, keep = stage;
-    stage = null;
-    const done = () => { window.removeEventListener('afterprint', done); root.classList.remove('rp-printing'); document.title = oldTitle; keep.remove(); };
+    return { D, stage };
+  } catch (e) { stage.remove(); throw e; }
+}
+/* تصدير الملف: الطباعة بمحرك المتصفح (نصوص حقيقية) ثم «حفظ بتنسيق PDF» */
+async function repPrint(sh, sid) {
+  toast('جارٍ تجهيز التقرير…');
+  try {
+    const { D, stage } = await repBuild(sh, sid);
+    const oldTitle = document.title, root = document.documentElement;
+    const done = () => { window.removeEventListener('afterprint', done); root.classList.remove('rp-printing'); document.title = oldTitle; stage.remove(); };
     root.classList.add('rp-printing');
-    document.title = clean('تقرير تسميع ' + D.st.name + ' - سورة ' + sname(sh.surah));
+    document.title = repClean('تقرير تسميع ' + D.st.name + ' - سورة ' + sname(sh.surah));
     window.addEventListener('afterprint', done);
-    btn.classList.remove('busy'); btn.innerHTML = old;
     toast('اختر «حفظ بتنسيق PDF» من نافذة الطباعة');
     setTimeout(() => window.print(), 60);
-  } catch (e) {
-    console.error(e);
-    toast('تعذّر إنشاء التقرير، حاول مرة أخرى', true);
-  } finally {
-    if (stage) stage.remove();
-    btn.classList.remove('busy'); btn.innerHTML = old;
+  } catch (e) { console.error(e); toast('تعذّر إنشاء التقرير، حاول مرة أخرى', true); }
+}
+/* إرسال للواتساب: كل صفحة صورة عالية الدقة */
+let h2cP = null;
+function loadH2C() {
+  if (window.html2canvas) return Promise.resolve(window.html2canvas);
+  return h2cP || (h2cP = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'vendor/html2canvas.min.js';
+    s.onload = () => window.html2canvas ? res(window.html2canvas) : rej(new Error('html2canvas'));
+    s.onerror = () => { h2cP = null; s.remove(); rej(new Error('html2canvas')); };
+    document.head.appendChild(s);
+  }));
+}
+const repJpeg = cv => new Promise((res, rej) => {
+  if (cv.toBlob) cv.toBlob(b => b ? res(b) : rej(new Error('jpeg')), 'image/jpeg', 0.95);
+  else { const u = cv.toDataURL('image/jpeg', 0.95), s = atob(u.split(',')[1]), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); res(new Blob([a], { type: 'image/jpeg' })); }
+});
+async function repImages(sh, sid) {
+  const h2c = await loadH2C();
+  const { D, stage } = await repBuild(sh, sid);
+  try {
+    const out = [], pages = $$('.rp', stage), base = repClean('تقرير تسميع ' + D.st.name + ' - سورة ' + sname(sh.surah));
+    for (let i = 0; i < pages.length; i++) {
+      const cv = await h2c(pages[i], { scale: 3, backgroundColor: '#FBF9F4', logging: false, useCORS: true, imageTimeout: 15000, ignoreElements: el => el.parentNode === document.body && el !== stage });
+      const b = await repJpeg(cv);
+      out.push(new File([b], base + ' - ' + (i + 1) + '.jpg', { type: 'image/jpeg' }));
+    }
+    return out;
+  } finally { stage.remove(); }
+}
+const isTouchDev = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function repShareFallback(files) {
+  closeRepMenu();
+  const m = document.createElement('div');
+  m.id = 'rep-menu';
+  m.innerHTML = `<div class="rm-box" role="dialog" aria-label="إرسال التقرير"><b>صور التقرير جاهزة</b><div class="rm-btns one"><button type="button" class="wa" data-a="share">${WA_ICON}<span>إرسال الآن</span></button></div><button type="button" class="x">إلغاء</button></div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', async e => {
+    if (e.target === m || e.target.closest('.x')) { closeRepMenu(); return; }
+    if (!e.target.closest('[data-a=share]')) return;
+    closeRepMenu();
+    try { await navigator.share({ files }); } catch (err) { if (err.name !== 'AbortError') toast('تعذّرت المشاركة من هذا الجهاز', true); }
+  });
+}
+async function repSend(imgsP, ph, st, sh) {
+  let files;
+  try { files = await imgsP; } catch (e) { console.error(e); toast('تعذّر تجهيز صور التقرير، حاول مرة أخرى', true); return; }
+  if (isTouchDev() && navigator.canShare && navigator.canShare({ files })) {
+    try { await navigator.share({ files }); }
+    catch (e) { if (e.name !== 'AbortError') repShareFallback(files); }
+    return;
   }
+  files.forEach((f, i) => setTimeout(() => download(f, f.name), i * 500));
+  setTimeout(() => { openWA(ph, sheetReport(sh, st)); toast('نُزّلت صور التقرير، اسحبها إلى المحادثة في واتساب'); }, files.length * 500 + 300);
+}
+function closeRepMenu() { const m = $('#rep-menu'); if (m) m.remove(); document.removeEventListener('keydown', repMenuKeys, true); }
+function repMenuKeys(e) { if (e.key === 'Escape') closeRepMenu(); }
+const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 10.5v6.5M9.3 14.3 12 17l2.7-2.7"/></svg>';
+/* زر «تقرير PDF»: مربعان كبيران، تصدير الملف أو الإرسال للواتساب */
+function reportPDF(sh, sid) {
+  const D = repData(sh, sid);
+  if (!D.st) return;
+  if (!D.k.ev) { toast('لم يُقيَّم هذا الطالب بعد، سجّل تسميعه أولاً', true); return; }
+  closeRepMenu(); closePick();
+  const m = document.createElement('div');
+  m.id = 'rep-menu';
+  m.innerHTML = `<div class="rm-box" role="dialog" aria-label="تقرير PDF"><b>تقرير ${esc(D.st.name)}</b>
+    <div class="rm-btns"><button type="button" data-a="pdf">${DL_ICON}<span>تصدير الملف</span></button><button type="button" class="wa" data-a="wa">${WA_ICON}<span>إرسال للواتساب</span></button></div>
+    <button type="button" class="x">إلغاء</button></div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click', e => {
+    if (e.target === m || e.target.closest('.x')) { closeRepMenu(); return; }
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    closeRepMenu();
+    if (b.dataset.a === 'pdf') { repPrint(sh, sid); return; }
+    const imgsP = repImages(sh, sid); imgsP.catch(() => {});
+    sendWA(D.st, sheetReport(sh, D.st), ph => repSend(imgsP, ph, D.st, sh));
+  });
+  document.addEventListener('keydown', repMenuKeys, true);
+  setTimeout(() => { const f = m.querySelector('[data-a]'); if (f) f.focus(); }, 0);
 }
 
 render();
