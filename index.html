@@ -53,6 +53,9 @@
   --g2:#4cc07d; --g1:#e2ad45; --g0:#ef7059; --g0s:#3d1d17; --on:#07130f;
   --gw:#5a2420; --gwi:#ffc2b8; --gm:#4d4310; --gmi:#ffe98a; --go:#57340f; --goi:#ffcf99;
   --gg:#123b5c; --ggi:#b9dcff; --gv:#164a26; --gvi:#b5f0c4; --ge1:#22c95e; --ge2:#0f3a1f; --gei:#ecfff2;
+  --sh1:0 1px 0 rgba(255,255,255,.03) inset,0 12px 30px -18px rgba(0,0,0,.9); --sh2:0 1px 0 rgba(255,255,255,.04) inset,0 30px 60px -26px rgba(0,0,0,.95);
+  --ring:0 0 0 4px rgba(56,191,162,.22);
+  --book:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338BFA2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z'/%3E%3Cpath d='M12 6.5v13'/%3E%3C/svg%3E");
   color-scheme:dark }
 
 *{box-sizing:border-box}
@@ -106,6 +109,11 @@ body:has(#sync[data-state="ok"]) #saved,body:has(#sync[data-state="wait"]) #save
 #sync[data-state="err"]{color:var(--g0);border-color:var(--g0)} #sync[data-state="err"] i{background:var(--g0)}
 #sync[data-state="off"]{color:var(--accent);border-color:var(--accent)} #sync[data-state="off"] i{background:var(--accent)}
 @keyframes pulse{50%{opacity:.3}}
+#theme{flex:none;width:44px;height:44px;border-radius:14px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);display:inline-grid;place-items:center;cursor:pointer;box-shadow:var(--sh1);transition:background .15s,color .15s,border-color .15s}
+#theme:hover{border-color:var(--gold-2);color:var(--gold)}
+#theme svg{width:21px;height:21px}
+#theme .moon{display:none}
+:root[data-mode="dark"] #theme .sun{display:none} :root[data-mode="dark"] #theme .moon{display:block}
 #sync-panel{position:fixed;z-index:60;top:calc(var(--hdr) + 10px);left:max(24px,env(safe-area-inset-left,0px));width:min(420px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh2);padding:22px 24px;display:grid;gap:6px}
 #sync-panel h3{margin:0 0 6px;font-size:1.3rem}
 .err-msg{color:var(--g0);background:var(--g0s);border-radius:10px;padding:8px 12px;margin:8px 0 0;font-size:.9rem}
@@ -205,11 +213,17 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .stu-head h2::before{display:none}
 .stu-title{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
 .nav{display:flex;gap:8px}
-.stu-tools{display:flex;gap:10px;align-items:end;flex-wrap:wrap;padding:14px;border-radius:16px;background:var(--sunk);border:1px solid var(--line)}
-.stu-tools .fld{width:170px}
-.stu-tools .phones{width:auto}
-.stu-tools .phones > div{display:flex;gap:6px}
-.stu-tools .phones input{width:132px;text-align:left;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:8px 10px;min-height:44px}
+.stu-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 12px;padding:16px;border-radius:18px;background:var(--sunk);border:1px solid var(--line)}
+.stu-tools .fld{min-width:0}
+.stu-tools .fld > span{display:flex;align-items:center;gap:6px;font-size:.84rem;white-space:nowrap}
+.stu-tools .fld > span svg{width:16px;height:16px;color:var(--gold);flex:none}
+.stu-tools input{display:block;width:100%;min-width:0;max-width:100%;height:46px;background:var(--surface);font-variant-numeric:tabular-nums}
+.stu-tools input[type=date]{-webkit-appearance:none;appearance:none;text-align:right;padding-inline:12px}
+.stu-tools input[type=date]::-webkit-date-and-time-value{text-align:right}
+.stu-tools input[type=tel]{text-align:left;direction:ltr;letter-spacing:.02em}
+.stu-acts{grid-column:1/-1;display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px dashed var(--line-2)}
+.stu-acts .btn{min-height:46px}
+.stu-acts .wa{margin-inline-start:auto}
 
 /* شريط الدرجة الثابت */
 .sbar{position:sticky;top:calc(var(--hdr) + 8px);z-index:4;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:stretch;margin:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh2);overflow:hidden}
@@ -243,6 +257,8 @@ kbd{font-family:inherit;font-size:.8rem;border:1px solid var(--line-2);border-bo
 .ayat{list-style:none;margin:0;padding:0}
 .ayat.dim{opacity:.45}
 .ayah{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,330px);gap:12px 24px;align-items:center;padding:16px 18px;border-radius:14px;transition:background .15s}
+.mushaf{container-type:inline-size}
+@container (max-width:700px){.ayah{grid-template-columns:minmax(0,1fr)}}
 .ayah + .ayah{border-top:1px dashed color-mix(in srgb,var(--gold-2) 30%,transparent)}
 .ayah:focus-within{background:color-mix(in srgb,var(--gold-2) 9%,transparent);border-top-color:transparent}
 .atext{font-family:var(--f-quran);font-size:28px;line-height:2.15;margin:0;min-width:0;color:var(--ink)}
@@ -381,11 +397,9 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   .panel{padding:18px 16px;border-radius:18px}
   .stu-head{padding:18px 16px 14px}
   .stu-head h2{font-size:1.6rem}
-  .stu-tools{padding:10px}
-  .stu-tools .fld,.stu-tools .phones{width:100%}
-  .stu-tools .phones > div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
-  .stu-tools .phones input{width:100%;min-width:0}
-  .stu-tools > .btn{flex:1}
+  .stu-tools{padding:12px;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}
+  .stu-tools .f-date{grid-column:1/-1}
+  .stu-acts .btn{flex:1}
   .sbar{margin:0 10px;border-radius:16px}
   .mushaf{margin:12px 8px 14px;padding:10px 4px 4px;border-radius:16px}
   .ayah{padding:12px 10px}
@@ -399,6 +413,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{.side,.top,.bar,.tools,.roster,.no-print{display:none!important} .shell{display:block} body{background:#fff}}
 </style>
+<script>(function(){var m;try{m=localStorage.getItem('tasmee3-theme')}catch(e){}if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;var d=m?m==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.mode=d?'dark':'light'})()</script>
 </head>
 <body>
 
@@ -422,6 +437,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
     <div class="page"><h2 id="pgTitle">التسميع</h2><p id="pgSub"></p></div>
     <span id="saved">محفوظ</span>
     <button type="button" id="sync" data-state="off"><i></i><span>تفعيل المزامنة</span></button>
+    <button type="button" id="theme" aria-label="الوضع النهاري أو الليلي" title="الوضع النهاري / الليلي"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
   </div>
 </header>
 
@@ -800,10 +816,10 @@ function rRecite() {
           <div class="stu-title"><div><small>${esc(cname(c))} · سورة ${sname(sh.surah)} ${rangeTxt(sh)}</small><h2>${esc(st.name)}</h2></div>
             <div class="nav"><button class="btn ghost" id="prev"${idx <= 0 ? ' disabled' : ''}>→ السابق</button><button class="btn ghost" id="next"${idx >= studs.length - 1 ? ' disabled' : ''}>التالي ←</button></div></div>
           <div class="stu-tools">
-            <label class="fld"><span>تاريخ تقييم الطالب</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
-            <div class="fld phones"><span>رقم ولي الأمر · رقم الطالب</span><div>${phonesOf(st).map((p_, k) => `<input class="r-ph" data-k="${k}" type="tel" inputmode="tel" dir="ltr" value="${esc(p_)}" placeholder="${k ? 'الطالب' : 'ولي الأمر'}" aria-label="${k ? 'رقم الطالب' : 'رقم ولي الأمر'}">`).join('')}</div></div>
-            <button class="btn ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button>
-            <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>
+            <label class="fld f-date"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>تاريخ التقييم</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
+            ${phonesOf(st).map((p_, k) => `<label class="fld"><span>${k ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9 12 5l9.5 4-9.5 4z"/><path d="M6.5 11v4.5c1.5 1.5 3.5 2.3 5.5 2.3s4-.8 5.5-2.3V11"/></svg>رقم الطالب' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.9-5 5.5-5s4.9 1.8 5.5 5"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.3c1.7.6 2.8 2.2 3 4.7"/></svg>رقم ولي الأمر'}</span><input class="r-ph" data-k="${k}" type="tel" inputmode="tel" dir="ltr" value="${esc(p_)}" placeholder="${k ? '66123456' : '55123456'}"></label>`).join('')}
+            <div class="stu-acts"><button class="btn ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button>
+            <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button></div>
           </div>
         </div>
         <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
@@ -1609,6 +1625,14 @@ render();
 save(true);
 $('#sync').addEventListener('click', () => { const p = $('#sync-panel'); if (p && !p.hidden) closeSync(); else syncPanel(); });
 initSync();
+/* الوضع النهاري والليلي */
+(function () {
+  const root = document.documentElement, mq = matchMedia('(prefers-color-scheme: dark)'), meta = document.querySelector('meta[name="theme-color"]');
+  const sync_ = () => { const d = root.dataset.theme ? root.dataset.theme === 'dark' : mq.matches; root.dataset.mode = d ? 'dark' : 'light'; if (meta) meta.content = d ? '#0A1311' : '#0B6656'; const b = $('#theme'); if (b) b.title = d ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'; };
+  mq.addEventListener && mq.addEventListener('change', sync_);
+  $('#theme').addEventListener('click', () => { const next = root.dataset.mode === 'dark' ? 'light' : 'dark'; root.dataset.theme = next; try { localStorage.setItem('tasmee3-theme', next); } catch (e) {} sync_(); });
+  sync_();
+})();
 })();
 </script>
 </body>
