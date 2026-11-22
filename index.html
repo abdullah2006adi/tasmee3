@@ -978,7 +978,8 @@ function mergeRemote(meta, sheets, full) {
   const del = Object.assign({}, S.deleted || {});
   Object.entries((meta && meta.deleted) || {}).forEach(([k, v]) => { del[k] = Math.max(del[k] || 0, v); });
   const hasRemote = (meta && (meta.classes || []).length) || (sheets && sheets.length);
-  if (hasRemote && dIds.size) { S.classes = S.classes.filter(c => !c.demo); S.sheets = S.sheets.filter(s => !dIds.has(s.classId)); }
+  /* once signed in, the account is the source of truth: sample (مثال) sections never stay, even if the account is empty */
+  if ((hasRemote || full) && dIds.size) { S.classes = S.classes.filter(c => !c.demo); S.sheets = S.sheets.filter(s => !dIds.has(s.classId)); }
   if (meta) {
     const map = new Map(S.classes.map(c => [c.id, c]));
     (meta.classes || []).forEach(rc => { const lc = map.get(rc.id); SY.H['c:' + rc.id] = strip(rc); if (!lc || (rc.u || 0) >= (lc.u || 0)) map.set(rc.id, rc); });
