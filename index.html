@@ -2073,7 +2073,7 @@ function rSched() {
   const lv = st => `<span class="mk lv"${st.mark != null ? ` data-v="${st.mark}"` : ''}>${st.mark != null ? st.mark : '–'}</span>`;
   const dateOpts = sid => `<select class="sc-d" data-sid="${sid}" aria-label="الموعد"><option value="">—</option>${ds.concat(c.plan[sid] && !ds.includes(c.plan[sid]) ? [c.plan[sid]] : []).map(d => `<option value="${d}"${c.plan[sid] === d ? ' selected' : ''}>${dayName(d)} ${dShort(d)}</option>`).join('')}</select>`;
   const byDay = {}; planned.forEach(x => (byDay[c.plan[x.st.id]] = byDay[c.plan[x.st.id]] || []).push(x));
-  const top = window.scrollY;
+  const top = window.scrollY, lt = ($('.sc-list', v) || {}).scrollTop || 0;
   v.innerHTML = `<div class="cols">
     <section class="panel"><h2>الإعداد</h2>
       <div class="fld"><span>الشعب</span><div class="sc-chips">${S.classes.filter(k => !k.demo).map(k => `<button type="button" class="chip" data-cls="${k.id}" aria-pressed="${c.classIds.includes(k.id)}">${esc(cname(k))}</button>`).join('') || '<span class="muted">لا توجد شعب</span>'}</div></div>
@@ -2098,28 +2098,31 @@ function rSched() {
       : '<p class="empty">اضغط «توزيع المواعيد» ليظهر الجدول.</p>'}
   </section>`;
   window.scrollTo(0, top);
+  const sl = $('.sc-list', v); if (sl) sl.scrollTop = lt;
+  /* بيانات المواعيد قد تُستبدل بالمزامنة أثناء الكتابة، فالمعالجات تقرأ النسخة الحالية دائماً */
+  const C = () => schedCfg();
   const redo = () => { save(); rSched(); };
-  $$('[data-cls]', v).forEach(b => b.addEventListener('click', () => { const id = b.dataset.cls; c.classIds = c.classIds.includes(id) ? c.classIds.filter(x => x !== id) : c.classIds.concat(id); redo(); }));
-  $$('[data-day]', v).forEach(b => b.addEventListener('click', () => { const d = +b.dataset.day; c.days = c.days.includes(d) ? c.days.filter(x => x !== d) : c.days.concat(d).sort(); redo(); }));
-  $('#sc-from').addEventListener('change', e => { c.from = e.target.value || c.from; if (c.to < c.from) c.to = c.from; redo(); });
-  $('#sc-to').addEventListener('change', e => { c.to = e.target.value || c.to; if (c.to < c.from) c.from = c.to; redo(); });
-  $('#sc-per').addEventListener('change', e => { c.perDay = Math.max(0, parseInt(e.target.value, 10) || 0) || ''; redo(); });
-  $('#sc-msg').addEventListener('input', e => { c.msg = e.target.value; save(); });
-  $('#sc-reset').addEventListener('click', () => { c.msg = SCHED_MSG; redo(); });
-  $$('.sc-in', v).forEach(b => b.addEventListener('change', () => { const id = b.dataset.sid; if (b.checked) delete c.off[id]; else { c.off[id] = 1; delete c.plan[id]; delete c.sent[id]; } redo(); }));
-  $$('.sc-d', v).forEach(sel => sel.addEventListener('change', () => { const id = sel.dataset.sid; if (sel.value) c.plan[id] = sel.value; else delete c.plan[id]; delete c.sent[id]; redo(); }));
+  $$('[data-cls]', v).forEach(b => b.addEventListener('click', () => { const id = b.dataset.cls; C().classIds = C().classIds.includes(id) ? C().classIds.filter(x => x !== id) : C().classIds.concat(id); redo(); }));
+  $$('[data-day]', v).forEach(b => b.addEventListener('click', () => { const d = +b.dataset.day; C().days = C().days.includes(d) ? C().days.filter(x => x !== d) : C().days.concat(d).sort(); redo(); }));
+  $('#sc-from').addEventListener('change', e => { C().from = e.target.value || C().from; if (C().to < C().from) C().to = C().from; redo(); });
+  $('#sc-to').addEventListener('change', e => { C().to = e.target.value || C().to; if (C().to < C().from) C().from = C().to; redo(); });
+  $('#sc-per').addEventListener('change', e => { C().perDay = Math.max(0, parseInt(e.target.value, 10) || 0) || ''; redo(); });
+  $('#sc-msg').addEventListener('input', e => { C().msg = e.target.value; save(); });
+  $('#sc-reset').addEventListener('click', () => { C().msg = SCHED_MSG; redo(); });
+  $$('.sc-in', v).forEach(b => b.addEventListener('change', () => { const id = b.dataset.sid; if (b.checked) delete C().off[id]; else { C().off[id] = 1; delete C().plan[id]; delete C().sent[id]; } redo(); }));
+  $$('.sc-d', v).forEach(sel => sel.addEventListener('change', () => { const id = sel.dataset.sid; if (sel.value) C().plan[id] = sel.value; else delete C().plan[id]; delete C().sent[id]; redo(); }));
   $('#sc-go').addEventListener('click', () => {
     if (!ds.length) { toast('لا توجد أيام تسميع في هذه الفترة', true); return; }
     if (!inc.length) { toast('لم تختر أي طالب', true); return; }
-    const per = +c.perDay > 0 ? +c.perDay : auto;
-    c.plan = {}; c.sent = {}; c.made = today();
-    inc.forEach((x, i) => { c.plan[x.st.id] = ds[Math.min(Math.floor(i / per), ds.length - 1)]; });
+    const per = +C().perDay > 0 ? +C().perDay : auto;
+    C().plan = {}; C().sent = {}; C().made = today();
+    inc.forEach((x, i) => { C().plan[x.st.id] = ds[Math.min(Math.floor(i / per), ds.length - 1)]; });
     toast(inc.length > per * ds.length ? 'وُزّعت المواعيد، وزاد اليوم الأخير عن العدد المحدد' : 'وُزّعت المواعيد على ' + Math.min(ds.length, Math.ceil(inc.length / per)) + ' أيام');
     redo();
   });
-  const send = x => sendWA(x.st, schedText(c, x), ph => { openWA(ph, schedText(c, x)); c.sent[x.st.id] = 1; redo(); }, 'إرسال موعد ' + x.st.name);
+  const send = x => sendWA(x.st, schedText(C(), x), ph => { openWA(ph, schedText(C(), x)); C().sent[x.st.id] = 1; redo(); }, 'إرسال موعد ' + x.st.name);
   $$('[data-wa]', v).forEach(b => b.addEventListener('click', () => { const x = planned.find(y => y.st.id === b.dataset.wa); if (x) send(x); }));
-  const nx = $('#sc-next'); if (nx) nx.addEventListener('click', () => { const x = planned.find(y => !c.sent[y.st.id]); if (x) send(x); });
+  const nx = $('#sc-next'); if (nx) nx.addEventListener('click', () => { const x = planned.find(y => !C().sent[y.st.id]); if (x) send(x); });
 }
 
 
