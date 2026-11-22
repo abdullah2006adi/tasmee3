@@ -866,7 +866,7 @@ function rRecite() {
         <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
         <div class="tools">
           <span class="legend"><span><i style="background:#1E9A55"></i>ضغطة: 2 بلا تذكير</span><span><i style="background:#2766D6"></i>ضغطتان: 1 مع تذكير</span><span><i style="background:#C93A25"></i>ثلاث: 0 لم يسمع</span><span><i style="background:var(--surface);border:1px solid var(--line-2)"></i>أربع: بلا درجة</span></span><span class="keys"><span><kbd>2</kbd> <kbd>1</kbd> <kbd>0</kbd> الدرجة ثم الآية التالية</span><span><kbd>Enter</kbd> خطأ النطق</span><span><kbd>↓</kbd> <kbd>↑</kbd> تنقّل</span></span>
-          <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ghost" id="all2">الدرجة ٢ لكل الآيات</button><button class="btn sm ghost" id="all1">الدرجة ١ لكل الآيات</button><button class="btn sm ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button><button class="btn sm danger" id="clr" data-msg="مسح تسميعه؟">مسح التسميع</button></span>
+          <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ghost" id="undo" disabled title="تراجع (Ctrl+Z)">↶ تراجع</button><button class="btn sm ghost" id="all2">الدرجة ٢ لكل الآيات</button><button class="btn sm ghost" id="all1">الدرجة ١ لكل الآيات</button><button class="btn sm ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button><button class="btn sm danger" id="clr" data-msg="مسح تسميعه؟">مسح التسميع</button></span>
         </div>
         <div class="mushaf">${sh.from === 1 && sh.surah !== 1 && sh.surah !== 9 ? '<p class="basmala">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>' : ''}
         <ol class="ayat" id="ayat">${rows}</ol></div>` : '<p class="empty">لا يوجد طلاب في هذه الشعبة.</p>'}
@@ -902,6 +902,8 @@ function rRecite() {
   $('#clr').addEventListener('click', e => arm(e.currentTarget, () => { sh.recs[S.ui.student] = { s: {}, e: {} }; save(true); rRecite(); toast('مُسح تسميع الطالب'); }));
 
   bindAyat($('#ayat'));
+  $('#undo').addEventListener('click', undo);
+  undoTrack();
 }
 function bindStudentPick(sh) {
   if (!sh) return;
@@ -934,6 +936,23 @@ function openSheet() {
   toast(isNew ? 'فُتح كشف جديد: سورة ' + sname(su) : 'فُتح الكشف المحفوظ');
 }
 const rec = () => { const sh = cur(); return sh.recs[S.ui.student] || (sh.recs[S.ui.student] = { s: {}, e: {} }); };
+/* التراجع: سجل حالات تسميع الطالب الحالي */
+const UNDO = { k: '', stack: [], last: '' };
+const undoKey = () => S.ui.sheet + ':' + S.ui.student;
+const recJson = () => { const sh = cur(), r = sh && sh.recs[S.ui.student]; return JSON.stringify(r || { s: {}, e: {} }, (k, v) => (k === 'u' ? undefined : v)); };
+function undoTrack() {
+  if (!cur() || !S.ui.student) return;
+  const k = undoKey(), j = recJson();
+  if (UNDO.k !== k) { UNDO.k = k; UNDO.stack = []; UNDO.last = j; }
+  else if (j !== UNDO.last) { UNDO.stack.push(UNDO.last); if (UNDO.stack.length > 80) UNDO.stack.shift(); UNDO.last = j; }
+  const b = $('#undo'); if (b) b.disabled = !UNDO.stack.length;
+}
+function undo() {
+  if (UNDO.k !== undoKey() || !UNDO.stack.length) return;
+  const prev = UNDO.stack.pop(); UNDO.last = prev;
+  cur().recs[S.ui.student] = JSON.parse(prev);
+  save(true); rRecite(); toast('تم التراجع');
+}
 const stamp = () => { const r = rec(); if (!r.date) r.date = ($('#r-sdate') && $('#r-sdate').value) || today(); };
 const clearAbsent = () => {};
 const doneTxt = (sh, studs) => { let d = 0, ab = 0; studs.forEach(s => { const k = calc(sh, s.id); if (k.ev) d++; if (k.absent) ab++; }); return 'قُيِّم ' + d + ' من ' + studs.length + (ab ? ' · لم يحفظ ' + ab : ''); };
@@ -1069,6 +1088,7 @@ function changed() {
   if (li) li.outerHTML = rosterItem(sh, st, i);
   $('#r-done').textContent = doneTxt(sh, studs);
   save();
+  undoTrack();
 }
 function pillHtml(k) {
   if (!k.touched) return '<span class="pill">—</span>';
@@ -1710,6 +1730,9 @@ render();
 save(true);
 $('#sync').addEventListener('click', () => { const p = $('#sync-panel'); if (p && !p.hidden) closeSync(); else syncPanel(); });
 initSync();
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z' || e.key === 'ئ') && S.ui.tab === 'recite' && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName)) { e.preventDefault(); undo(); }
+});
 /* الوضع النهاري والليلي */
 (function () {
   const root = document.documentElement, mq = matchMedia('(prefers-color-scheme: dark)'), meta = document.querySelector('meta[name="theme-color"]');
