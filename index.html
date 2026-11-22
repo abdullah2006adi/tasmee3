@@ -466,7 +466,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .btn.pdf.busy{cursor:progress;opacity:.75}
 :root[data-mode="dark"] .btn.pdf{background:linear-gradient(180deg,#2B2616,#1F1B0F);border-color:#8C7130;color:#EBCB7A;box-shadow:0 3px 0 #4A3C18}
 #rep-stage{position:absolute;top:0;left:-40000px;width:794px;direction:rtl;pointer-events:none}
-#rep-stage .rp{position:relative;z-index:0;width:794px;height:1123px;overflow:hidden;background:#FBF9F4;color:#1D2B28;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;font-size:14px;font-weight:400;font-style:normal;line-height:1.55;letter-spacing:0;text-align:right}
+#rep-stage .rp{position:relative;z-index:0;width:794px;height:1123px;overflow:hidden;background:#FBF9F4;color:#1D2B28;font-family:"AdvertisingMedium","Advertising Medium","IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;font-size:14px;font-weight:400;font-style:normal;line-height:1.55;letter-spacing:0;text-align:right}
 #rep-stage .rp *{box-sizing:border-box;letter-spacing:0;font-style:normal;box-shadow:none;transition:none}
 #rep-stage .rp + .rp{margin-top:24px}
 .rp-hero{position:relative;height:198px;padding:30px 42px 0;color:#FFFFFF;background-color:#0D5D51;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cg fill='none' stroke='%23F2D68E' stroke-opacity='.14' stroke-width='1.2'%3E%3Crect x='23' y='23' width='30' height='30'/%3E%3Crect x='23' y='23' width='30' height='30' transform='rotate(45 38 38)'/%3E%3Ccircle cx='38' cy='38' r='7'/%3E%3Cpath d='M0 0l15 15M76 0L61 15M0 76l15-15M76 76L61 61'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(135deg,#093F37 0%,#0E6655 55%,#17866F 100%);background-size:76px 76px,100% 100%;background-repeat:repeat,no-repeat}
@@ -479,7 +479,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .rp-tt small{display:block;font-size:13px;font-weight:500;color:#CBE6DC}
 .rp-tt h1{margin:0;font-size:34px;font-weight:700;line-height:1.3;color:#FFFFFF;text-shadow:0 2px 6px rgba(0,0,0,.25)}
 .rp-hero.sm .rp-tt h1{font-size:25px;white-space:nowrap;overflow:hidden}
-.rp-sur{display:block;font-family:"Amiri Quran","Amiri",serif;font-weight:400;font-size:25px;line-height:1.6;color:#F2D68E}
+.rp-sur{display:block;font-weight:400;font-size:25px;line-height:1.6;color:#F2D68E}
 .rp-date{flex:none;min-width:178px;text-align:center;padding:11px 16px 12px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.28);border-bottom:4px solid rgba(0,0,0,.18)}
 .rp-date span{display:block;font-size:12.5px;font-weight:600;color:#F2D68E}
 .rp-date b{display:block;font-size:21px;font-weight:700;color:#FFFFFF;line-height:1.45}
@@ -2011,7 +2011,7 @@ function repDonut(parts, W, H) {
   at(0, () => { ring(0, Math.PI * 2); g.clip(); const sh = g.createLinearGradient(0, -R, 0, R * 0.25); sh.addColorStop(0, 'rgba(255,255,255,0.42)'); sh.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = sh; g.fillRect(-R, -R, 2 * R, 2 * R); });
   at(0, () => { g.beginPath(); g.arc(0, 0, R - 0.5, 0, Math.PI * 2); });
   g.strokeStyle = 'rgba(255,255,255,0.6)'; g.lineWidth = 1; g.stroke();
-  g.font = '700 17px "IBM Plex Sans Arabic", Tahoma, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 17px "AdvertisingMedium", "Advertising Medium", "IBM Plex Sans Arabic", Tahoma, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
   if (tot) segs.forEach(s => {
     if (s.a1 - s.a0 < 0.3) return;
     const m = (s.a0 + s.a1) / 2, rr = (R + r) / 2, x = cx + Math.cos(m) * rr, y = cy + Math.sin(m) * rr * T;
@@ -2141,7 +2141,6 @@ function repP2(D, sh, o) {
         <div class="rp-trk">${seg.map(s => `<i style="width:${s[1]}%;background:linear-gradient(180deg,${shade(s[2], 0.25)},${s[2]})"></i>`).join('')}</div>
         <div class="rp-lb">${seg.map(s => `<span style="width:${s[1]}%">${s[0]}</span>`).join('')}</div></div>${cmp}</div>
     ${o.msg ? `<div class="rp-card rp-note"><span class="rp-nico">${REP_SVG.book}</span><div><b>رسالة المعلم</b><p>${REP_MSG[k.absent ? 'weak' : D.un ? 'part' : k.g.key]}</p></div></div>` : ''}
-    ${o.sig ? `<div class="rp-sig"><div><i></i><span>توقيع ${sign}</span></div><div><i></i><span>توقيع ولي الأمر</span></div></div>` : ''}
   </div>${repFoot(2)}</section>`;
 }
 const repOver = pg => {
@@ -2150,7 +2149,7 @@ const repOver = pg => {
 };
 async function repFonts() {
   if (!document.fonts || !document.fonts.load) return;
-  const L = ['400', '500', '600', '700'].map(w => document.fonts.load(w + ' 20px "IBM Plex Sans Arabic"', 'تقرير التسميع 0123456789%')).concat(document.fonts.load('400 24px "Amiri Quran"', 'سورة ٱللَّهِ'));
+  const L = ['400 20px "AdvertisingMedium"', '400 20px "Advertising Medium"'].map(f => document.fonts.load(f, 'تقرير 012')).concat(['400', '500', '600', '700'].map(w => document.fonts.load(w + ' 20px "IBM Plex Sans Arabic"', 'تقرير التسميع 0123456789%')).concat(document.fonts.load('400 24px "Amiri Quran"', 'سورة ٱللَّهِ')));
   await Promise.race([Promise.all(L).catch(() => {}), new Promise(r => setTimeout(r, 6000))]);
 }
 const repBlob = cv => new Promise((res, rej) => {
@@ -2220,7 +2219,7 @@ async function reportPDF(sh, sid, btn) {
       i1++;
     }
     /* الصفحة الثانية: تُختصر تدريجياً حتى لا تتجاوز الصفحتين */
-    const steps = [{ cols: 1, sig: true, msg: true }, { cols: 1, sig: true }, { cols: 1 }, { cols: 2 }, { cols: 2, cmp: true }, { cols: 2, cmp: true, noCmp: true }];
+    const steps = [{ cols: 1, msg: true }, { cols: 1 }, { cols: 2 }, { cols: 2, cmp: true }, { cols: 2, cmp: true, noCmp: true }];
     let p2 = null, st = 0, max = D.errs.length;
     for (;;) {
       if (p2) p2.remove();
