@@ -374,6 +374,27 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .res td.go{cursor:pointer}
 .res td.go:hover{outline:2px solid var(--accent);outline-offset:-2px}
 .res sup{font-size:.6rem;margin-inline-start:2px}
+.sl-h{display:flex;align-items:center;gap:8px;margin:4px 0 10px;font-size:1.05rem}
+.sl-h small{font-size:.8rem;color:var(--muted);background:var(--sunk);border-radius:999px;padding:2px 10px}
+.slist{list-style:none;margin:0 0 14px;padding:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;max-height:560px;overflow-y:auto}
+.slist li{display:flex;align-items:center;gap:12px;padding:8px 12px;border-top:1px solid var(--line)}
+.slist li:first-child{border-top:0}
+.slist li:nth-child(even){background:var(--sunk)}
+.sl-n{flex:none;width:28px;text-align:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.sl-nm{flex:1;min-width:0;font-weight:600}
+.sl-nm small{display:block;font-weight:400;font-size:.78rem;color:var(--muted);text-align:right}
+.mk{flex:none;width:46px;height:38px;border-radius:9px;border:1.5px dashed var(--line-2);background:var(--surface);font:inherit;font-size:1.15rem;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .08s}
+.mk:active{transform:scale(.94)}
+.mk[data-v]{border:1.5px solid rgba(0,0,0,.6)}
+.mk[data-v="0"]{background:#FF0000;color:#FFFFFF}
+.mk[data-v="1"]{background:#FFFF00;color:#1A1A1A}
+.mk[data-v="2"]{background:#FFC000;color:#1A1A1A}
+.mk[data-v="3"]{background:#00B0F0;color:#FFFFFF}
+.mk[data-v="4"]{background:#00B050;color:#FFFFFF}
+.mk[data-v="5"]{background:linear-gradient(90deg,#2BFF2B 0%,#F4FFF4 50%,#2BFF2B 100%);color:#0B4D12}
+.paste{margin:0 0 6px;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.paste summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.paste[open] summary{margin-bottom:10px}
 .res small.or{display:block;font-size:.72rem;font-weight:600;line-height:1.25;opacity:.85}
 .res th.sep,.res td.sep{border-inline-end:2px solid var(--line-2)}
 .res td.e::after,.ebtn em{direction:ltr;unicode-bidi:isolate}
@@ -891,11 +912,15 @@ function rClasses() {
         <label class="fld"><span>الشعبة</span><input id="f-sec" value="${esc(ed ? ed.section : '')}" placeholder="5"></label>
       </div>
       <datalist id="grades"><option value="سابع"><option value="ثامن"><option value="تاسع"><option value="عاشر"><option value="حادي عشر"><option value="ثاني عشر"></datalist>
+      ${ed ? `<h3 class="sl-h">طلاب الشعبة <small>${ed.students.length}</small></h3>
+      <ol class="slist">${ed.students.map((st, n) => `<li><span class="sl-n">${n + 1}</span><span class="sl-nm">${esc(st.name)}${phonesOf(st).some(x => x) ? `<small dir="ltr">${phonesOf(st).filter(x => x).map(esc).join(' · ')}</small>` : ''}</span><button type="button" class="mk"${st.mark != null ? ` data-v="${st.mark}"` : ''} data-sid="${st.id}" aria-label="درجة ${esc(st.name)}">${st.mark != null ? st.mark : ''}</button></li>`).join('')}</ol>
+      <details class="paste"><summary>تعديل الأسماء والأرقام باللصق</summary>` : ''}
       <p class="hint" style="margin:0 0 6px">الصق الأسماء في الخانة الأولى، ثم الصق رقم ولي الأمر ورقم الطالب في الخانتين المجاورتين بالترتيب نفسه، كل رقم في سطر الطالب نفسه. اترك السطر فارغاً إن لم يوجد رقم.</p>
       <div class="namegrid">
         <label class="fld"><span>أسماء الطلاب</span><textarea id="f-names" rows="14" wrap="off" placeholder="محمد أحمد&#10;عبدالله خالد&#10;يوسف علي">${esc(ed ? ed.students.map(x => x.name).join('\n') : '')}</textarea></label>
         ${[0, 1].map(k => `<label class="fld"><span>${['رقم ولي الأمر', 'رقم الطالب'][k]}</span><textarea id="f-ph${k}" class="phcol" rows="14" wrap="off" dir="ltr" placeholder="${k ? '' : '55123456&#10;66123456'}">${esc(ed ? ed.students.map(x => phonesOf(x)[k]).join('\n') : '')}</textarea></label>`).join('')}
       </div>
+      ${ed ? '</details>' : ''}
       <div class="filebar">
         <label class="btn ghost" for="f-file">رفع ملف أسماء (Excel أو CSV أو نص)</label>
         <input id="f-file" type="file" accept=".xlsx,.xls,.csv,.txt" hidden>
@@ -976,6 +1001,14 @@ function rClasses() {
     save(true); render();
   });
   const cancel = $('#f-cancel'); if (cancel) cancel.addEventListener('click', () => { S.ui.editClass = null; save(); render(); });
+  /* زر الدرجة بجانب كل طالب: فارغ ← 0 ← 1 ← 2 ← 3 ← 4 ← 5 ← فارغ */
+  $$('.slist .mk', v).forEach(b => b.addEventListener('click', () => {
+    const st = ed && ed.students.find(x => x.id === b.dataset.sid); if (!st) return;
+    const nv = st.mark == null ? 0 : st.mark >= 5 ? null : st.mark + 1;
+    if (nv == null) delete st.mark; else st.mark = nv;
+    if (nv == null) { delete b.dataset.v; b.textContent = ''; } else { b.dataset.v = nv; b.textContent = nv; }
+    save();
+  }));
 
   $$('[data-edit]', v).forEach(b => b.addEventListener('click', () => { S.ui.editClass = b.dataset.edit; save(); render(); window.scrollTo(0, 0); }));
   $$('[data-del]', v).forEach(b => b.addEventListener('click', () => arm(b, () => {
