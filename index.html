@@ -1217,15 +1217,17 @@ function mergeRemote(meta, sheets, full) {
   S.deleted = del;
   S.classes = S.classes.filter(c => !(del[c.id] && del[c.id] >= (c.u || 0)));
   S.sheets = S.sheets.filter(s => !(del[s.id] && del[s.id] >= (s.u || 0)) && S.classes.some(c => c.id === s.classId));
-  if (meta) SY.H.del = JSON.stringify(meta.deleted || {});
+  if (meta) SY.H.del = delKey(meta.deleted);
   migrate();
 }
 /* local → remote: stamp what changed since the last known cloud state */
+/* ترتيب المفاتيح لا يُعدّ تغييراً (Firestore يعيدها مرتبة) */
+const delKey = o => JSON.stringify(Object.keys(o || {}).sort().map(k => [k, o[k]]));
 function collectDirty() {
   const now = Date.now(), dIds = demoIds(), out = { meta: false, sheets: new Set() };
   S.classes.filter(c => !c.demo).forEach(c => { const h = strip(c); if (SY.H['c:' + c.id] !== h) { c.u = now; out.meta = true; } });
   if (S.wa && SY.H.wa !== JSON.stringify(S.wa)) { S.waU = now; out.meta = true; }
-  if (SY.H.del !== JSON.stringify(S.deleted || {})) out.meta = true;
+  if (SY.H.del !== delKey(S.deleted)) out.meta = true;
   S.sheets.filter(sh => !dIds.has(sh.classId)).forEach(sh => {
     if (SY.H['s:' + sh.id] !== sheetHead(sh)) { sh.u = now; out.sheets.add(sh.id); }
     Object.keys(sh.recs || {}).forEach(sid => { const h = strip(sh.recs[sid]); if (SY.H['r:' + sh.id + ':' + sid] !== h) { sh.recs[sid].u = now; out.sheets.add(sh.id); } });
@@ -1248,7 +1250,7 @@ async function pushNow() {
       /* ادمج ما في الحساب أولاً حتى لا يمحو جهاز قديم شعباً أُضيفت من جهاز آخر */
       try { const rs = await FS.getDoc(FS.doc(db, 'tasmee3', uid)); if (rs.exists()) { const before = JSON.stringify(S.classes); mergeRemote(rs.data(), null, false); if (JSON.stringify(S.classes) !== before) render(); } } catch (e) {}
       const meta = clone({ classes: S.classes.filter(c => !c.demo), deleted: S.deleted || {}, wa: S.wa || null, waU: S.waU || 0, u: Date.now() });
-      jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid), meta).then(() => { meta.classes.forEach(c => SY.H['c:' + c.id] = strip(c)); SY.H.del = JSON.stringify(meta.deleted); if (meta.wa) SY.H.wa = JSON.stringify(meta.wa); }));
+      jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid), meta).then(() => { meta.classes.forEach(c => SY.H['c:' + c.id] = strip(c)); SY.H.del = delKey(meta.deleted); if (meta.wa) SY.H.wa = JSON.stringify(meta.wa); }));
     }
     await Promise.all(jobs);
     localStorage.setItem(KEY, JSON.stringify(S));
@@ -1288,7 +1290,7 @@ async function startSync(user, quiet) {
     SY.unsub.push(FS.onSnapshot(FS.doc(db, 'tasmee3', uid), snap => {
       if (snap.metadata && snap.metadata.hasPendingWrites) return;
       if (!snap.exists()) return;
-      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && JSON.stringify(d.deleted || {}) === JSON.stringify(S.deleted || {}) && JSON.stringify(d.wa || null) === JSON.stringify(S.wa || null)) return;
+      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && delKey(d.deleted) === delKey(S.deleted) && JSON.stringify(d.wa || null) === JSON.stringify(S.wa || null)) return;
       collectDirty(); mergeRemote(d, [], false); applyRemote(); syncSchedule();
     }, e => setSync('err', fbErr(e))));
     SY.unsub.push(FS.onSnapshot(FS.collection(db, 'tasmee3', uid, 'sheets'), snap => {
