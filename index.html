@@ -911,7 +911,7 @@ function rRecite() {
 
   bindAyat($('#ayat'));
   $('#undo').addEventListener('click', undo);
-  $('#r-sent').addEventListener('click', () => { const r = rec(); r.sent = { v: r1(calc(sh, S.ui.student).fin), d: new Date().toLocaleDateString('ar-QA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }) }; changed(); toast('سُجّلت الدرجة المرسلة: ' + fmt(r.sent.v)); });
+  $('#r-sent').addEventListener('click', markSent);
   undoTrack();
 }
 function bindStudentPick(sh) {
@@ -963,10 +963,15 @@ function undo() {
   save(true); rRecite(); toast('تم التراجع');
 }
 /* «تم إرسال الدرجة»: يحفظ الدرجة وقت الضغط ولا تتغير إلا بضغطة جديدة */
+function markSent() {
+  const r = rec();
+  r.sent = { v: r1(calc(cur(), S.ui.student).fin), a: !!r.absent, d: new Date().toLocaleDateString('ar-QA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }) };
+  changed(); toast('سُجّلت الدرجة المرسلة: ' + (r.sent.a ? 'لم يحفظ' : fmt(r.sent.v)));
+}
 function sentBtn(sh, sid) {
-  const r = sh.recs[sid] || {}, x = r.sent, now = fmt(calc(sh, sid).fin);
-  const stale = x && fmt(x.v) !== now;
-  return `<button class="btn sent${x ? ' on' : ''}${stale ? ' stale' : ''}" id="r-sent" title="${x ? 'سُجّلت في ' + esc(x.d) + (stale ? ' · الدرجة الحالية ' + now : '') + ' · اضغط لتسجيل الدرجة الحالية' : 'اضغط لتسجيل الدرجة الحالية'}">✓ تم إرسال الدرجة: <b>${x ? fmt(x.v) : '—'}</b>${stale ? '<small>الحالية ' + now + '</small>' : ''}</button>`;
+  const r = sh.recs[sid] || {}, x = r.sent, now = r.absent ? 'لم يحفظ' : fmt(calc(sh, sid).fin);
+  const was = x ? (x.a ? 'لم يحفظ' : fmt(x.v)) : '—', stale = x && was !== now;
+  return `<button class="btn sent${x ? ' on' : ''}${stale ? ' stale' : ''}" id="r-sent" title="${x ? 'سُجّلت في ' + esc(x.d) + (stale ? ' · الدرجة الحالية ' + now : '') + ' · اضغط لتسجيل الدرجة الحالية' : 'اضغط لتسجيل الدرجة الحالية'}">✓ تم إرسال الدرجة: <b>${was}</b>${stale ? '<small>الحالية ' + now + '</small>' : ''}</button>`;
 }
 const stamp = () => { const r = rec(); if (!r.date) r.date = ($('#r-sdate') && $('#r-sdate').value) || today(); };
 const clearAbsent = () => {};
@@ -1104,7 +1109,7 @@ function changed() {
   const li = $(`#roster li[data-s="${S.ui.student}"]`);
   if (li) li.outerHTML = rosterItem(sh, st, i);
   $('#r-done').textContent = doneTxt(sh, studs);
-  const sb = $('#r-sent'); if (sb) { sb.outerHTML = sentBtn(sh, S.ui.student); $('#r-sent').addEventListener('click', () => { const r = rec(); r.sent = { v: r1(calc(sh, S.ui.student).fin), d: new Date().toLocaleDateString('ar-QA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }) }; changed(); toast('سُجّلت الدرجة المرسلة: ' + fmt(r.sent.v)); }); }
+  const sb = $('#r-sent'); if (sb) { sb.outerHTML = sentBtn(sh, S.ui.student); $('#r-sent').addEventListener('click', markSent); }
   save();
   undoTrack();
 }
