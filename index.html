@@ -148,7 +148,7 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .empty::before{content:"";display:block;width:76px;height:86px;margin:0 auto 14px;border-radius:999px 999px 18px 18px;background:var(--accent-soft) var(--book) center 58%/38px no-repeat;border:1px solid color-mix(in srgb,var(--accent) 22%,transparent)}
 .tag{font-size:.74rem;background:var(--gm);color:var(--gmi);padding:1px 9px;border-radius:999px;font-weight:700}
 .tag.nh{background:var(--g0s);color:var(--g0);margin-inline-start:6px;vertical-align:middle}
-.namegrid{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr));gap:10px}
+.namegrid{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,1fr));gap:10px}
 .namegrid textarea{white-space:pre;overflow-x:hidden}
 .phcol{text-align:left;font-variant-numeric:tabular-nums}
 .clist{list-style:none;margin:0;padding:0;display:grid;gap:10px}
@@ -209,7 +209,7 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .stu-tools .fld{width:170px}
 .stu-tools .phones{width:auto}
 .stu-tools .phones > div{display:flex;gap:6px}
-.stu-tools .phones input{width:118px;text-align:left;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:8px 10px;min-height:44px}
+.stu-tools .phones input{width:132px;text-align:left;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;padding:8px 10px;min-height:44px}
 
 /* شريط الدرجة الثابت */
 .sbar{position:sticky;top:calc(var(--hdr) + 8px);z-index:4;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:stretch;margin:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh2);overflow:hidden}
@@ -350,7 +350,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 }
 @media (max-width:900px){
   .cols{grid-template-columns:1fr}
-  .namegrid{grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr))}
+  .namegrid{grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr))}
   .work{grid-template-columns:1fr}
   .roster{display:none}
   .mobile-only{display:block}
@@ -383,7 +383,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
   .stu-head h2{font-size:1.6rem}
   .stu-tools{padding:10px}
   .stu-tools .fld,.stu-tools .phones{width:100%}
-  .stu-tools .phones > div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stu-tools .phones > div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
   .stu-tools .phones input{width:100%;min-width:0}
   .stu-tools > .btn{flex:1}
   .sbar{margin:0 10px;border-radius:16px}
@@ -586,10 +586,10 @@ $$('.tab').forEach(b => b.addEventListener('click', () => { S.ui.tab = b.dataset
 /* ---------- names ---------- */
 const PHONE_RE = /^\+?[\d٠-٩][\d٠-٩ \-]{6,}$/;
 const cleanPhone = x => String(x || '').trim().replace(/[\s\-]/g, '');
-const phonesOf = st => (st.phones || (st.phone ? [st.phone] : [])).concat(['', '', '']).slice(0, 3);
+const phonesOf = st => (st.phones || (st.phone ? [st.phone] : [])).concat(['', '']).slice(0, 2);
 /* names: one per line; phones[k]: matching lines (same line number) for number k+1 */
 function parseNames(t, cols) {
-  cols = cols || ['', '', ''];
+  cols = cols || ['', ''];
   const lines = t.split(/\r?\n/), pl = cols.map(c => c.split(/\r?\n/));
   const seen = new Set(), out = [];
   lines.forEach((l, i) => {
@@ -621,7 +621,7 @@ async function readNamesFile(f) {
       .filter(x => x && /[؀-ۿA-Za-z]/.test(x) && !/^[\d٠-٩]+$/.test(x) && !x.startsWith('='))
       .sort((a, b) => b.length - a.length)[0];
     const ph = r.map(x => String(x).trim()).filter(x => PHONE_RE.test(x) && x.replace(/\D/g, '').length >= 7).map(cleanPhone);
-    if (cell) out.push({ name: cell, phones: [ph[0] || '', ph[1] || '', ph[2] || ''] });
+    if (cell) out.push({ name: cell, phones: [ph[0] || '', ph[1] || ''] });
   }
   return out;
 }
@@ -639,10 +639,10 @@ function rClasses() {
         <label class="fld"><span>الشعبة</span><input id="f-sec" value="${esc(ed ? ed.section : '')}" placeholder="5"></label>
       </div>
       <datalist id="grades"><option value="سابع"><option value="ثامن"><option value="تاسع"><option value="عاشر"><option value="حادي عشر"><option value="ثاني عشر"></datalist>
-      <p class="hint" style="margin:0 0 6px">الصق الأسماء في الخانة الأولى، ثم الصق أرقام أولياء الأمور في الخانات المجاورة بالترتيب نفسه، كل رقم في سطر الطالب نفسه. اترك السطر فارغاً إن لم يوجد رقم.</p>
+      <p class="hint" style="margin:0 0 6px">الصق الأسماء في الخانة الأولى، ثم الصق رقم ولي الأمر ورقم الطالب في الخانتين المجاورتين بالترتيب نفسه، كل رقم في سطر الطالب نفسه. اترك السطر فارغاً إن لم يوجد رقم.</p>
       <div class="namegrid">
         <label class="fld"><span>أسماء الطلاب</span><textarea id="f-names" rows="14" wrap="off" placeholder="محمد أحمد&#10;عبدالله خالد&#10;يوسف علي">${esc(ed ? ed.students.map(x => x.name).join('\n') : '')}</textarea></label>
-        ${[0, 1, 2].map(k => `<label class="fld"><span>الرقم ${['الأول', 'الثاني', 'الثالث'][k]}</span><textarea id="f-ph${k}" class="phcol" rows="14" wrap="off" dir="ltr" placeholder="${k ? '' : '55123456&#10;66123456'}">${esc(ed ? ed.students.map(x => phonesOf(x)[k]).join('\n') : '')}</textarea></label>`).join('')}
+        ${[0, 1].map(k => `<label class="fld"><span>${['رقم ولي الأمر', 'رقم الطالب'][k]}</span><textarea id="f-ph${k}" class="phcol" rows="14" wrap="off" dir="ltr" placeholder="${k ? '' : '55123456&#10;66123456'}">${esc(ed ? ed.students.map(x => phonesOf(x)[k]).join('\n') : '')}</textarea></label>`).join('')}
       </div>
       <div class="filebar">
         <label class="btn ghost" for="f-file">رفع ملف أسماء (Excel أو CSV أو نص)</label>
@@ -669,7 +669,7 @@ function rClasses() {
         <label class="fld"><span>رمز الدولة للأرقام المحلية</span><input id="w-cc" inputmode="numeric" value="${esc(waCfg().cc)}" placeholder="974"></label>
         <label class="fld"><span>التوقيع في آخر الرسالة</span><input id="w-sign" value="${esc(waCfg().sign)}" placeholder="معلم التربية الإسلامية"></label>
       </div>
-      <p class="hint" style="margin:0 0 18px">يُضاف رمز الدولة تلقائياً إلى الرقم المحلي (مثل 55123456). أضف أرقام أولياء الأمور (حتى ثلاثة أرقام لكل طالب) في نموذج الشعبة، أو من صفحة التسميع.</p>
+      <p class="hint" style="margin:0 0 18px">يُضاف رمز الدولة تلقائياً إلى الرقم المحلي (مثل 55123456). أضف رقم ولي الأمر ورقم الطالب في نموذج الشعبة، أو من صفحة التسميع.</p>
       <h2>حساب المزامنة</h2>
       <p class="hint" style="margin:0 0 4px">تُحفظ الشعب والدرجات في حسابك تلقائياً وتظهر في كل أجهزتك. من هنا يمكنك تسجيل الخروج من هذا الجهاز.</p>
       <div class="actions" style="margin-bottom:18px"><button class="btn ghost" id="acc-open">إدارة الحساب</button></div>
@@ -683,7 +683,7 @@ function rClasses() {
     </section>
   </div>`;
 
-  const ta = $('#f-names'), pcs = [0, 1, 2].map(k => $('#f-ph' + k));
+  const ta = $('#f-names'), pcs = [0, 1].map(k => $('#f-ph' + k));
   const colsVal = () => pcs.map(x => x.value);
   const all = [ta].concat(pcs);
   all.forEach(t => t.addEventListener('scroll', () => all.forEach(o => { if (o !== t) o.scrollTop = t.scrollTop; })));
@@ -801,7 +801,7 @@ function rRecite() {
             <div class="nav"><button class="btn ghost" id="prev"${idx <= 0 ? ' disabled' : ''}>→ السابق</button><button class="btn ghost" id="next"${idx >= studs.length - 1 ? ' disabled' : ''}>التالي ←</button></div></div>
           <div class="stu-tools">
             <label class="fld"><span>تاريخ تقييم الطالب</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
-            <div class="fld phones"><span>أرقام ولي الأمر (الأول، الثاني، الثالث)</span><div>${phonesOf(st).map((p_, k) => `<input class="r-ph" data-k="${k}" type="tel" inputmode="tel" dir="ltr" value="${esc(p_)}" placeholder="${k + 1}" aria-label="الرقم ${k + 1}">`).join('')}</div></div>
+            <div class="fld phones"><span>رقم ولي الأمر · رقم الطالب</span><div>${phonesOf(st).map((p_, k) => `<input class="r-ph" data-k="${k}" type="tel" inputmode="tel" dir="ltr" value="${esc(p_)}" placeholder="${k ? 'الطالب' : 'ولي الأمر'}" aria-label="${k ? 'رقم الطالب' : 'رقم ولي الأمر'}">`).join('')}</div></div>
             <button class="btn ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button>
             <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>
           </div>
@@ -1318,17 +1318,17 @@ function openWA(ph, text) {
 function closePick() { const m = $('#wa-pick'); if (m) m.remove(); document.removeEventListener('keydown', pickKeys, true); }
 function pickKeys(e) {
   if (e.key === 'Escape') { closePick(); return; }
-  const n = { '1': 0, '2': 1, '3': 2, '١': 0, '٢': 1, '٣': 2 }[e.key];
+  const n = { '1': 0, '2': 1, '١': 0, '٢': 1 }[e.key];
   if (n != null) { const b = $$('#wa-pick [data-ph]')[n]; if (b) { e.preventDefault(); b.click(); } }
 }
 function sendWA(s, text) {
   closePick();
   const nums = phonesOf(s).map((p_, k) => ({ k, raw: p_, ph: waPhone(p_) })).filter(x => x.ph);
-  const ord = ['الأول', 'الثاني', 'الثالث'];
+  const ord = ['رقم ولي الأمر', 'رقم الطالب'];
   const m = document.createElement('div');
   m.id = 'wa-pick'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-label', 'اختيار رقم ولي الأمر');
   m.innerHTML = `<b>إرسال تقرير ${esc(s.name)} إلى:</b>
-    ${nums.length ? nums.map((x, i) => `<button type="button" data-ph="${x.ph}"><span class="kn">${i + 1}</span><span>الرقم ${ord[x.k]}</span><span dir="ltr" class="pn">${esc(x.raw)}</span></button>`).join('') : '<p class="muted" style="margin:0">لا توجد أرقام محفوظة لهذا الطالب.</p>'}
+    ${nums.length ? nums.map((x, i) => `<button type="button" data-ph="${x.ph}"><span class="kn">${i + 1}</span><span>${ord[x.k]}</span><span dir="ltr" class="pn">${esc(x.raw)}</span></button>`).join('') : '<p class="muted" style="margin:0">لا توجد أرقام محفوظة لهذا الطالب.</p>'}
     <button type="button" data-ph=""><span class="kn">${nums.length + 1}</span><span>اختيار المحادثة من واتساب</span></button>
     <button type="button" class="x">إلغاء</button>`;
   document.body.appendChild(m);
