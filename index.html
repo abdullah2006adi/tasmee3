@@ -1173,7 +1173,7 @@ function wordsHtml(sh, r, a) {
 function marksHtml(r, a, marking) {
   const old = oldErrs(r, a).map((x, i) => `<div class="mark" data-old="${i}"><span class="mw free">خطأ</span><input class="mx" value="${esc(x)}" autocomplete="off" aria-label="خطأ النطق"><em>−1</em><button type="button" class="mdel" aria-label="حذف الخطأ">✕</button></div>`);
   const ms = marksOf(r, a).map((m, i) => `<div class="mark" data-m="${i}"><span class="mw" title="${esc(m.w)}">${esc(m.w)}</span><input class="mx" value="${esc(m.x || '')}" autocomplete="off" placeholder="كيف قرأها الطالب؟" aria-label="ما قرأه الطالب"><em>−${mLen(m)}</em><button type="button" class="mdel" aria-label="حذف الخطأ">✕</button></div>`);
-  const hint = marking ? '<p class="mark-hint">اضغط على الكلمة التي أخطأ فيها الطالب، أو اسحب إصبعك على أكثر من كلمة، ثم اكتب كيف قرأها. كل كلمة تُنقص درجة، والضغط على الكلمة المحددة مرةً أخرى يلغي تحديدها.</p>' : '';
+  const hint = marking ? '<p class="mark-hint">اضغط على الكلمة التي أخطأ فيها الطالب، أو اسحب إصبعك على أكثر من كلمة، ثم اكتب كيف قرأها. كل كلمة تُنقص درجة، والضغط على كلمة محددة مرةً أخرى يلغي تحديدها هي وحدها.</p>' : '';
   return hint + old.concat(ms).join('');
 }
 function ayahRow(sh, r, a, marking) {
@@ -1216,9 +1216,24 @@ function addMark(a, f, t) {
   const sh = cur(), r = rec(), words = wordsOf(sh, a);
   r.w = r.w || {};
   let list = marksOf(r, a).slice(), x = '';
-  /* ضغطة على كلمة محددة من قبل: يُلغى تحديدها */
-  const hit = f === t ? list.findIndex(m => f >= m.f && f <= m.t) : -1;
-  if (hit >= 0) { list.splice(hit, 1); if (list.length) r.w[a] = list; else delete r.w[a]; stamp(); changed(); redraw(a, true); return; }
+  /* الضغط أو السحب على كلمات محددة كلها: يُلغى تحديد هذه الكلمات وحدها، ويبقى ما حولها */
+  const isBad = i => list.some(m => i >= m.f && i <= m.t);
+  let allBad = true;
+  for (let i = f; i <= t; i++) if (!isBad(i)) { allBad = false; break; }
+  if (allBad) {
+    const out = [];
+    list.forEach(m => {
+      let run = null, first = true;
+      for (let i = m.f; i <= m.t + 1; i++) {
+        const keep = i <= m.t && (i < f || i > t);
+        if (keep) { if (!run) run = { f: i, t: i }; else run.t = i; }
+        else if (run) { out.push({ f: run.f, t: run.t, w: words.slice(run.f, run.t + 1).join(' '), x: first ? (m.x || '') : '' }); first = false; run = null; }
+      }
+    });
+    out.sort((p, q) => p.f - q.f);
+    if (out.length) r.w[a] = out; else delete r.w[a];
+    stamp(); changed(); redraw(a, true); return;
+  }
   list = list.filter(m => { const ov = m.f <= t && f <= m.t; if (ov) { f = Math.min(f, m.f); t = Math.max(t, m.t); x = x || m.x || ''; } return !ov; });
   list.push({ f, t, w: words.slice(f, t + 1).join(' '), x });
   list.sort((p, q) => p.f - q.f);
