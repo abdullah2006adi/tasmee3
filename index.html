@@ -55,6 +55,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:8px}
 .brand{display:flex;align-items:baseline;gap:10px;margin-inline-end:auto}
 .brand h1{font-weight:700;font-size:1.45rem;margin:0;color:var(--accent)}
+.brand{align-items:center!important}
+.brand .logo{width:40px;height:40px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.18);flex:none}
 .brand small{color:var(--muted);font-size:.8rem}
 .tabs{display:flex;gap:3px;background:var(--sunk);padding:4px;border-radius:999px;flex-wrap:wrap}
 .tab{border:0;background:transparent;padding:5px 14px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:600}
@@ -297,7 +299,7 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 
 <header class="top">
   <div class="wrap">
-    <div class="brand"><h1>كشف التسميع</h1><small>درجتان لكل آية · كل خطأ نطق ينقص درجة</small></div>
+    <div class="brand"><img class="logo" src="icon-192.png" alt="" width="40" height="40"><h1>كشف التسميع</h1><small>درجتان لكل آية · كل خطأ نطق ينقص درجة</small></div>
     <nav class="tabs" role="tablist">
       <button class="tab" role="tab" data-tab="classes">الشُّعب</button>
       <button class="tab" role="tab" data-tab="recite">التسميع</button>
