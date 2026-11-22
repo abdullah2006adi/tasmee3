@@ -1245,6 +1245,8 @@ async function pushNow() {
     d.sheets.forEach(id => { const sh = S.sheets.find(x => x.id === id); if (sh) jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid, 'sheets', id), clone(sh)).then(() => { SY.H['s:' + id] = sheetHead(sh); Object.keys(sh.recs).forEach(sid => SY.H['r:' + id + ':' + sid] = strip(sh.recs[sid])); })); });
     delSheets.forEach(id => jobs.push(FS.deleteDoc(FS.doc(db, 'tasmee3', uid, 'sheets', id)).then(() => { Object.keys(SY.H).forEach(k => { if (k === 's:' + id || k.startsWith('r:' + id + ':')) delete SY.H[k]; }); })));
     if (d.meta) {
+      /* ادمج ما في الحساب أولاً حتى لا يمحو جهاز قديم شعباً أُضيفت من جهاز آخر */
+      try { const rs = await FS.getDoc(FS.doc(db, 'tasmee3', uid)); if (rs.exists()) { const before = JSON.stringify(S.classes); mergeRemote(rs.data(), null, false); if (JSON.stringify(S.classes) !== before) render(); } } catch (e) {}
       const meta = clone({ classes: S.classes.filter(c => !c.demo), deleted: S.deleted || {}, wa: S.wa || null, waU: S.waU || 0, u: Date.now() });
       jobs.push(FS.setDoc(FS.doc(db, 'tasmee3', uid), meta).then(() => { meta.classes.forEach(c => SY.H['c:' + c.id] = strip(c)); SY.H.del = JSON.stringify(meta.deleted); if (meta.wa) SY.H.wa = JSON.stringify(meta.wa); }));
     }
