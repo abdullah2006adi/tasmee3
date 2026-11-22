@@ -895,6 +895,7 @@ function rRecite() {
   $('#absent').addEventListener('click', e => {
     const r = rec(); r.absent = !r.absent;
     if (r.absent && !r.date) r.date = $('#r-sdate').value || today();
+    if (r.absent) for (let a = sh.from; a <= sh.to; a++) { r.s[a] = 0; updRow(a); }
     e.currentTarget.setAttribute('aria-pressed', String(r.absent));
     changed();
   });
