@@ -383,6 +383,14 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .sc-list input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex:none}
 .sc-d{flex:none;max-width:150px;border:1px solid var(--line-2);border-radius:10px;padding:6px 8px;background:var(--surface);color:var(--ink);font:inherit;font-size:.85rem}
 .mk.lv{width:32px;height:28px;font-size:.95rem;cursor:default;display:inline-grid;place-items:center;border-style:solid}
+.sc-save{display:flex;gap:8px;align-items:center;margin-top:10px}
+.sc-save input{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:12px;padding:8px 12px;background:var(--surface);color:var(--ink);font:inherit}
+.sc-save[hidden]{display:none}
+.sc-tpls{margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.sc-tpl{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.sc-tpl:first-child{border-top:0}
+.sc-tpl > div{flex:1;min-width:0}
+.sc-tpl small{display:block;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sc-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .sc-bar span{font-weight:700;color:var(--muted)}
 .sc-bar .btn{margin-inline-start:auto}
@@ -2085,7 +2093,9 @@ function rSched() {
       <h2 style="margin-top:22px">نص الرسالة</h2>
       <textarea id="sc-msg" rows="10" class="sc-msg">${esc(c.msg)}</textarea>
       <p class="hint">تُستبدل تلقائياً: {الطالب} {اليوم} {التاريخ} {الشعبة} {التوقيع}</p>
-      <div class="actions"><button class="btn ghost sm" id="sc-reset">استعادة النص الأصلي</button></div>
+      <div class="actions"><button class="btn ghost sm" id="sc-tpls" aria-expanded="${!!S.ui.scTpl}">نماذج رسائل محفوظة${(c.tpls || []).length ? ' (' + c.tpls.length + ')' : ''}</button><button class="btn ghost sm" id="sc-save">حفظ في النماذج</button><button class="btn ghost sm" id="sc-reset">استعادة النص الأصلي</button></div>
+      <div class="sc-save" id="sc-saveRow" hidden><input id="sc-tname" placeholder="اسم النموذج، مثل: موعد التسميع الأول"><button class="btn primary sm" id="sc-tok">حفظ</button><button class="btn ghost sm" id="sc-tno">إلغاء</button></div>
+      ${S.ui.scTpl ? `<div class="sc-tpls">${(c.tpls || []).length ? c.tpls.map(t => `<div class="sc-tpl"><div><b>${esc(t.name)}</b><small>${esc(t.text.replace(/\s+/g, ' ').slice(0, 90))}…</small></div><button class="btn primary sm" data-tuse="${t.id}">استخدام</button><button class="btn danger sm" data-tdel="${t.id}">حذف</button></div>`).join('') : '<p class="muted" style="margin:0">لا توجد نماذج محفوظة بعد.</p>'}</div>` : ''}
     </section>
     <section class="panel"><h2>الطلاب حسب المستوى <small class="muted">${inc.length} من ${L.length}</small></h2>
       <p class="hint" style="margin-top:0">أزل علامة الاختيار عن الطالب الذي لا تريد تحديد موعد له.</p>
@@ -2109,6 +2119,20 @@ function rSched() {
   $('#sc-per').addEventListener('change', e => { C().perDay = Math.max(0, parseInt(e.target.value, 10) || 0) || ''; redo(); });
   $('#sc-msg').addEventListener('input', e => { C().msg = e.target.value; save(); });
   $('#sc-reset').addEventListener('click', () => { C().msg = SCHED_MSG; redo(); });
+  $('#sc-tpls').addEventListener('click', () => { S.ui.scTpl = !S.ui.scTpl; redo(); });
+  $('#sc-save').addEventListener('click', () => { const r = $('#sc-saveRow'); r.hidden = false; $('#sc-tname').focus(); });
+  $('#sc-tno').addEventListener('click', () => { $('#sc-saveRow').hidden = true; });
+  const saveTpl = () => {
+    const name = $('#sc-tname').value.trim(), text = $('#sc-msg').value;
+    if (!name) { toast('اكتب اسماً للنموذج', true); return; }
+    if (!text.trim()) { toast('نص الرسالة فارغ', true); return; }
+    const cc = C(); cc.tpls = (cc.tpls || []).filter(t => t.name !== name).concat({ id: uid(), name, text });
+    S.ui.scTpl = true; toast('حُفظ النموذج: ' + name); redo();
+  };
+  $('#sc-tok').addEventListener('click', saveTpl);
+  $('#sc-tname').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveTpl(); } });
+  $$('[data-tuse]', v).forEach(b => b.addEventListener('click', () => { const t = (C().tpls || []).find(x => x.id === b.dataset.tuse); if (t) { C().msg = t.text; toast('وُضع النموذج في خانة الرسالة'); redo(); } }));
+  $$('[data-tdel]', v).forEach(b => b.addEventListener('click', () => arm(b, () => { C().tpls = (C().tpls || []).filter(x => x.id !== b.dataset.tdel); redo(); })));
   $$('.sc-in', v).forEach(b => b.addEventListener('change', () => { const id = b.dataset.sid; if (b.checked) delete C().off[id]; else { C().off[id] = 1; delete C().plan[id]; delete C().sent[id]; } redo(); }));
   $$('.sc-d', v).forEach(sel => sel.addEventListener('change', () => { const id = sel.dataset.sid; if (sel.value) C().plan[id] = sel.value; else delete C().plan[id]; delete C().sent[id]; redo(); }));
   $('#sc-go').addEventListener('click', () => {
