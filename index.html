@@ -1084,6 +1084,8 @@ function onKey(e) {
 function changed() {
   const sh = cur(), studs = cls(sh.classId).students;
   const st = studs.find(s => s.id === S.ui.student), i = studs.indexOf(st);
+  const r0 = sh.recs[S.ui.student];
+  if (r0 && r0.absent && Object.values(r0.s || {}).some(v => v > 0)) { r0.absent = false; const ab = $('#absent'); if (ab) ab.setAttribute('aria-pressed', 'false'); }
   $('#sbar').innerHTML = barHtml(st, calc(sh, st.id));
   const li = $(`#roster li[data-s="${S.ui.student}"]`);
   if (li) li.outerHTML = rosterItem(sh, st, i);
