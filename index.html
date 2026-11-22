@@ -223,6 +223,13 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .stu-tools input[type=tel]{text-align:left;direction:ltr;letter-spacing:.02em}
 .stu-acts{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .stu-acts .btn{min-height:46px}
+.btn.sent{background:var(--surface);border:1.5px dashed var(--line-2);color:var(--muted);gap:6px}
+.btn.sent b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.btn.sent.on{border-style:solid;border-color:#1E9A55;color:#178348;background:color-mix(in srgb,#1E9A55 9%,var(--surface))}
+.btn.sent.on b{color:#178348}
+.btn.sent.stale{border-color:#E2B100;background:color-mix(in srgb,#FACC15 14%,var(--surface))}
+.btn.sent small{font-size:.75rem;color:#8A6400;background:#FFF3C4;border-radius:999px;padding:2px 8px}
+:root[data-mode="dark"] .btn.sent.on,:root[data-mode="dark"] .btn.sent.on b{color:#4ADE80}
 
 
 /* شريط الدرجة الثابت */
@@ -860,7 +867,7 @@ function rRecite() {
           <div class="stu-tools">
             <label class="fld f-date"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>تاريخ التقييم</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
             <div class="stu-acts">
-            <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button></div>
+            <button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>${sentBtn(sh, S.ui.student)}</div>
           </div>
         </div>
         <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
@@ -904,6 +911,7 @@ function rRecite() {
 
   bindAyat($('#ayat'));
   $('#undo').addEventListener('click', undo);
+  $('#r-sent').addEventListener('click', () => { const r = rec(); r.sent = { v: r1(calc(sh, S.ui.student).fin), d: new Date().toLocaleDateString('ar-QA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }) }; changed(); toast('سُجّلت الدرجة المرسلة: ' + fmt(r.sent.v)); });
   undoTrack();
 }
 function bindStudentPick(sh) {
@@ -953,6 +961,12 @@ function undo() {
   const prev = UNDO.stack.pop(); UNDO.last = prev;
   cur().recs[S.ui.student] = JSON.parse(prev);
   save(true); rRecite(); toast('تم التراجع');
+}
+/* «تم إرسال الدرجة»: يحفظ الدرجة وقت الضغط ولا تتغير إلا بضغطة جديدة */
+function sentBtn(sh, sid) {
+  const r = sh.recs[sid] || {}, x = r.sent, now = fmt(calc(sh, sid).fin);
+  const stale = x && fmt(x.v) !== now;
+  return `<button class="btn sent${x ? ' on' : ''}${stale ? ' stale' : ''}" id="r-sent" title="${x ? 'سُجّلت في ' + esc(x.d) + (stale ? ' · الدرجة الحالية ' + now : '') + ' · اضغط لتسجيل الدرجة الحالية' : 'اضغط لتسجيل الدرجة الحالية'}">✓ تم إرسال الدرجة: <b>${x ? fmt(x.v) : '—'}</b>${stale ? '<small>الحالية ' + now + '</small>' : ''}</button>`;
 }
 const stamp = () => { const r = rec(); if (!r.date) r.date = ($('#r-sdate') && $('#r-sdate').value) || today(); };
 const clearAbsent = () => {};
@@ -1090,6 +1104,7 @@ function changed() {
   const li = $(`#roster li[data-s="${S.ui.student}"]`);
   if (li) li.outerHTML = rosterItem(sh, st, i);
   $('#r-done').textContent = doneTxt(sh, studs);
+  const sb = $('#r-sent'); if (sb) { sb.outerHTML = sentBtn(sh, S.ui.student); $('#r-sent').addEventListener('click', () => { const r = rec(); r.sent = { v: r1(calc(sh, S.ui.student).fin), d: new Date().toLocaleDateString('ar-QA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }) }; changed(); toast('سُجّلت الدرجة المرسلة: ' + fmt(r.sent.v)); }); }
   save();
   undoTrack();
 }
