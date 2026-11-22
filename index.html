@@ -2099,6 +2099,7 @@ function rSched() {
     </section>
     <section class="panel"><h2>الطلاب حسب المستوى <small class="muted">${inc.length} من ${L.length}</small></h2>
       <p class="hint" style="margin-top:0">أزل علامة الاختيار عن الطالب الذي لا تريد تحديد موعد له.</p>
+      ${L.length ? '<div class="actions" style="margin:0 0 10px"><button class="btn ghost sm" id="sc-all">تحديد الكل</button><button class="btn ghost sm" id="sc-none">إزالة التحديد عن الكل</button></div>' : ''}
       ${L.length ? `<ol class="slist sc-list">${L.map(x => `<li${c.off[x.st.id] ? ' class="off"' : ''}><input type="checkbox" class="sc-in" data-sid="${x.st.id}"${c.off[x.st.id] ? '' : ' checked'} aria-label="اختيار ${esc(x.st.name)}">${lv(x.st)}<span class="sl-nm">${esc(x.st.name)}<small>${esc(cname(x.k))}</small></span>${c.off[x.st.id] ? '' : dateOpts(x.st.id)}</li>`).join('')}</ol>` : '<p class="empty">اختر شعبة من الإعداد.</p>'}
     </section>
   </div>
@@ -2133,6 +2134,8 @@ function rSched() {
   $('#sc-tname').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveTpl(); } });
   $$('[data-tuse]', v).forEach(b => b.addEventListener('click', () => { const t = (C().tpls || []).find(x => x.id === b.dataset.tuse); if (t) { C().msg = t.text; toast('وُضع النموذج في خانة الرسالة'); redo(); } }));
   $$('[data-tdel]', v).forEach(b => b.addEventListener('click', () => arm(b, () => { C().tpls = (C().tpls || []).filter(x => x.id !== b.dataset.tdel); redo(); })));
+  const all = $('#sc-all'); if (all) all.addEventListener('click', () => { const cc = C(); L.forEach(x => delete cc.off[x.st.id]); redo(); });
+  const none = $('#sc-none'); if (none) none.addEventListener('click', () => { const cc = C(); L.forEach(x => { cc.off[x.st.id] = 1; delete cc.plan[x.st.id]; delete cc.sent[x.st.id]; }); redo(); });
   $$('.sc-in', v).forEach(b => b.addEventListener('change', () => { const id = b.dataset.sid; if (b.checked) delete C().off[id]; else { C().off[id] = 1; delete C().plan[id]; delete C().sent[id]; } redo(); }));
   $$('.sc-d', v).forEach(sel => sel.addEventListener('change', () => { const id = sel.dataset.sid; if (sel.value) C().plan[id] = sel.value; else delete C().plan[id]; delete C().sent[id]; redo(); }));
   $('#sc-go').addEventListener('click', () => {
