@@ -521,6 +521,21 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{.side,.top,.bar,.tools,.roster,.no-print{display:none!important} .shell{display:block} body{background:#fff}}
 /* ===== تقرير PDF: يُرسم خارج الشاشة بألوان ثابتة ثم يُحوَّل إلى صفحات (بلا ظلال box-shadow لأن أداة التحويل لا ترسمها بدقة) ===== */
+.btn.note{position:relative;background:linear-gradient(180deg,#F7FBFF,#E3EEFA);border:1.5px solid #8FB1DA;color:#1F4E86;box-shadow:inset 0 1px 0 #FFFFFF,0 3px 0 #B5CDEA}
+.btn.note:hover{background:linear-gradient(180deg,#EEF5FE,#D6E6F8)}
+.btn.note:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #FFFFFF,0 1px 0 #B5CDEA}
+.btn.note svg{width:19px;height:19px}
+.btn.note.has::after{content:"";position:absolute;top:-4px;inset-inline-end:-4px;width:12px;height:12px;border-radius:50%;background:#E0A21B;border:2px solid var(--surface)}
+:root[data-mode="dark"] .btn.note{background:linear-gradient(180deg,#16263A,#101C2B);border-color:#3D6597;color:#A9CBF3;box-shadow:0 3px 0 #1C3350}
+#note-dlg{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(8,22,18,.46);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#note-dlg .nd-box{width:min(520px,100%);display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh2);padding:20px}
+#note-dlg .nd-box > b{font-size:1.1rem;color:var(--ink)}
+#note-dlg .nd-box > small{color:var(--muted);margin-top:-6px}
+#note-dlg textarea{width:100%;box-sizing:border-box;min-height:150px;resize:vertical;padding:12px 14px;border:1px solid var(--line-2);border-radius:14px;background:var(--sunk);color:var(--ink);font:inherit;font-size:1rem;line-height:1.8}
+#note-dlg textarea:focus{outline:2px solid var(--accent);outline-offset:1px;background:var(--surface)}
+#note-dlg .nd-acts{display:flex;gap:10px;flex-wrap:wrap}
+#note-dlg .nd-acts .btn{min-height:44px}
+#note-dlg .nd-acts .sp{flex:1}
 .btn.pdf{background:linear-gradient(180deg,#FFFDF6,#F5EBD2);border:1.5px solid #D6B25E;color:#74540F;box-shadow:inset 0 1px 0 #FFFFFF,0 3px 0 #E0C886}
 .btn.pdf:hover{background:linear-gradient(180deg,#FFF8E4,#EFDDB2)}
 .btn.pdf:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #FFFFFF,0 1px 0 #E0C886}
@@ -666,6 +681,10 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 .rp-mn{flex:1;text-align:center;padding:6px 4px 5px;border-radius:14px;background:linear-gradient(180deg,#FFFFFF,#F5F0E4);border:1px solid #E9E1CE;border-bottom:3px solid #E2D9C3}
 .rp-mn small{display:block;font-size:0.7188rem;font-weight:600;color:#6E7F7A}
 .rp-mn b{display:block;font-size:1.1875rem;font-weight:700;color:#14302A;line-height:1.35}
+.rp-obs{padding:14px 22px 16px;background:linear-gradient(180deg,#F7FBFF,#EAF2FB);border-color:#C9DBEF;border-bottom-color:#AFC8E5}
+.rp-obs .rp-h b{color:#1F4E86}
+.rp-obs p{margin:0;font-size:0.9375rem;font-weight:500;line-height:1.85;color:#223A55;white-space:pre-line;overflow-wrap:anywhere}
+.rp-obs.clamp p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 .rp-note{display:flex;align-items:center;gap:16px;padding:16px 22px;background:linear-gradient(180deg,#FFFDF6,#F7EED8);border-color:#EBDDB5;border-bottom-color:#E0CC96}
 .rp-nico{flex:none;display:block;width:58px;height:58px}
 .rp-nico svg{display:block}
@@ -1143,7 +1162,7 @@ function rRecite() {
           <div class="stu-tools">
             <label class="fld f-date"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>تاريخ التقييم</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
             <div class="stu-acts">
-            <button class="btn pdf" id="r-pdf" title="تقرير تفصيلي عن تسميع الطالب في صفحتين">${PDF_ICON} تقرير PDF</button><button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>${sentBtn(sh, S.ui.student)}</div>
+            <button class="btn note${r.note ? ' has' : ''}" id="r-note" title="${r.note ? esc(r.note) : 'ملاحظات تُرفق في التقرير ورسالة الواتساب'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8.5 12h7M8.5 15.5h5"/></svg> ملاحظات</button><button class="btn pdf" id="r-pdf" title="تقرير تفصيلي عن تسميع الطالب في صفحتين">${PDF_ICON} تقرير PDF</button><button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>${sentBtn(sh, S.ui.student)}</div>
           </div>
         </div>
         <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
@@ -1176,6 +1195,7 @@ function rRecite() {
   $('#r-sdate').addEventListener('change', e => { rec().date = e.target.value || today(); changed(); });
   $('#r-wa').addEventListener('click', () => { const st = cls(sh.classId).students.find(x => x.id === S.ui.student); sendWA(st, sheetReport(sh, st)); });
   $('#r-pdf').addEventListener('click', () => reportPDF(sh, S.ui.student));
+  $('#r-note').addEventListener('click', openNote);
   $('#absent').addEventListener('click', e => {
     const r = rec(); r.absent = !r.absent;
     if (r.absent && !r.date) r.date = $('#r-sdate').value || today();
@@ -1281,6 +1301,37 @@ function undo() {
   save(true); rRecite(); toast('تم التراجع');
 }
 /* «تم إرسال الدرجة»: يحفظ الدرجة وقت الضغط ولا تتغير إلا بضغطة جديدة */
+/* زر «ملاحظات»: نص حر يُحفظ مع تسميع الطالب ويُرفق في التقرير ورسالة الواتساب */
+function closeNote() { const m = $('#note-dlg'); if (m) m.remove(); }
+function openNote() {
+  closeNote();
+  const st = cls(cur().classId).students.find(x => x.id === S.ui.student); if (!st) return;
+  const old = (cur().recs[S.ui.student] || {}).note || '';
+  const m = document.createElement('div');
+  m.id = 'note-dlg';
+  m.innerHTML = `<div class="nd-box" role="dialog" aria-label="ملاحظات"><b>ملاحظات عن ${esc(st.name)}</b><small>تُرفق في تقرير PDF ورسالة الواتساب</small>
+    <textarea id="nd-t" placeholder="اكتب ملاحظتك هنا…">${esc(old)}</textarea>
+    <div class="nd-acts"><button type="button" class="btn primary" data-a="save">حفظ</button>${old ? '<button type="button" class="btn danger" data-a="del">حذف الملاحظة</button>' : ''}<span class="sp"></span><button type="button" class="btn ghost" data-a="x">إلغاء</button></div></div>`;
+  document.body.appendChild(m);
+  const t = $('#nd-t', m); t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+  const put = v => {
+    const r = rec(), nv = v.trim();
+    if (nv === (r.note || '')) { closeNote(); return; }
+    if (nv) r.note = nv; else delete r.note;
+    closeNote(); changed();
+    const b = $('#r-note'); if (b) { b.classList.toggle('has', !!nv); b.title = nv || 'ملاحظات تُرفق في التقرير ورسالة الواتساب'; }
+    toast(nv ? 'حُفظت الملاحظة' : 'حُذفت الملاحظة');
+  };
+  m.addEventListener('click', e => {
+    if (e.target === m) { closeNote(); return; }
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    if (a.dataset.a === 'save') put(t.value); else if (a.dataset.a === 'del') put(''); else closeNote();
+  });
+  m.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.stopPropagation(); closeNote(); }
+    else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); put(t.value); }
+  });
+}
 function markSent() {
   const r = rec();
   r.sent = { v: r1(calc(cur(), S.ui.student).fin), a: !!r.absent, d: new Date().toLocaleDateString('ar-QA-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }) };
@@ -1770,6 +1821,8 @@ function sheetReport(sh, s) {
     L.push('🎤 درجة الشفوي: ' + k.oral + ' من 6');
     if (k.absent) L.push('⚠️ ملاحظة: الطالب لم يحفظ السورة.');
   }
+  const nt = ((sh.recs[s.id] || {}).note || '').trim();
+  if (nt) L.push('📝 ملاحظات المعلم:', nt);
   L.push('🔵🔵', '💡الدرجة قابلة للتعديل إذا تم التسميع مرةً أخرى.', '🌴مع تحيات ' + waCfg().sign);
   return L.join('\n');
 }
@@ -2242,7 +2295,7 @@ function repData(sh, sid) {
   const rk = rankMap(sh, studs), evs = studs.map(s => calc(sh, s.id)).filter(x => x.ev);
   const avg = evs.length ? evs.reduce((t, x) => t + x.fin, 0) / evs.length : null;
   const best = evs.length ? Math.max(...evs.map(x => x.fin)) : null;
-  return { c, st, r, k, errs, by, un: by.u.length, rank: rk[sid], evN: evs.length, avg, best };
+  return { c, st, r, k, errs, by, un: by.u.length, rank: rk[sid], evN: evs.length, avg, best, note: String(r.note || '').trim() };
 }
 function shade(hex, p) {
   const n = parseInt(hex.slice(1), 16), f = p < 0 ? 0 : 255, t = Math.abs(p);
@@ -2404,6 +2457,7 @@ function repP2(D, sh, o) {
   return `<section class="rp p2">${repHero(D, sh, 2)}<div class="rp-bd">
     <div class="rp-card"><div class="rp-h"><i></i><b>جدول أخطاء النطق</b>${D.errs.length ? `<em>مجموع الخصم <span class="rp-num">−${k.err}</span></em>` : '<span>كل كلمة خطأ تُخصم درجة من النسبة المئوية</span>'}</div>${eh}</div>
     <div class="rp-card"><div class="rp-h"><i></i><b>ملخص الأداء</b></div><p class="rp-msg${sm.ok ? ' ok' : ''}"${rec ? '' : ' style="margin:0"'}>${sm.t}</p>${rec ? `<div class="rp-rec">${rec}</div>` : ''}</div>
+    ${D.note ? `<div class="rp-card rp-obs${o.clamp ? ' clamp' : ''}"><div class="rp-h"><i></i><b>ملاحظات المعلم</b></div><p>${esc(D.note)}</p></div>` : ''}
     <div class="rp-card"><div class="rp-h"><i></i><b>كيف حُسبت الدرجة؟</b></div>
       <div class="rp-calc"><div class="rp-cc wd"><small>مجموع درجات الآيات</small><b>${k.sum} من ${2 * n}</b></div><span class="rp-ca">←</span>
         <div class="rp-cc"><small>النسبة المئوية</small><b>${fmt(k.pct)}%</b></div><span class="rp-ca">←</span>
@@ -2457,6 +2511,7 @@ async function repBuild(sh, sid) {
       if (st < steps.length - 1) { st++; continue; }
       if (max > 4) { max = Math.max(4, max - 2); continue; }
       if (!steps[st].chipMax) { steps[st] = Object.assign({}, steps[st], { chipMax: 14 }); continue; }
+      if (D.note && !steps[st].clamp) { steps[st] = Object.assign({}, steps[st], { clamp: true }); continue; }
       break;
     }
     await Promise.all($$('img', stage).map(im => im.decode ? im.decode().catch(() => {}) : null));
