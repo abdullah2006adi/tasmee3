@@ -192,7 +192,20 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .work{display:grid;grid-template-columns:290px minmax(0,1fr);gap:20px;align-items:start}
 .roster{position:sticky;top:calc(var(--hdr) + 16px);max-height:calc(100vh - var(--hdr) - 32px);overflow:auto;padding:0;scrollbar-width:thin}
 .rhead{display:flex;justify-content:space-between;align-items:baseline;padding:18px 18px 10px;position:sticky;top:0;background:var(--surface);z-index:1;border-bottom:1px solid var(--line)}
+.rhead{flex-wrap:wrap;row-gap:10px}
 .rhead b{font-size:1.15rem}
+.sq{position:relative;flex:1 1 100%}
+.sq input{width:100%;box-sizing:border-box;padding:9px 38px 9px 12px;border:1px solid var(--line-2);border-radius:12px;background:var(--sunk);color:var(--ink);font:inherit;font-size:.95rem;-webkit-appearance:none;appearance:none}
+.sq input:focus{outline:2px solid var(--accent);outline-offset:1px;background:var(--surface)}
+.sq svg{position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--muted);pointer-events:none}
+.sq-none{padding:14px 18px;color:var(--muted);font-size:.9rem;text-align:center}
+.sq-list{list-style:none;margin:6px 0 0;padding:6px;position:absolute;inset-inline:0;top:100%;z-index:30;background:var(--surface);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 40px -18px rgba(0,0,0,.45);max-height:min(60vh,360px);overflow:auto}
+.sq-list:empty{display:none}
+.sq-list button{width:100%;display:flex;gap:10px;align-items:center;text-align:right;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:700;padding:10px 12px;border-radius:10px;cursor:pointer}
+.sq-list button:hover,.sq-list button.hi{background:var(--accent-soft)}
+.sq-list small{color:var(--muted);font-weight:400;min-width:1.6em}
+.sq-list li.nf{padding:10px 12px;color:var(--muted)}
+.stu-pick .sq{margin-bottom:12px}
 .rhead small{color:var(--muted);font-size:.82rem}
 .roster ol{list-style:none;margin:0;padding:8px}
 .roster li button{position:relative;width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:right;border:0;background:transparent;padding:7px 10px;border-radius:12px;cursor:pointer;transition:background .12s}
@@ -1117,11 +1130,12 @@ function rRecite() {
     for (let a = sh.from; a <= sh.to; a++) rows += ayahRow(sh, r, a);
     html += `<div class="work">
       <aside class="panel roster" aria-label="قائمة الطلاب">
-        <div class="rhead"><b>الطلاب</b><small id="r-done">${doneTxt(sh, studs)}</small></div>
+        <div class="rhead"><b>الطلاب</b><small id="r-done">${doneTxt(sh, studs)}</small><div class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="r-q" type="search" placeholder="ابحث باسم الطالب…" aria-label="البحث عن طالب بالاسم" autocomplete="off"></div></div>
+        <p class="sq-none" id="r-qnone" hidden>لا يوجد طالب بهذا الاسم</p>
         <ol id="roster">${studs.map((s, i) => rosterItem(sh, s, i)).join('')}</ol>
       </aside>
       <section class="panel sheet">
-        <div class="stu-pick mobile-only"><label class="fld"><span>الطالب</span><select id="r-stu">${studs.map((s, i) => `<option value="${s.id}"${s.id === S.ui.student ? ' selected' : ''}>${i + 1}. ${esc(s.name)}</option>`).join('')}</select></label></div>
+        <div class="stu-pick mobile-only"><div class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="r-q2" type="search" placeholder="ابحث باسم الطالب…" aria-label="البحث عن طالب بالاسم" autocomplete="off"><ul class="sq-list" id="r-sug" role="listbox"></ul></div><label class="fld"><span>الطالب</span><select id="r-stu">${studs.map((s, i) => `<option value="${s.id}"${s.id === S.ui.student ? ' selected' : ''}>${i + 1}. ${esc(s.name)}</option>`).join('')}</select></label></div>
         ${st ? `
         <div class="stu-head">
           <div class="stu-title"><div><small>${esc(cname(c))} · سورة ${sname(sh.surah)} ${rangeTxt(sh)}</small><h2>${esc(st.name)}</h2></div>
@@ -1183,9 +1197,50 @@ function bindStudentPick(sh) {
   const pick = id => { S.ui.student = id; save(); rRecite(); const sp = $('.sheet'); if (sp && sp.getBoundingClientRect().top < 0) window.scrollTo(0, sp.getBoundingClientRect().top + window.scrollY - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hdr')) || 0) - 12); const s1 = $('#ayat .abtn'); if (s1 && !matchMedia('(max-width:900px)').matches) s1.focus({ preventScroll: true }); };
   const ro = $('#roster'); if (ro) ro.addEventListener('click', e => { const li = e.target.closest('li[data-s]'); if (li) pick(li.dataset.s); });
   const rs = $('#r-stu'); if (rs) rs.addEventListener('change', e => pick(e.target.value));
+  bindStuSearch(studs, pick);
   const pv = $('#prev'), nx = $('#next');
   if (pv) pv.addEventListener('click', () => idx > 0 && pick(studs[idx - 1].id));
   if (nx) nx.addEventListener('click', () => idx < studs.length - 1 && pick(studs[idx + 1].id));
+}
+/* البحث عن طالب بجزء من اسمه: يتجاهل التشكيل والهمزات والتاء المربوطة والألف المقصورة */
+const normAr = t => String(t || '').replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').replace(/[٠-٩]/g, d => AR.indexOf(d)).toLowerCase().replace(/\s+/g, ' ').trim();
+function stuMatch(studs, q) {
+  const w = normAr(q).split(' ').filter(Boolean);
+  if (!w.length) return null;
+  return studs.map((s, i) => ({ s, i })).filter(({ s, i }) => { const n = normAr(s.name), nc = n.replace(/ /g, ''); return w.every(x => n.includes(x) || nc.includes(x) || String(i + 1) === x); });
+}
+function bindStuSearch(studs, pick) {
+  const q = $('#r-q'), ro = $('#roster'), none = $('#r-qnone');
+  if (q && ro) {
+    const run = () => {
+      const m = stuMatch(studs, q.value), ids = m && new Set(m.map(x => x.s.id));
+      $$('#roster li[data-s]').forEach(li => { li.hidden = !!ids && !ids.has(li.dataset.s); });
+      if (none) none.hidden = !(m && !m.length);
+    };
+    q.addEventListener('input', run);
+    q.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); const m = stuMatch(studs, q.value); if (m && m.length) pick(m[0].s.id); }
+      else if (e.key === 'Escape') { q.value = ''; run(); }
+    });
+  }
+  const q2 = $('#r-q2'), sug = $('#r-sug');
+  if (q2 && sug) {
+    let hi = 0, list = [];
+    const draw = () => {
+      const m = stuMatch(studs, q2.value); list = m || []; hi = Math.min(hi, Math.max(list.length - 1, 0));
+      sug.innerHTML = !m ? '' : m.length ? m.slice(0, 30).map((x, k) => `<li><button type="button" role="option" data-s="${x.s.id}"${k === hi ? ' class="hi"' : ''}><small>${x.i + 1}.</small>${esc(x.s.name)}</button></li>`).join('') : '<li class="nf">لا يوجد طالب بهذا الاسم</li>';
+    };
+    q2.addEventListener('input', () => { hi = 0; draw(); });
+    q2.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (list.length) { hi = (hi + (e.key === 'ArrowDown' ? 1 : -1) + list.length) % list.length; draw(); } }
+      else if (e.key === 'Enter') { e.preventDefault(); if (list[hi]) pick(list[hi].s.id); }
+      else if (e.key === 'Escape') { q2.value = ''; draw(); }
+    });
+    sug.addEventListener('mousedown', e => e.preventDefault());
+    sug.addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (b) pick(b.dataset.s); });
+    q2.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== q2) sug.innerHTML = ''; }, 150));
+    q2.addEventListener('focus', draw);
+  }
 }
 function chipsHtml(cid) {
   const list = S.sheets.filter(s => s.classId === cid);
