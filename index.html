@@ -1164,7 +1164,7 @@ function rRecite() {
           <div class="stu-tools">
             <label class="fld f-date"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>تاريخ التقييم</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
             <div class="stu-acts">
-            <button class="btn note${r.note ? ' has' : ''}" id="r-note" title="${r.note ? esc(r.note) : 'ملاحظات تُرفق في التقرير ورسالة الواتساب'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8.5 12h7M8.5 15.5h5"/></svg> ملاحظات</button><button class="btn pdf" id="r-pdf" title="تقرير تفصيلي عن تسميع الطالب في صفحتين">${PDF_ICON} تقرير PDF</button><button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>${sentBtn(sh, S.ui.student)}</div>
+            <button class="btn note${r.note ? ' has' : ''}" id="r-note" title="${r.note ? esc(r.note) : 'ملاحظات تُرفق في التقرير ورسالة الواتساب'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8.5 12h7M8.5 15.5h5"/></svg> ملاحظات</button><button class="btn pdf" id="r-pdf" title="تقرير تفصيلي عن تسميع الطالب">${PDF_ICON} تقرير PDF</button><button class="btn wa" id="r-wa">${WA_ICON} إرسال للواتساب</button>${sentBtn(sh, S.ui.student)}</div>
           </div>
         </div>
         <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
@@ -2370,7 +2370,7 @@ function repHero(D, sh, p) {
     <div class="rp-date"><div class="rp-sur">سورة ${esc(sname(sh.surah))}</div><i>${esc(cname(D.c))}</i></div></div></header>`;
 }
 function repFoot(p) {
-  return `<footer class="rp-ft"><b>كشف التسميع</b><span>·</span><span>أُعدّ التقرير في ${esc(repDate(today()).d)}</span><span class="pg">صفحة ${p} من 2</span></footer>`;
+  return `<footer class="rp-ft"><b>كشف التسميع</b><span>·</span><span>أُعدّ التقرير في ${esc(repDate(today()).d)}</span><span class="pg">صفحة <span class="pgn">${p}</span> من <span class="pgt">${p}</span></span></footer>`;
 }
 function repP1(D, sh, cell) {
   const k = D.k, n = k.n, B = REP_BAND[k.g.key];
@@ -2435,15 +2435,15 @@ function repP2(D, sh, o) {
     ? `<div class="rp-none">${REP_SVG.ok}<div><b>لا توجد أخطاء نطق</b><span>أتقن الطالب نطق كلمات الآيات التي سمّعها.</span></div></div>`
     : `<div class="rp-none nil"><div><b>لا توجد أخطاء نطق مسجّلة</b><span>لم يسمّع الطالب آيات في هذا التقييم.</span></div></div>`;
   else {
-    const list = D.errs.slice(0, o.max), rest = D.errs.length - list.length, two = o.cols === 2 && list.length > 1;
+    const a0 = o.eFrom || 0, list = D.errs.slice(a0, o.eTo == null ? D.errs.length : o.eTo), two = o.cols === 2 && list.length > 1;
     const row = (e, i) => `<tr><td>${i + 1}</td><td><span class="rp-an">${e.a}</span></td>${e.w
       ? `<td class="qw">${esc(e.w)}</td><td class="${e.x ? 'sw' : 'mu'}">${e.x ? esc(e.x) : '—'}</td>`
       : `<td class="mu">—</td><td class="nt">${esc(e.x)}</td>`}<td><span class="rp-dd">−${e.n}</span></td></tr>`;
     const hd = two ? ['م', 'الآية', 'في المصحف', 'كما قرأها', 'الخصم'] : ['م', 'الآية', 'الكلمة كما في المصحف', 'كما قرأها الطالب', 'الخصم'];
-    const tbl = (rows, off) => `<table class="rp-tb${o.cmp ? ' cmp' : ''}"><thead><tr>${hd.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e, i) => row(e, i + off)).join('')}</tbody></table>`;
+    const tbl = (rows, off) => (off += a0, `<table class="rp-tb${o.cmp ? ' cmp' : ''}"><thead><tr>${hd.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e, i) => row(e, i + off)).join('')}</tbody></table>`);
     if (two) { const h = Math.ceil(list.length / 2); eh = `<div class="rp-tw">${tbl(list.slice(0, h), 0)}${tbl(list.slice(h), h)}</div>`; }
     else eh = tbl(list, 0);
-    if (rest > 0) eh += `<p class="rp-more">عدد الأخطاء غير المعروضة هنا ${rest}، وتجدها كاملةً في كشف التسميع.</p>`;
+    if (o.eTo != null && o.eTo < D.errs.length) eh += `<p class="rp-more">يتبع جدول الأخطاء في الصفحة التالية ←</p>`;
   }
   const sm = repSummary(D);
   const CM = o.chipMax || 44, chips = (arr, v) => arr.slice(0, CM).map(a => `<span class="rp-ach v${v}">${a}</span>`).join('') + (arr.length > CM ? `<span class="rp-ach vu rp-num">+${arr.length - CM}</span>` : '');
@@ -2460,8 +2460,8 @@ function repP2(D, sh, o) {
       <div class="rp-mn"><small>متوسط الشعبة</small><b>${D.avg == null ? '—' : fmt(D.avg)}</b></div>
       <div class="rp-mn"><small>أعلى درجة في الشعبة</small><b>${D.best == null ? '—' : fmt(D.best)}</b></div></div></div>`;
   return `<section class="rp p2">${repHero(D, sh, 2)}<div class="rp-bd">
-    <div class="rp-card"><div class="rp-h"><i></i><b>جدول أخطاء النطق</b>${D.errs.length ? `<em>مجموع الخصم <span class="rp-num">−${k.err}</span></em>` : '<span>كل كلمة خطأ تُخصم درجة من النسبة المئوية</span>'}</div>${eh}</div>
-    <div class="rp-card"><div class="rp-h"><i></i><b>ملخص الأداء</b></div><p class="rp-msg${sm.ok ? ' ok' : ''}"${rec ? '' : ' style="margin:0"'}>${sm.t}</p>${rec ? `<div class="rp-rec">${rec}</div>` : ''}</div>
+    ${o.head === false ? '' : `<div class="rp-card"><div class="rp-h"><i></i><b>جدول أخطاء النطق${o.eFrom ? ' (تتمة)' : ''}</b>${D.errs.length ? `<em>مجموع الخصم <span class="rp-num">−${k.err}</span></em>` : '<span>كل كلمة خطأ تُخصم درجة من النسبة المئوية</span>'}</div>${eh}</div>`}
+    ${o.tail === false ? '' : `<div class="rp-card"><div class="rp-h"><i></i><b>ملخص الأداء</b></div><p class="rp-msg${sm.ok ? ' ok' : ''}"${rec ? '' : ' style="margin:0"'}>${sm.t}</p>${rec ? `<div class="rp-rec">${rec}</div>` : ''}</div>
     ${D.note ? `<div class="rp-card rp-obs${o.clamp ? ' clamp' : ''}"><div class="rp-h"><i></i><b>ملاحظات المعلم</b></div><p>${esc(D.note)}</p></div>` : ''}
     <div class="rp-card"><div class="rp-h"><i></i><b>كيف حُسبت الدرجة؟</b></div>
       <div class="rp-calc"><div class="rp-cc wd"><small>مجموع درجات الآيات</small><b>${k.sum} من ${2 * n}</b></div><span class="rp-ca">←</span>
@@ -2472,7 +2472,7 @@ function repP2(D, sh, o) {
       <div class="rp-sc"><div class="rp-pin" style="right:clamp(0px,calc(${pos}% - 32px),calc(100% - 64px))"><b>${fmt(f)}</b><i></i></div>
         <div class="rp-trk">${seg.map(s => `<i style="width:${s[1]}%;background:linear-gradient(180deg,${shade(s[2], 0.25)},${s[2]})"></i>`).join('')}</div>
         <div class="rp-lb">${seg.map(s => `<span style="width:${s[1]}%">${s[0]}</span>`).join('')}</div></div>${cmp}</div>
-    ${o.msg ? `<div class="rp-card rp-note"><span class="rp-nico">${REP_SVG.book}</span><div><b>رسالة المعلم</b><p>${REP_MSG[k.absent ? 'weak' : D.un ? 'part' : k.g.key]}</p></div></div>` : ''}
+    ${o.msg ? `<div class="rp-card rp-note"><span class="rp-nico">${REP_SVG.book}</span><div><b>رسالة المعلم</b><p>${REP_MSG[k.absent ? 'weak' : D.un ? 'part' : k.g.key]}</p></div></div>` : ''}`}
   </div>${repFoot(2)}</section>`;
 }
 const repOver = pg => {
@@ -2485,7 +2485,7 @@ async function repFonts() {
   await Promise.race([Promise.all(L).catch(() => {}), new Promise(r => setTimeout(r, 6000))]);
 }
 const repClean = x => String(x).replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim();
-/* يبني صفحتي التقرير خارج الشاشة ويضبطهما حتى لا تتجاوزا صفحتين */
+/* يبني صفحات التقرير خارج الشاشة: صفحتان عادةً، ويمتد جدول الأخطاء على صفحات إضافية إذا كثرت الأخطاء */
 async function repBuild(sh, sid) {
   $$('#rep-stage').forEach(x => x.remove()); document.documentElement.classList.remove('rp-printing');
   const D = repData(sh, sid), stage = document.createElement('div');
@@ -2507,18 +2507,44 @@ async function repBuild(sh, sid) {
       i1++;
     }
     const steps = [{ cols: 1, msg: true }, { cols: 1 }, { cols: 2 }, { cols: 2, cmp: true }, { cols: 2, cmp: true, noCmp: true }];
-    let p2 = null, st = 0, max = D.errs.length;
-    for (;;) {
-      if (p2) p2.remove();
-      stage.insertAdjacentHTML('beforeend', repP2(D, sh, Object.assign({ max }, steps[st])));
-      p2 = stage.lastElementChild;
-      if (!repOver(p2)) break;
-      if (st < steps.length - 1) { st++; continue; }
-      if (max > 4) { max = Math.max(4, max - 2); continue; }
-      if (!steps[st].chipMax) { steps[st] = Object.assign({}, steps[st], { chipMax: 14 }); continue; }
-      if (D.note && !steps[st].clamp) { steps[st] = Object.assign({}, steps[st], { clamp: true }); continue; }
-      break;
+    const add = o => { stage.insertAdjacentHTML('beforeend', repP2(D, sh, o)); return stage.lastElementChild; };
+    /* يجرّب كل الخطوات حتى تتسع الصفحة؛ يعيد الصفحة المناسبة أو null */
+    const fit = base => {
+      for (let st = 0; st < steps.length; st++) {
+        let o = Object.assign({}, steps[st], base), pg = add(o);
+        if (!repOver(pg)) return pg;
+        pg.remove();
+        if (st === steps.length - 1) {
+          for (const extra of [{ chipMax: 14 }, D.note ? { chipMax: 14, clamp: true } : null]) {
+            if (!extra) continue;
+            pg = add(Object.assign(o, extra)); if (!repOver(pg)) return pg; pg.remove();
+          }
+        }
+      }
+      return null;
+    };
+    const N = D.errs.length;
+    if (!fit({})) {
+      /* أخطاء كثيرة: كل الأخطاء تظهر، ويمتد الجدول على صفحات إضافية */
+      const ecols = { cols: 2, cmp: true };
+      let a0 = 0;
+      while (a0 < N) {
+        let lo = 1, hi = N - a0, best = 1;
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1, pg = add(Object.assign({ tail: false, eFrom: a0, eTo: a0 + mid }, ecols));
+          if (!repOver(pg)) { best = mid; lo = mid + 1; } else hi = mid - 1;
+          pg.remove();
+        }
+        const last = a0 + best >= N;
+        let pg = null;
+        if (last) pg = fit({ eFrom: a0, eTo: N, cols: 2 }); // آخر جزء من الجدول مع بقية البطاقات إن اتسعت
+        if (!pg) add(Object.assign({ tail: false, eFrom: a0, eTo: a0 + best }, ecols));
+        a0 += best;
+        if (last && !pg) { if (!fit({ head: false })) add(Object.assign({ head: false }, steps[steps.length - 1], { chipMax: 14, clamp: true })); }
+      }
     }
+    const all = $$('.rp', stage);
+    all.forEach((pg, i) => { const n = $('.pgn', pg), t = $('.pgt', pg); if (n) n.textContent = i + 1; if (t) t.textContent = all.length; });
     await Promise.all($$('img', stage).map(im => im.decode ? im.decode().catch(() => {}) : null));
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     return { D, stage };
