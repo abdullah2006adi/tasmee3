@@ -257,6 +257,8 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 
 
 /* شريط الدرجة الثابت */
+/* غطاء شريط الحالة في الآيباد والآيفون حتى لا يظهر النص من خلفه فوق شريط الدرجة */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:45;pointer-events:none}
 .sbar{position:sticky;top:var(--hdr);z-index:4;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:stretch;margin:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh2);overflow:hidden}
 .sb-name{padding:10px 18px;display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;min-width:0}
 .sb-name small,.sb-cell small,.sb-grade small{font-size:.76rem;color:var(--muted);display:block;line-height:1.25}
