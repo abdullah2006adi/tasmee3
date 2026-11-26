@@ -1705,7 +1705,12 @@ function applyRemote() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
   const a = document.activeElement;
   if (a && a.closest && a.closest('main') && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) { SY.pending = true; return; }
-  SY.pending = false; render();
+  SY.pending = false;
+  /* إعادة الرسم بعد وصول تحديث من جهاز آخر لا تحرّك الصفحة: نحفظ موضع التمرير ونعيده */
+  const y = window.scrollY, ro = $('.roster'), ry = ro ? ro.scrollTop : 0;
+  render();
+  const back = () => { if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y); const r2 = $('.roster'); if (r2 && ry && Math.abs(r2.scrollTop - ry) > 2) r2.scrollTop = ry; };
+  back(); requestAnimationFrame(back); setTimeout(back, 60);
 }
 document.addEventListener('focusout', () => setTimeout(() => {
   if (!SY.pending) return;
@@ -1730,13 +1735,13 @@ async function startSync(user, quiet) {
     SY.unsub.push(FS.onSnapshot(FS.doc(db, 'tasmee3', uid), snap => {
       if (snap.metadata && snap.metadata.hasPendingWrites) return;
       if (!snap.exists()) return;
-      const d = snap.data(); if (JSON.stringify(d.classes || []) === JSON.stringify(S.classes.filter(c => !c.demo)) && delKey(d.deleted) === delKey(S.deleted) && JSON.stringify(d.wa || null) === JSON.stringify(S.wa || null) && canon(d.sched || null) === canon(S.sched || null)) return;
+      const d = snap.data(); if (canon(d.classes || []) === canon(S.classes.filter(c => !c.demo)) && delKey(d.deleted) === delKey(S.deleted) && canon(d.wa || null) === canon(S.wa || null) && canon(d.sched || null) === canon(S.sched || null)) return;
       collectDirty(); mergeRemote(d, [], false); applyRemote(); syncSchedule();
     }, e => setSync('err', fbErr(e))));
     SY.unsub.push(FS.onSnapshot(FS.collection(db, 'tasmee3', uid, 'sheets'), snap => {
       /* skip only this device's own pending docs, so another device's change arriving meanwhile is not lost */
       const ch = snap.docChanges().filter(c => c.type !== 'removed' && !(c.doc.metadata && c.doc.metadata.hasPendingWrites)).map(c => c.doc.data())
-        .filter(rs => { const ls = S.sheets.find(x => x.id === rs.id); return !ls || JSON.stringify(ls) !== JSON.stringify(rs); });
+        .filter(rs => { const ls = S.sheets.find(x => x.id === rs.id); return !ls || canon(ls) !== canon(rs); });
       if (!ch.length) return;
       collectDirty(); mergeRemote(null, ch, false); applyRemote(); syncSchedule();
     }, e => setSync('err', fbErr(e))));
