@@ -733,6 +733,85 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 :root[data-mode="dark"] #rep-menu .rm-btns button:not(.wa){background:linear-gradient(180deg,#2B2616,#1F1B0F);border-color:#8C7130;color:#EBCB7A;box-shadow:0 6px 0 #4A3C18}
 /* ===== نهاية التقرير ===== */
 
+
+/* ===== شريط علوي رفيع بدل الشريط الجانبي ===== */
+:root{--nav-h:0px}
+.shell{display:block}
+.side{position:sticky;top:0;height:auto;min-height:0;flex-direction:row;align-items:center;gap:18px;padding:6px max(20px,env(safe-area-inset-right,0px)) 6px max(20px,env(safe-area-inset-left,0px));padding-top:calc(6px + env(safe-area-inset-top,0px));border-radius:0;box-shadow:0 6px 18px -12px rgba(0,0,0,.5);inset:auto;z-index:40}
+.side::after{display:none}
+.brand{display:flex;padding:0;gap:9px;flex:none}
+.brand .logo{width:34px;height:34px;border-radius:10px}
+.brand h1{display:block;font-size:1.12rem;white-space:nowrap}
+.tabs{flex-direction:row;gap:2px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;width:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;width:auto;flex-direction:row;gap:7px;padding:7px 12px;font-size:.95rem;border-radius:11px;white-space:nowrap}
+.tab svg{width:19px;height:19px}
+.tab[aria-selected="true"]::before{inset-inline-start:22%;inset-inline-end:22%;top:auto;bottom:-6px;width:auto;height:3px;border-radius:3px 3px 0 0}
+.side-tools{display:flex;align-items:center;gap:8px;flex:none}
+.side #saved{color:#A9CFC5}
+.side #sync{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#E4F0EC;box-shadow:none;padding:4px 12px;font-size:.82rem}
+.side #sync[data-state="off"]{color:#F3D58A;border-color:rgba(243,213,138,.6)} .side #sync[data-state="off"] i{background:#F3D58A}
+.side #sync[data-state="err"]{color:#FFB4A6;border-color:#FFB4A6} .side #sync[data-state="err"] i{background:#FFB4A6}
+.tb-btn,.side #theme{flex:none;width:36px;height:36px;border-radius:11px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#E4F0EC;display:inline-grid;place-items:center;cursor:pointer;box-shadow:none;padding:0}
+.tb-btn:hover,.side #theme:hover{background:rgba(255,255,255,.16);border-color:var(--gold-2);color:#fff}
+.tb-btn svg,.side #theme svg{width:19px;height:19px}
+.tb-btn:active svg{transform:rotate(120deg);transition:transform .25s}
+main{padding-block:16px 64px}
+body{padding-bottom:0}
+@media (max-width:1180px){
+  .side{align-items:center;gap:12px;padding-block:6px}
+  .brand h1{display:none}
+  .tab{flex-direction:row;width:auto;font-size:.88rem;padding:7px 10px;gap:6px}
+}
+@media (max-width:760px){
+  .side{position:sticky;inset:auto;top:0;flex-direction:row;padding:calc(4px + env(safe-area-inset-top,0px)) 10px 4px;gap:6px;border-radius:0;box-shadow:0 6px 18px -12px rgba(0,0,0,.5)}
+  .brand{display:none}
+  .tabs{flex-direction:row;gap:0}
+  .tab{flex:1 0 auto;flex-direction:column;gap:1px;padding:5px 7px 4px;font-size:.7rem;border-radius:10px}
+  .tab svg{width:20px;height:20px}
+  .tab[aria-selected="true"]::before{bottom:-4px;top:auto}
+  .side #saved{display:none}
+  .side #sync{padding:0;width:32px;height:32px;justify-content:center;font-size:0;gap:0}
+  .side #sync i{width:10px;height:10px}
+  .side-tools{gap:5px}
+  .tab{flex:1 1 0;min-width:0;padding:5px 2px 4px;font-size:.66rem}
+  .tab span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .panel.bar.slim{padding:8px}
+  .bar.slim .fi,.bar.slim .fi.grow{flex:1 1 100%}
+  .bar.slim .fi.sm{flex:1 1 0}
+  .bar.slim > .btn.primary{flex:1 1 0;padding-inline:8px}
+  .tb-btn,.side #theme{width:32px;height:32px;border-radius:10px}
+  body{padding-bottom:0}
+  main{padding-block:12px 30px}
+}
+/* شريط الشعبة والسورة الرفيع */
+.panel.bar.slim{padding:8px 12px;gap:8px;align-items:center;flex-wrap:wrap}
+.bar.slim .fi{display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 150px;background:var(--sunk);border:1px solid var(--line-2);border-radius:11px;padding:0 4px 0 0;padding-inline-start:10px}
+.bar.slim .fi.grow{flex:2 1 220px}
+.bar.slim .fi.sm{flex:0 1 112px}
+.bar.slim .fi > span{font-size:.8rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.bar.slim .fi select,.bar.slim .fi input{flex:1;min-width:0;border:0;background:transparent;height:36px;padding:0 6px;font-size:.95rem}
+.bar.slim .fi select:focus,.bar.slim .fi input:focus{outline:none}
+.bar.slim .fi:focus-within{border-color:var(--accent);box-shadow:var(--ring)}
+.bar.slim > .btn.primary{min-height:38px;padding:6px 18px}
+.bar.slim .chips{margin-top:2px;padding-top:8px}
+/* الكشوف المحفوظة: قائمة منسدلة مكان اسم الشعبة والسورة */
+.sh-pick{display:inline-flex;align-items:center;gap:6px;max-width:100%}
+.sh-pick select{border:1px solid var(--line-2);background:var(--sunk);color:var(--ink-2);border-radius:10px;padding:4px 10px;font-size:.9rem;font-weight:700;max-width:100%;min-width:0;cursor:pointer}
+.sh-pick select:hover{border-color:var(--accent)}
+.stu-tools .f-date > span{display:none}
+/* طي قائمة الطلاب */
+.rfold{border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:10px;width:32px;height:32px;display:inline-grid;place-items:center;cursor:pointer;flex:none;padding:0}
+.rfold:hover{border-color:var(--accent);color:var(--accent)}
+.rfold svg{width:18px;height:18px}
+.rhead .rfold{margin-inline-start:auto}
+.rhead small{margin-inline-start:8px}
+.work.folded{grid-template-columns:minmax(0,1fr)}
+.work.folded .roster{display:none}
+.unfold{display:none;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:10px;padding:5px 12px;font-weight:700;font-size:.88rem;cursor:pointer}
+.unfold svg{width:17px;height:17px}
+.work.folded .unfold{display:inline-flex}
+@media (max-width:900px){ .rfold,.work.folded .unfold{display:none} }
 </style>
 <script>(function(){var m;try{m=localStorage.getItem('tasmee3-theme')}catch(e){}if(m==='light'||m==='dark')document.documentElement.dataset.theme=m;var d=m?m==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.mode=d?'dark':'light'})()</script>
 </head>
@@ -741,27 +820,18 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 
 <div class="shell">
 <aside class="side">
-  <div class="brand"><img class="logo" src="icon-192.png" alt="" width="52" height="52"><div><h1>كشف التسميع</h1><small>درجتان لكل آية · كل خطأ نطق ينقص درجة</small></div></div>
+  <div class="brand"><img class="logo" src="icon-192.png" alt="" width="34" height="34"><h1>كشف التسميع</h1></div>
   <nav class="tabs" role="tablist" aria-label="أقسام الموقع">
-    <span class="navlbl">القائمة</span>
     <button class="tab" role="tab" data-tab="recite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5v13"/></svg><span>التسميع</span></button>
     <button class="tab" role="tab" data-tab="results"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M9.5 9.5v10M15 9.5v10"/></svg><span>النتائج</span></button>
     <button class="tab" role="tab" data-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><rect x="5.5" y="11" width="3" height="6.5" rx="1"/><rect x="10.5" y="7" width="3" height="10.5" rx="1"/><rect x="15.5" y="13" width="3" height="4.5" rx="1"/></svg><span>إحصاء الشُّعب</span></button>
     <button class="tab" role="tab" data-tab="sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/></svg><span>المواعيد</span></button>
     <button class="tab" role="tab" data-tab="classes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.9-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.8 14.2c2.3.2 4 1.8 4.7 4.8"/></svg><span>الشُّعب</span></button>
   </nav>
-  <div class="side-foot"><b>النص القرآني</b>بالرسم العثماني من مشروع تنزيل (tanzil.net)</div>
+  <div class="side-tools"><span id="saved">محفوظ</span><button type="button" id="sync" data-state="off"><i></i><span>تفعيل المزامنة</span></button><button type="button" id="reload" class="tb-btn" aria-label="تحديث الصفحة" title="تحديث الصفحة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 1 17.7 6"/><path d="M20 4.5V9h-4.5"/></svg></button><button type="button" id="theme" aria-label="الوضع النهاري أو الليلي" title="الوضع النهاري / الليلي"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button></div>
 </aside>
 <div class="main-col">
-<header class="top">
-  <div class="wrap">
-    <img class="mlogo" src="icon-192.png" alt="" width="38" height="38">
-    <div class="page"><h2 id="pgTitle">التسميع</h2><p id="pgSub"></p></div>
-    <span id="saved">محفوظ</span>
-    <button type="button" id="sync" data-state="off"><i></i><span>تفعيل المزامنة</span></button>
-    <button type="button" id="theme" aria-label="الوضع النهاري أو الليلي" title="الوضع النهاري / الليلي"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
-  </div>
-</header>
+<div class="page" hidden><h2 id="pgTitle"></h2><p id="pgSub"></p></div>
 
 <main class="wrap">
   <div id="demo-banner" class="banner" hidden>تظهر الآن شعب <b>مثال</b> لتجربة الأداة. احذفها من تبويب «الشُّعب» بعد إضافة شعبك.</div>
@@ -912,7 +982,7 @@ function download(blob, name) {
 }
 function setHdr() {
   const root = document.documentElement.style;
-  root.setProperty('--hdr', $('.top').offsetHeight + 'px');
+  root.setProperty('--hdr', (matchMedia('(max-width:760px)').matches ? $('.side').offsetHeight : $('.side').offsetHeight) + 'px');
   const b = $('#sbar'); root.setProperty('--bar', (b ? b.offsetHeight : 0) + 'px');
 }
 window.addEventListener('resize', setHdr);
@@ -1142,13 +1212,13 @@ function rRecite() {
   const selS = sh ? sh.surah : (S.ui.lastSurah || 64);
   const total = Q[selS - 1][1].length;
 
-  let html = `<section class="panel bar">
-      <label class="fld"><span>الشعبة</span><select id="r-class">${S.classes.map(c => `<option value="${c.id}"${c.id === selC ? ' selected' : ''}>${esc(cname(c))}</option>`).join('')}</select></label>
-      <label class="fld grow"><span>السورة</span><select id="r-surah">${Q.map((s, i) => `<option value="${i + 1}"${i + 1 === selS ? ' selected' : ''}>${i + 1}. ${s[0]} (${s[1].length} آية)</option>`).join('')}</select></label>
-      <label class="fld sm"><span>من آية</span><input id="r-from" type="number" inputmode="numeric" min="1" max="${total}" value="${sh ? sh.from : 1}"></label>
-      <label class="fld sm"><span>إلى آية</span><input id="r-to" type="number" inputmode="numeric" min="1" max="${total}" value="${sh ? sh.to : total}"></label>
+  let html = `<section class="panel bar slim">
+      <label class="fi"><span>الشعبة</span><select id="r-class">${S.classes.map(c => `<option value="${c.id}"${c.id === selC ? ' selected' : ''}>${esc(cname(c))}</option>`).join('')}</select></label>
+      <label class="fi grow"><span>السورة</span><select id="r-surah">${Q.map((s, i) => `<option value="${i + 1}"${i + 1 === selS ? ' selected' : ''}>${i + 1}. ${s[0]} (${s[1].length} آية)</option>`).join('')}</select></label>
+      <label class="fi sm"><span>من آية</span><input id="r-from" type="number" inputmode="numeric" min="1" max="${total}" value="${sh ? sh.from : 1}"></label>
+      <label class="fi sm"><span>إلى آية</span><input id="r-to" type="number" inputmode="numeric" min="1" max="${total}" value="${sh ? sh.to : total}"></label>
       <button class="btn primary" id="r-open">فتح الكشف</button>
-      <div class="chips" id="r-chips">${chipsHtml(selC)}</div>
+      ${sh ? '' : `<div class="chips" id="r-chips">${chipsHtml(selC)}</div>`}
     </section>`;
 
   if (sh) {
@@ -1158,16 +1228,16 @@ function rRecite() {
     const r = (st && sh.recs[st.id]) || { s: {}, e: {} };
     let rows = '';
     for (let a = sh.from; a <= sh.to; a++) rows += ayahRow(sh, r, a);
-    html += `<div class="work">
+    html += `<div class="work${S.ui.rosterFold ? ' folded' : ''}">
       <aside class="panel roster" aria-label="قائمة الطلاب">
-        <div class="rhead"><b>الطلاب</b><small id="r-done">${doneTxt(sh, studs)}</small><div class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input class="sq-in" type="search" placeholder="ابحث عن طالب في كل الشعب…" aria-label="البحث عن طالب بالاسم في كل الشعب" autocomplete="off"><ul class="sq-list" role="listbox"></ul></div></div>
+        <div class="rhead"><b>الطلاب</b><small id="r-done">${doneTxt(sh, studs)}</small><button type="button" class="rfold" id="r-fold" title="طي قائمة الطلاب" aria-label="طي قائمة الطلاب"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M14.5 4.5v15"/><path d="m9 10 2 2-2 2"/></svg></button><div class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input class="sq-in" type="search" placeholder="ابحث عن طالب في كل الشعب…" aria-label="البحث عن طالب بالاسم في كل الشعب" autocomplete="off"><ul class="sq-list" role="listbox"></ul></div></div>
         <ol id="roster">${studs.map((s, i) => rosterItem(sh, s, i)).join('')}</ol>
       </aside>
       <section class="panel sheet">
         <div class="stu-pick mobile-only"><div class="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input class="sq-in" type="search" placeholder="ابحث عن طالب في كل الشعب…" aria-label="البحث عن طالب بالاسم في كل الشعب" autocomplete="off"><ul class="sq-list" role="listbox"></ul></div><label class="fld"><span>الطالب</span><select id="r-stu">${studs.map((s, i) => `<option value="${s.id}"${s.id === S.ui.student ? ' selected' : ''}>${i + 1}. ${esc(s.name)}</option>`).join('')}</select></label></div>
         ${st ? `
         <div class="stu-head">
-          <div class="stu-title"><div><small>${esc(cname(c))} · سورة ${sname(sh.surah)} ${rangeTxt(sh)}</small><h2>${esc(st.name)}</h2></div>
+          <div class="stu-title"><div><span class="sh-pick"><button type="button" class="unfold" id="r-unfold" title="إظهار قائمة الطلاب"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M14.5 4.5v15"/><path d="m11 10-2 2 2 2"/></svg> الطلاب</button><select id="r-shpick" aria-label="الكشوف المحفوظة" title="الكشوف المحفوظة لهذه الشعبة">${S.sheets.filter(x => x.classId === sh.classId).map(x => `<option value="${x.id}"${x.id === sh.id ? ' selected' : ''}>${esc(cname(c))} · سورة ${esc(sname(x.surah))} ${esc(rangeTxt(x))}</option>`).join('')}</select></span><h2>${esc(st.name)}</h2></div>
             <div class="nav"><button class="btn ghost" id="prev"${idx <= 0 ? ' disabled' : ''}>→ السابق</button><button class="btn ghost" id="next"${idx >= studs.length - 1 ? ' disabled' : ''}>التالي ←</button></div></div>
           <div class="stu-tools">
             <label class="fld f-date"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>تاريخ التقييم</span><input id="r-sdate" type="date" value="${r.date || today()}"></label>
@@ -1190,7 +1260,7 @@ function rRecite() {
   v.innerHTML = html;
   setHdr();
 
-  $('#r-class').addEventListener('change', e => { S.ui.lastClass = e.target.value; $('#r-chips').innerHTML = chipsHtml(e.target.value); bindChips(); save(); });
+  $('#r-class').addEventListener('change', e => { S.ui.lastClass = e.target.value; const ch = $('#r-chips'); if (ch) { ch.innerHTML = chipsHtml(e.target.value); bindChips(); } save(); });
   $('#r-surah').addEventListener('change', e => {
     const n = +e.target.value, t = Q[n - 1][1].length;
     S.ui.lastSurah = n;
@@ -1199,6 +1269,9 @@ function rRecite() {
   });
   $('#r-open').addEventListener('click', openSheet);
   bindChips();
+  { const sp = $('#r-shpick'); if (sp) sp.addEventListener('change', e => { S.ui.sheet = e.target.value; S.ui.student = null; save(); rRecite(); }); }
+  { const f = $('#r-fold'), u = $('#r-unfold'), set = on => { S.ui.rosterFold = on; save(); const w = $('.work'); if (w) w.classList.toggle('folded', on); };
+    if (f) f.addEventListener('click', () => set(true)); if (u) u.addEventListener('click', () => set(false)); }
   bindStuSearch();
   if (!sh || !$('#ayat')) { bindStudentPick(sh); return; }
   bindStudentPick(sh);
@@ -2699,6 +2772,7 @@ function reportPDF(sh, sid) {
 
 render();
 save(true);
+$('#reload').addEventListener('click', () => location.reload());
 $('#sync').addEventListener('click', () => { const p = $('#sync-panel'); if (p && !p.hidden) closeSync(); else syncPanel(); });
 initSync();
 document.addEventListener('keydown', e => {
