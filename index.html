@@ -66,7 +66,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:1re
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:none;box-shadow:var(--ring)}
 ::selection{background:var(--accent-soft)}
-.wrap{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px));max-width:1360px;margin:0 auto}
+.wrap{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));max-width:none;margin:0 auto}
 
 /* ===== هيكل التطبيق: شريط جانبي + منطقة العمل ===== */
 .shell{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh;min-height:100dvh}
@@ -197,7 +197,7 @@ main{padding-block:26px 64px;display:grid;gap:20px;width:100%}
 .chip:hover{border-color:var(--accent);color:var(--accent)}
 .chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 
-.work{display:grid;grid-template-columns:290px minmax(0,1fr);gap:20px;align-items:start}
+.work{display:grid;grid-template-columns:clamp(290px,19vw,340px) minmax(0,1fr);gap:20px;align-items:start}
 .roster{position:sticky;top:calc(var(--hdr) + 16px);max-height:calc(100vh - var(--hdr) - 32px);overflow:auto;padding:0;scrollbar-width:thin}
 .rhead{display:flex;justify-content:space-between;align-items:baseline;padding:18px 18px 10px;position:sticky;top:0;background:var(--surface);z-index:1;border-bottom:1px solid var(--line)}
 .rhead{flex-wrap:wrap;row-gap:10px}
