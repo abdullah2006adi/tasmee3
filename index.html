@@ -566,6 +566,19 @@ table.res{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular
 #note-dlg .nd-acts{display:flex;gap:10px;flex-wrap:wrap}
 #note-dlg .nd-acts .btn{min-height:44px}
 #note-dlg .nd-acts .sp{flex:1}
+#note-dlg .nd-box{max-height:calc(100vh - 32px);overflow:auto}
+.nd-addlib{border-color:#8FB1DA;color:#1F4E86}
+:root[data-mode="dark"] .nd-addlib{color:#A9CBF3;border-color:#3D6597}
+.nd-lib{display:grid;gap:4px;border-top:1px dashed var(--line-2);padding-top:12px}
+.nd-lib > b{color:var(--ink);font-size:.98rem}
+.nd-lib > small{color:var(--muted);font-size:.8rem}
+.nd-lib ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px;max-height:240px;overflow:auto}
+.nd-lib li{display:flex;gap:6px;align-items:stretch}
+.nd-use{flex:1;min-width:0;text-align:right;border:1px solid var(--line-2);background:var(--sunk);color:var(--ink);border-radius:12px;padding:8px 12px;font:inherit;font-size:.92rem;line-height:1.6;cursor:pointer;white-space:pre-line}
+.nd-use:hover{border-color:var(--accent);background:var(--accent-soft)}
+.nd-rm{flex:none;width:36px;border:1px solid var(--line-2);background:var(--surface);color:var(--muted);border-radius:10px;cursor:pointer}
+.nd-rm:hover{color:#B42318;border-color:#F0B4AB}
+.nd-empty{color:var(--muted);font-size:.86rem;padding:6px 2px}
 .btn.pdf{background:linear-gradient(180deg,#FFFDF6,#F5EBD2);border:1.5px solid #D6B25E;color:#74540F;box-shadow:inset 0 1px 0 #FFFFFF,0 3px 0 #E0C886}
 .btn.pdf:hover{background:linear-gradient(180deg,#FFF8E4,#EFDDB2)}
 .btn.pdf:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #FFFFFF,0 1px 0 #E0C886}
@@ -1421,9 +1434,37 @@ function openNote() {
   m.id = 'note-dlg';
   m.innerHTML = `<div class="nd-box" role="dialog" aria-label="ملاحظات"><b>ملاحظات عن ${esc(st.name)}</b><small>تُرفق في تقرير PDF ورسالة الواتساب</small>
     <textarea id="nd-t" placeholder="اكتب ملاحظتك هنا…">${esc(old)}</textarea>
-    <div class="nd-acts"><button type="button" class="btn primary" data-a="save">حفظ</button>${old ? '<button type="button" class="btn danger" data-a="del">حذف الملاحظة</button>' : ''}<span class="sp"></span><button type="button" class="btn ghost" data-a="x">إلغاء</button></div></div>`;
+    <div class="nd-acts"><button type="button" class="btn primary" data-a="save">حفظ</button><button type="button" class="btn ghost nd-addlib" data-a="lib" title="ظلّل جزءاً من الرسالة ثم اضغط لإضافته إلى الرسائل الجاهزة">＋ إضافة للمكتبة</button>${old ? '<button type="button" class="btn danger" data-a="del">حذف الملاحظة</button>' : ''}<span class="sp"></span><button type="button" class="btn ghost" data-a="x">إلغاء</button></div>
+    <div class="nd-lib"><b>رسائل جاهزة</b><small>اضغط الرسالة لتُكتب مكان مؤشر الكتابة</small><ul id="nd-lib"></ul></div></div>`;
   document.body.appendChild(m);
   const t = $('#nd-t', m); t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+  /* مكتبة الرسائل الجاهزة: تُحفظ مع إعدادات الواتساب فتتزامن بين الأجهزة */
+  const lib = () => (S.wa && Array.isArray(S.wa.notes) ? S.wa.notes : []);
+  const drawLib = () => { const L = lib(); $('#nd-lib', m).innerHTML = L.length ? L.map((x, i) => `<li><button type="button" class="nd-use" data-i="${i}">${esc(x)}</button><button type="button" class="nd-rm" data-i="${i}" aria-label="حذف من المكتبة" title="حذف من المكتبة">✕</button></li>`).join('') : '<li class="nd-empty">لا توجد رسائل بعد. ظلّل جزءاً من الملاحظة ثم اضغط «إضافة للمكتبة».</li>'; };
+  drawLib();
+  let caret = [t.value.length, t.value.length];
+  const keep = () => { caret = [t.selectionStart, t.selectionEnd]; };
+  ['keyup', 'mouseup', 'select', 'input', 'touchend', 'blur'].forEach(ev => t.addEventListener(ev, keep));
+  m.addEventListener('mousedown', e => { if (e.target.closest('.nd-use,.nd-addlib')) e.preventDefault(); });
+  const addLib = () => {
+    let piece = t.value.slice(caret[0], caret[1]).trim(); if (!piece) piece = t.value.trim();
+    if (!piece) { toast('اكتب الرسالة أو ظلّل جزءاً منها أولاً', true); return; }
+    S.wa = S.wa || {}; S.wa.notes = lib().slice();
+    if (S.wa.notes.includes(piece)) { toast('هذه الرسالة موجودة في المكتبة'); return; }
+    S.wa.notes.push(piece); save(); drawLib(); toast('أُضيفت إلى المكتبة');
+  };
+  const useLib = i => {
+    const x = lib()[i]; if (x == null) return;
+    const [a0, a1] = caret, before = t.value.slice(0, a0), after = t.value.slice(a1);
+    const pre = before && !/\s$/.test(before) ? ' ' : '', post = after && !/^\s/.test(after) ? ' ' : '';
+    t.value = before + pre + x + post + after;
+    const pos = (before + pre + x).length; t.focus(); t.setSelectionRange(pos, pos); caret = [pos, pos];
+  };
+  $('#nd-lib', m).addEventListener('click', e => {
+    const u = e.target.closest('.nd-use'), r = e.target.closest('.nd-rm');
+    if (u) useLib(+u.dataset.i);
+    else if (r) { S.wa.notes = lib().filter((_, i) => i !== +r.dataset.i); save(); drawLib(); }
+  });
   const put = v => {
     const r = rec(), nv = v.trim();
     if (nv === (r.note || '')) { closeNote(); return; }
@@ -1435,7 +1476,7 @@ function openNote() {
   m.addEventListener('click', e => {
     if (e.target === m) { closeNote(); return; }
     const a = e.target.closest('[data-a]'); if (!a) return;
-    if (a.dataset.a === 'save') put(t.value); else if (a.dataset.a === 'del') put(''); else closeNote();
+    if (a.dataset.a === 'save') put(t.value); else if (a.dataset.a === 'lib') addLib(); else if (a.dataset.a === 'del') put(''); else closeNote();
   });
   m.addEventListener('keydown', e => {
     if (e.key === 'Escape') { e.stopPropagation(); closeNote(); }
