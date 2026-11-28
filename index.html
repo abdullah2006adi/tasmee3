@@ -337,6 +337,23 @@ kbd{font-family:inherit;font-size:.8rem;border:1px solid var(--line-2);border-bo
 .mark .mw.free{font-family:var(--f-ui);font-size:.88rem;font-weight:700}
 .mark input{flex:1;min-width:0;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:10px;padding:7px 10px;min-height:40px;outline:none}
 .mark input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.mark .mx{flex:1;min-width:0;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:10px;padding:7px 10px;min-height:40px;outline:none;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;cursor:text;-webkit-user-select:text;user-select:text}
+.mark .mx:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.mark .mx:empty::before{content:attr(data-ph);color:var(--muted);font-size:.85rem;pointer-events:none}
+.mx .xr,.rp-tb .xr{color:#D92D20;font-weight:800;background:rgba(217,45,32,.10);border-radius:4px}
+:root[data-mode="dark"] .mx .xr{color:#FF8A7A;background:rgba(255,138,122,.14)}
+.ebtn.rev[aria-pressed="true"]{background:#E59A12;border-color:#C98208;color:#fff;box-shadow:0 8px 18px -10px #B26F00}
+.ayah .w.rvw{text-decoration:underline wavy #E59A12;text-decoration-thickness:2px;text-underline-offset:9px}
+.ayah.revmode .w{outline:1px dashed rgba(229,154,18,.55)}
+.mark-hint.rv{color:#9A5B00;background:#FFF5E0;border-color:#F0CE8A}
+.mark.rvm{background:#FFF5E0;border-color:#F0CE8A}
+.mark.rvm .mw{background:#E59A12;color:#fff}
+.mark.rvm .rvl{flex:1;min-width:0;font-weight:700;color:#7A4A00}
+:root[data-mode="dark"] .mark.rvm,:root[data-mode="dark"] .mark-hint.rv{background:rgba(229,154,18,.12);border-color:rgba(229,154,18,.4);color:#F6C56B}
+:root[data-mode="dark"] .mark.rvm .rvl{color:#F6C56B}
+.res.rv td.rv-w{text-align:right;font-size:.92rem;min-width:160px}
+.res.rv td.rv-w span{display:block;white-space:nowrap}
+.res.rv td.rv-w b{color:#9A5B00}
 .mark em{font-style:normal;font-weight:700;color:var(--g0);white-space:nowrap}
 .mdel{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);color:var(--muted);cursor:pointer;font-size:1rem}
 .mdel:hover{color:var(--g0);border-color:var(--g0)}
@@ -352,7 +369,7 @@ kbd{font-family:inherit;font-size:.8rem;border:1px solid var(--line-2);border-bo
   .marks{grid-area:marks}
   .mark{flex-wrap:wrap}
   .mark .mw{max-width:none;flex:1}
-  .mark input{order:5;flex-basis:100%}
+  .mark input,.mark .mx{order:5;flex-basis:100%}
 }
 
 
@@ -942,8 +959,13 @@ const cur = () => S.ui.sheet && sheetById(S.ui.sheet);
 const oldErrs = (r, a) => (r.e && Array.isArray(r.e[a]) ? r.e[a] : []).filter(x => String(x || '').trim());
 const marksOf = (r, a) => (r.w && Array.isArray(r.w[a]) ? r.w[a] : []);
 const mLen = m => m.t - m.f + 1;
-const markTxt = m => '«' + m.w + '»' + (String(m.x || '').trim() ? ' قرأها: ' + m.x.trim() : '');
-const errList = (r, a) => oldErrs(r, a).concat(marksOf(r, a).map(markTxt));
+/* ما قرأه الطالب: الحروف الخطأ محفوظة بين { } وتظهر بالأحمر */
+const xPlain = t => String(t || '').replace(/[{}]/g, '');
+const xHtml = t => esc(String(t || '')).replace(/\{([^{}]*)\}/g, '<b class="xr">$1</b>').replace(/[{}]/g, '');
+const rvOf = (r, a) => (r.rv && Array.isArray(r.rv[a]) ? r.rv[a] : []);
+const hasRv = r => !!(r && (r.review || (r.rv && Object.values(r.rv).some(x => x && x.length))));
+const markTxt = m => '«' + m.w + '»' + (xPlain(m.x).trim() ? ' قرأها: ' + xPlain(m.x).trim() : '');
+const errList = (r, a) => oldErrs(r, a).map(xPlain).concat(marksOf(r, a).map(markTxt));
 const errCount = (r, a) => oldErrs(r, a).length + marksOf(r, a).reduce((n, m) => n + mLen(m), 0);
 const wordsOf = (sh, a) => Q[sh.surah - 1][1][a - 1].split(/\s+/).filter(Boolean);
 
@@ -1250,7 +1272,7 @@ function rRecite() {
         <div class="sbar" id="sbar">${barHtml(st, calc(sh, st.id))}</div>
         <div class="tools">
           <span class="legend"><span><i style="background:#1E9A55"></i>ضغطة: 2 بلا تذكير</span><span><i style="background:#2766D6"></i>ضغطتان: 1 مع تذكير</span><span><i style="background:#C93A25"></i>ثلاث: 0 لم يسمع</span><span><i style="background:var(--surface);border:1px solid var(--line-2)"></i>أربع: بلا درجة</span></span><span class="keys"><span><kbd>2</kbd> <kbd>1</kbd> <kbd>0</kbd> الدرجة ثم الآية التالية</span><span><kbd>Enter</kbd> خطأ النطق</span><span><kbd>↓</kbd> <kbd>↑</kbd> تنقّل</span></span>
-          <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ghost" id="undo" disabled title="تراجع (Ctrl+Z)">↶ تراجع</button><button class="btn sm ghost" id="all2">الدرجة ٢ لكل الآيات</button><button class="btn sm ghost" id="all1">الدرجة ١ لكل الآيات</button><button class="btn sm ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button><button class="btn sm ghost toggle rev" id="review" aria-pressed="${!!r.review}" title="ضع علامة على الطالب ليُراجَع، وتجده في تبويب النتائج">يراجَع الطالب</button><button class="btn sm danger" id="clr" data-msg="مسح تسميعه؟">مسح التسميع</button></span>
+          <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ghost" id="undo" disabled title="تراجع (Ctrl+Z)">↶ تراجع</button><button class="btn sm ghost" id="all2">الدرجة ٢ لكل الآيات</button><button class="btn sm ghost" id="all1">الدرجة ١ لكل الآيات</button><button class="btn sm ghost toggle" id="absent" aria-pressed="${!!r.absent}">لم يحفظ</button><button class="btn sm danger" id="clr" data-msg="مسح تسميعه؟">مسح التسميع</button></span>
         </div>
         <div class="mushaf">${sh.from === 1 && sh.surah !== 1 && sh.surah !== 9 ? '<p class="basmala">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>' : ''}
         <ol class="ayat" id="ayat">${rows}</ol></div>` : '<p class="empty">لا يوجد طلاب في هذه الشعبة.</p>'}
@@ -1288,11 +1310,6 @@ function rRecite() {
     if (r.absent) for (let a = sh.from; a <= sh.to; a++) { r.s[a] = 0; updRow(a); }
     e.currentTarget.setAttribute('aria-pressed', String(r.absent));
     changed();
-  });
-  $('#review').addEventListener('click', e => {
-    const r = rec(); if (r.review) delete r.review; else r.review = true;
-    e.currentTarget.setAttribute('aria-pressed', String(!!r.review));
-    changed(); toast(r.review ? 'وُضع الطالب في قائمة من يراجَعون' : 'أُزيل الطالب من قائمة من يراجَعون');
   });
   [2, 1].forEach(v => $('#all' + v).addEventListener('click', () => { const r = rec(); for (let a = sh.from; a <= sh.to; a++) { r.s[a] = v; updRow(a); } stamp(); changed(); }));
   $('#clr').addEventListener('click', e => arm(e.currentTarget, () => { sh.recs[S.ui.student] = { s: {}, e: {} }; save(true); rRecite(); toast('مُسح تسميع الطالب'); }));
@@ -1442,20 +1459,24 @@ const doneTxt = (sh, studs) => { let d = 0, ab = 0; studs.forEach(s => { const k
 const ICON_ERR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
 function wordsHtml(sh, r, a) {
   const bad = new Set(); marksOf(r, a).forEach(m => { for (let i = m.f; i <= m.t; i++) bad.add(i); });
-  return wordsOf(sh, a).map((w, i) => `<span class="w${bad.has(i) ? ' bad' : ''}" data-i="${i}">${esc(w)}</span>`).join(' ');
+  const rv = new Set(rvOf(r, a));
+  return wordsOf(sh, a).map((w, i) => `<span class="w${bad.has(i) ? ' bad' : ''}${rv.has(i) ? ' rvw' : ''}" data-i="${i}">${esc(w)}</span>`).join(' ');
 }
 function marksHtml(r, a, marking) {
-  const old = oldErrs(r, a).map((x, i) => `<div class="mark" data-old="${i}"><span class="mw free">خطأ</span><input class="mx" value="${esc(x)}" autocomplete="off" aria-label="خطأ النطق"><em>−1</em><button type="button" class="mdel" aria-label="حذف الخطأ">✕</button></div>`);
-  const ms = marksOf(r, a).map((m, i) => `<div class="mark" data-m="${i}"><span class="mw" title="${esc(m.w)}">${esc(m.w)}</span><input class="mx" value="${esc(m.x || '')}" autocomplete="off" placeholder="كيف قرأها الطالب؟" aria-label="ما قرأه الطالب"><em>−${mLen(m)}</em><button type="button" class="mdel" aria-label="حذف الخطأ">✕</button></div>`);
-  const hint = marking ? '<p class="mark-hint">اضغط على الكلمة التي أخطأ فيها الطالب، أو اسحب إصبعك على أكثر من كلمة، ثم اكتب كيف قرأها. كل كلمة تُنقص درجة، والضغط على كلمة محددة مرةً أخرى يلغي تحديدها هي وحدها.</p>' : '';
-  return hint + old.concat(ms).join('');
+  const old = oldErrs(r, a).map((x, i) => `<div class="mark" data-old="${i}"><span class="mw free">خطأ</span><div class="mx" contenteditable="true" role="textbox" spellcheck="false" aria-label="خطأ النطق">${xHtml(x)}</div><em>−1</em><button type="button" class="mdel" aria-label="حذف الخطأ">✕</button></div>`);
+  const ms = marksOf(r, a).map((m, i) => `<div class="mark" data-m="${i}"><span class="mw" title="${esc(m.w)}">${esc(m.w)}</span><div class="mx" contenteditable="true" role="textbox" spellcheck="false" data-ph="كيف قرأها الطالب؟ ظلّل الحرف الخطأ بالماوس ليتلوّن بالأحمر" aria-label="ما قرأه الطالب">${xHtml(m.x)}</div><em>−${mLen(m)}</em><button type="button" class="mdel" aria-label="حذف الخطأ">✕</button></div>`);
+  const hint = marking === 'rev' ? '<p class="mark-hint rv">وضع «يراجَع»: اضغط على الكلمة التي يحتاج الطالب إلى مراجعتها، أو اسحب على أكثر من كلمة. لا تُنقص من الدرجة، ولا تظهر في التقرير، وتجدها في النتائج ← الطلاب الذين يراجَعون. اضغط الزر مرةً أخرى للخروج.</p>'
+    : marking ? '<p class="mark-hint">اضغط على الكلمة التي أخطأ فيها الطالب، أو اسحب إصبعك على أكثر من كلمة، ثم اكتب كيف قرأها، وظلّل الحرف الخطأ بالماوس ليتلوّن بالأحمر. كل كلمة تُنقص درجة. اضغط الزر مرةً أخرى لوضع «يراجَع».</p>' : '';
+  const rv = rvOf(r, a), words = wordsOf(cur(), a);
+  const rvRow = rv.length ? `<div class="mark rvm"><span class="mw free">يراجَع</span><span class="rvl">${rv.map(i => esc(words[i] || '')).join('، ')}</span><button type="button" class="mdel rvdel" aria-label="حذف كلمات المراجعة">✕</button></div>` : '';
+  return hint + old.concat(ms).join('') + rvRow;
 }
 function ayahRow(sh, r, a, marking) {
   const v = r.s[a], n = errCount(r, a);
-  return `<li class="ayah${marking ? ' marking' : ''}" data-a="${a}">
+  return `<li class="ayah${marking ? ' marking' : ''}${marking === 'rev' ? ' revmode' : ''}" data-a="${a}">
     <div class="anum-box" aria-hidden="true"><small>آية</small><b>${ar(a)}</b></div>
     <button type="button" class="abtn"${v != null ? ` data-v="${v}"` : ''} aria-label="الآية ${a}"><span class="aval"></span>${wordsHtml(sh, r, a)}</button>
-    <button type="button" class="ebtn" aria-pressed="${!!marking}" aria-label="خطأ النطق في الآية ${a}">${ICON_ERR}<span>${marking ? 'تمّ' : 'خطأ النطق'}</span><em>${n ? '−' + n : ''}</em></button>
+    <button type="button" class="ebtn${marking === 'rev' ? ' rev' : ''}" aria-pressed="${!!marking}" aria-label="خطأ النطق في الآية ${a}">${ICON_ERR}<span>${marking === 'rev' ? 'يراجَع' : 'خطأ النطق'}</span><em>${n ? '−' + n : ''}</em></button>
     <div class="marks">${marksHtml(r, a, marking)}</div>
   </li>`;
 }
@@ -1469,7 +1490,7 @@ function updRow(a) {
 function redraw(a, marking, focusMark) {
   const li = liOf(a); if (!li) return;
   li.outerHTML = ayahRow(cur(), rec(), a, marking);
-  if (focusMark != null) { const inp = $(`#ayat li[data-a="${a}"] .mark[data-m="${focusMark}"] input`); if (inp) inp.focus({ preventScroll: true }); }
+  if (focusMark != null) { const inp = $(`#ayat li[data-a="${a}"] .mark[data-m="${focusMark}"] .mx`); if (inp) { inp.focus({ preventScroll: true }); mxCaret(inp, inp.textContent.length); } }
 }
 function setScore(a, v) {
   const r = rec(); r.s[a] = v;
@@ -1506,25 +1527,51 @@ function addMark(a, f, t) {
     });
     out.sort((p, q) => p.f - q.f);
     if (out.length) r.w[a] = out; else delete r.w[a];
-    stamp(); changed(); redraw(a, true); return;
+    stamp(); changed(); redraw(a, 'err'); return;
   }
   list = list.filter(m => { const ov = m.f <= t && f <= m.t; if (ov) { f = Math.min(f, m.f); t = Math.max(t, m.t); x = x || m.x || ''; } return !ov; });
   list.push({ f, t, w: words.slice(f, t + 1).join(' '), x });
   list.sort((p, q) => p.f - q.f);
   r.w[a] = list; stamp(); changed();
-  redraw(a, true, list.findIndex(m => m.f === f));
+  redraw(a, 'err', list.findIndex(m => m.f === f));
 }
 function delMark(a, row) {
   const r = rec();
   if (row.dataset.old != null) { r.e[a].splice(+row.dataset.old, 1); if (!oldErrs(r, a).length) delete r.e[a]; }
   else { r.w[a].splice(+row.dataset.m, 1); if (!r.w[a].length) delete r.w[a]; }
-  changed(); redraw(a, liOf(a).classList.contains('marking'));
+  changed(); redraw(a, liOf(a).classList.contains('revmode') ? 'rev' : liOf(a).classList.contains('marking') ? 'err' : false);
+}
+/* حروف الخانة مع حالة اللون الأحمر لكل حرف */
+function mxChars(box) {
+  const out = [];
+  const walk = (n, red) => n.childNodes.forEach(c => {
+    if (c.nodeType === 3) [...c.nodeValue].forEach(ch => out.push({ c: ch, r: red }));
+    else if (c.nodeName === 'BR') out.push({ c: ' ', r: red });
+    else walk(c, red || (c.classList && c.classList.contains('xr')));
+  });
+  walk(box, false); return out;
+}
+const mxSer = chars => { let o = '', red = false; chars.forEach(ch => { if (ch.r !== red) { o += ch.r ? '{' : '}'; red = ch.r; } o += ch.c.replace(/[{}]/g, ''); }); return o + (red ? '}' : ''); };
+function mxCaret(box, pos) {
+  const sel = getSelection(), rg = document.createRange(); let left = pos, done = false;
+  const walk = n => { for (const c of n.childNodes) { if (done) return; if (c.nodeType === 3) { if (left < c.nodeValue.length || (left === c.nodeValue.length && !c.parentElement.closest('.xr'))) { rg.setStart(c, left); done = true; return; } left -= c.nodeValue.length; } else walk(c); } };
+  walk(box); if (!done) { rg.selectNodeContents(box); rg.collapse(false); } else rg.collapse(true);
+  sel.removeAllRanges(); sel.addRange(rg);
 }
 function editMark(a, inp) {
-  const r = rec(), row = inp.closest('.mark');
-  if (row.dataset.old != null) r.e[a][+row.dataset.old] = inp.value;
-  else r.w[a][+row.dataset.m].x = inp.value;
+  const r = rec(), row = inp.closest('.mark'), v = inp.matches('.mx') ? mxSer(mxChars(inp)) : inp.value;
+  if (row.dataset.old != null) r.e[a][+row.dataset.old] = v;
+  else r.w[a][+row.dataset.m].x = v;
   save();
+}
+/* كلمات «يراجَع»: لا تنقص الدرجة ولا تظهر في التقرير */
+function addRv(a, f, t) {
+  const r = rec(), set = new Set(rvOf(r, a));
+  let all = true; for (let i = f; i <= t; i++) if (!set.has(i)) { all = false; break; }
+  for (let i = f; i <= t; i++) { if (all) set.delete(i); else set.add(i); }
+  r.rv = r.rv || {};
+  if (set.size) r.rv[a] = [...set].sort((p, q) => p - q); else { delete r.rv[a]; if (!Object.keys(r.rv).length) delete r.rv; }
+  changed(); redraw(a, 'rev');
 }
 function focusAyah(a) { const b = btnOf(a); if (b) { b.focus({ preventScroll: true }); b.scrollIntoView({ block: 'center', behavior: 'smooth' }); } return !!b; }
 function goNextAyah(a) {
@@ -1540,12 +1587,13 @@ function bindAyat(ay) {
   ay.addEventListener('click', e => {
     const li = e.target.closest('li.ayah'); if (!li) return;
     const a = +li.dataset.a;
-    if (e.target.closest('.ebtn')) { setMarking(a, !li.classList.contains('marking')); return; }
+    if (e.target.closest('.ebtn')) { setMarking(a, li.classList.contains('revmode') ? false : li.classList.contains('marking') ? 'rev' : 'err'); return; }
+    if (e.target.closest('.rvdel')) { const r = rec(); if (r.rv) { delete r.rv[a]; if (!Object.keys(r.rv).length) delete r.rv; } changed(); redraw(a, li.classList.contains('revmode') ? 'rev' : li.classList.contains('marking') ? 'err' : false); return; }
     if (e.target.closest('.mdel')) { delMark(a, e.target.closest('.mark')); return; }
     if (e.target.closest('.abtn') && !li.classList.contains('marking')) cycle(a);
   });
-  ay.addEventListener('input', e => { const inp = e.target.closest('.mx'); if (inp) editMark(+inp.closest('li').dataset.a, inp); });
-  ay.addEventListener('change', e => { if (e.target.closest('.mx')) changed(); });
+  ay.addEventListener('input', e => { const inp = e.target.closest('.mx'); if (inp) { if (/[{}]/.test(inp.textContent)) { const c = mxChars(inp).filter(x => x.c !== '{' && x.c !== '}'); inp.innerHTML = xHtml(mxSer(c)); mxCaret(inp, c.length); } editMark(+inp.closest('li').dataset.a, inp); } });
+  ay.addEventListener('focusout', e => { if (e.target.closest('.mx')) changed(); });
   ay.addEventListener('pointerdown', e => {
     const w = e.target.closest('.ayah.marking .w'); if (!w) return;
     e.preventDefault();
@@ -1559,8 +1607,23 @@ function bindAyat(ay) {
     const el = document.elementFromPoint(e.clientX, e.clientY), w = el && el.closest && el.closest('.w');
     if (w && drag.li.contains(w) && +w.dataset.i !== drag.e) { drag.e = +w.dataset.i; paintSel(); }
   });
-  ay.addEventListener('pointerup', () => { if (!drag) return; const d = drag; drag = null; addMark(d.a, Math.min(d.s, d.e), Math.max(d.s, d.e)); });
-  ay.addEventListener('pointercancel', () => { if (drag) { const d = drag; drag = null; redraw(d.a, true); } });
+  ay.addEventListener('pointerup', () => { if (!drag) return; const d = drag; drag = null; if (d.li.classList.contains('revmode')) addRv(d.a, Math.min(d.s, d.e), Math.max(d.s, d.e)); else addMark(d.a, Math.min(d.s, d.e), Math.max(d.s, d.e)); });
+  ay.addEventListener('pointercancel', () => { if (drag) { const d = drag; drag = null; redraw(d.a, d.li.classList.contains('revmode') ? 'rev' : 'err'); } });
+  /* تظليل الحرف الخطأ بالماوس داخل خانة ما قرأه الطالب: يتلوّن بالأحمر، وتظليله مرة أخرى يعيده */
+  const markSel = () => {
+    const sel = getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) return;
+    const box = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement).closest('.mx');
+    if (!box || !box.contains(sel.focusNode)) return;
+    const rg = sel.getRangeAt(0), pre = document.createRange(); pre.selectNodeContents(box); pre.setEnd(rg.startContainer, rg.startOffset);
+    const st = pre.toString().length, en = st + rg.toString().length; if (en <= st) return;
+    const chars = mxChars(box), allRed = chars.slice(st, en).every(c => c.r);
+    for (let i = st; i < en && i < chars.length; i++) chars[i].r = !allRed;
+    box.innerHTML = xHtml(mxSer(chars)); mxCaret(box, en);
+    editMark(+box.closest('li').dataset.a, box); changed();
+  };
+  ay.addEventListener('mouseup', e => { if (e.target.closest('.mx')) setTimeout(markSel, 0); });
+  ay.addEventListener('touchend', e => { if (e.target.closest('.mx')) setTimeout(markSel, 350); });
+  ay.addEventListener('paste', e => { const box = e.target.closest('.mx'); if (!box) return; e.preventDefault(); const t = (e.clipboardData || window.clipboardData).getData('text').replace(/[{}\n\r]/g, ' '); document.execCommand('insertText', false, t); });
   ay.addEventListener('keydown', onKey);
 }
 const DIG = { '2': 2, '1': 1, '0': 0, '٢': 2, '١': 1, '٠': 0 };
@@ -1569,7 +1632,7 @@ function onKey(e) {
   if (btn) {
     const a = +btn.closest('li').dataset.a;
     if (e.key in DIG) { e.preventDefault(); setScore(a, DIG[e.key]); goNextAyah(a); return; }
-    if (e.key === 'Enter') { e.preventDefault(); setMarking(a, !btn.closest('li').classList.contains('marking')); return; }
+    if (e.key === 'Enter') { e.preventDefault(); setMarking(a, btn.closest('li').classList.contains('marking') ? false : 'err'); return; }
     if (e.key === 'ArrowDown') { e.preventDefault(); goNextAyah(a); return; }
     if (e.key === 'ArrowUp') { e.preventDefault(); focusAyah(a - 1); return; }
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); const r = rec(); if (r.s[a] != null) { delete r.s[a]; updRow(a); changed(); } return; }
@@ -1595,7 +1658,7 @@ function pillHtml(k) {
   return `<span class="pill ${gcls(k.g)}">${fmt(k.fin)}</span>`;
 }
 function rosterItem(sh, s, i) {
-  return `<li data-s="${s.id}"${s.id === S.ui.student ? ' class="on"' : ''}><button type="button"><span class="av">${esc((s.name.trim()[0] || '؟'))}</span><span class="n">${i + 1}</span><span class="nm">${esc(s.name)}${calc(sh, s.id).absent ? ' <span class="tag nh">لم يحفظ</span>' : ''}${(sh.recs[s.id] || {}).review ? ' <span class="tag rv">يراجَع</span>' : ''}${S.sched && S.sched.plan && S.sched.plan[s.id] === today() ? ' <span class="tag td">موعده اليوم</span>' : ''}</span>${pillHtml(calc(sh, s.id))}</button></li>`;
+  return `<li data-s="${s.id}"${s.id === S.ui.student ? ' class="on"' : ''}><button type="button"><span class="av">${esc((s.name.trim()[0] || '؟'))}</span><span class="n">${i + 1}</span><span class="nm">${esc(s.name)}${calc(sh, s.id).absent ? ' <span class="tag nh">لم يحفظ</span>' : ''}${hasRv(sh.recs[s.id]) ? ' <span class="tag rv">يراجَع</span>' : ''}${S.sched && S.sched.plan && S.sched.plan[s.id] === today() ? ' <span class="tag td">موعده اليوم</span>' : ''}</span>${pillHtml(calc(sh, s.id))}</button></li>`;
 }
 function barHtml(st, k) {
   const gc = k.ev ? gcls(k.g) : 'g-none';
@@ -2000,14 +2063,15 @@ function rResultsReview() {
   S.classes.forEach(c => {
     if (F !== 'all' && c.id !== F) return;
     S.sheets.filter(sh => sh.classId === c.id).forEach(sh => c.students.forEach((s, i) => {
-      const r = sh.recs[s.id]; if (!r || !r.review) return;
+      const r = sh.recs[s.id]; if (!hasRv(r)) return;
       rows.push({ c, sh, s, i, r, k: calc(sh, s.id) });
     }));
   });
-  const cnt = classes.map(c => ({ c, n: S.sheets.filter(sh => sh.classId === c.id).reduce((t, sh) => t + c.students.filter(s => (sh.recs[s.id] || {}).review).length, 0) }));
+  const cnt = classes.map(c => ({ c, n: S.sheets.filter(sh => sh.classId === c.id).reduce((t, sh) => t + c.students.filter(s => hasRv(sh.recs[s.id])).length, 0) }));
   const total = cnt.reduce((t, x) => t + x.n, 0);
   const body = rows.map((x, j) => `<tr><td>${j + 1}</td><td class="nm go" data-sh="${x.sh.id}" data-st="${x.s.id}">${esc(x.s.name)}</td><td>${esc(cname(x.c))}</td><td>${esc(sname(x.sh.surah))}${fullRange(x.sh) ? '' : ` <small>${x.sh.from}–${x.sh.to}</small>`}</td>
     ${x.k.ev ? `<td class="gr ${gcls(x.k.g)}">${fmt(x.k.fin)}${x.k.absent ? '<sup>✕</sup>' : ''}</td><td class="gr ${gcls(x.k.g)}">${x.k.g.label}</td>` : '<td class="gr">—</td><td class="gr">—</td>'}
+    <td class="rv-w">${Object.keys(x.r.rv || {}).map(Number).sort((p, q) => p - q).map(a => `<span><b>آية ${a}</b> - ${esc(rvOf(x.r, a).map(i => wordsOf(x.sh, a)[i] || '').join('، '))}</span>`).join('') || '—'}</td>
     <td>${x.r.date || '—'}</td><td class="rv-nt">${x.r.note ? esc(x.r.note) : '—'}</td>
     <td><button type="button" class="btn sm ghost" data-unrev="${x.sh.id}|${x.s.id}" title="إزالة الطالب من قائمة من يراجَعون">تمت المراجعة ✓</button></td></tr>`).join('');
   v.innerHTML = `${modeBar()}
@@ -2015,14 +2079,14 @@ function rResultsReview() {
       <label class="fld grow"><span>الشعبة</span><select id="rv-class"><option value="all"${F === 'all' ? ' selected' : ''}>جميع الشعب (${total})</option>${cnt.map(x => `<option value="${x.c.id}"${x.c.id === F ? ' selected' : ''}>${esc(cname(x.c))} (${x.n})</option>`).join('')}</select></label>
     </section>
     ${rows.length ? `<div class="tscroll"><table class="res rv">
-      <thead><tr><th>م</th><th class="nm">اسم الطالب</th><th>الشعبة</th><th>السورة</th><th>الدرجة النهائية</th><th>التقدير</th><th>تاريخ التقييم</th><th>ملاحظات</th><th></th></tr></thead>
+      <thead><tr><th>م</th><th class="nm">اسم الطالب</th><th>الشعبة</th><th>السورة</th><th>الدرجة النهائية</th><th>التقدير</th><th>الآية - الكلمة</th><th>تاريخ التقييم</th><th>ملاحظات</th><th></th></tr></thead>
       <tbody>${body}</tbody></table></div>
-    <p class="hint" style="margin:0">اضغط اسم الطالب لفتح تسميعه. «تمت المراجعة» تزيله من هذه القائمة، ويمكنك أيضاً إزالته بزر «يراجَع الطالب» في صفحة التسميع.</p>`
-    : `<section class="panel"><p class="empty">لا يوجد طلاب يراجَعون${F === 'all' ? '' : ' في هذه الشعبة'}.<br>ضع العلامة من زر «يراجَع الطالب» في صفحة التسميع.</p></section>`}`;
+    <p class="hint" style="margin:0">اضغط اسم الطالب لفتح تسميعه. «تمت المراجعة» تزيله من هذه القائمة مع كلماته.</p>`
+    : `<section class="panel"><p class="empty">لا يوجد طلاب يراجَعون${F === 'all' ? '' : ' في هذه الشعبة'}.<br>اضغط زر «خطأ النطق» في الآية مرتين ليصير «يراجَع»، ثم اضغط الكلمات.</p></section>`}`;
   bindModes();
   $('#rv-class').addEventListener('change', e => { S.ui.revClass = e.target.value; save(); rResultsReview(); });
   $$('#v-results td.go').forEach(td => td.addEventListener('click', () => { S.ui.sheet = td.dataset.sh; S.ui.student = td.dataset.st; S.ui.tab = 'recite'; save(); render(); window.scrollTo(0, 0); }));
-  $$('[data-unrev]', v).forEach(b => b.addEventListener('click', () => { const [shid, sid] = b.dataset.unrev.split('|'), sh = sheetById(shid), r = sh && sh.recs[sid]; if (r) { delete r.review; save(); rResultsReview(); toast('أُزيل من قائمة من يراجَعون'); } }));
+  $$('[data-unrev]', v).forEach(b => b.addEventListener('click', () => { const [shid, sid] = b.dataset.unrev.split('|'), sh = sheetById(shid), r = sh && sh.recs[sid]; if (r) { delete r.review; delete r.rv; save(); rResultsReview(); toast('أُزيل من قائمة من يراجَعون'); } }));
 }
 function classSummary(c) {
   const sheets = S.sheets.filter(s => s.classId === c.id);
@@ -2564,8 +2628,8 @@ function repP2(D, sh, o) {
   else {
     const a0 = o.eFrom || 0, list = D.errs.slice(a0, o.eTo == null ? D.errs.length : o.eTo), two = o.cols === 2 && list.length > 1;
     const row = (e, i) => `<tr><td>${i + 1}</td><td><span class="rp-an">${e.a}</span></td>${e.w
-      ? `<td class="qw">${esc(e.w)}</td><td class="${e.x ? 'sw' : 'mu'}">${e.x ? esc(e.x) : '—'}</td>`
-      : `<td class="mu">—</td><td class="nt">${esc(e.x)}</td>`}<td><span class="rp-dd">−${e.n}</span></td></tr>`;
+      ? `<td class="qw">${esc(e.w)}</td><td class="${xPlain(e.x) ? 'sw' : 'mu'}">${xPlain(e.x) ? xHtml(e.x) : '—'}</td>`
+      : `<td class="mu">—</td><td class="nt">${xHtml(e.x)}</td>`}<td><span class="rp-dd">−${e.n}</span></td></tr>`;
     const hd = two ? ['م', 'الآية', 'في المصحف', 'كما قرأها', 'الخصم'] : ['م', 'الآية', 'الكلمة كما في المصحف', 'كما قرأها الطالب', 'الخصم'];
     const tbl = (rows, off) => (off += a0, `<table class="rp-tb${o.cmp ? ' cmp' : ''}"><thead><tr>${hd.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map((e, i) => row(e, i + off)).join('')}</tbody></table>`);
     if (two) { const h = Math.ceil(list.length / 2); eh = `<div class="rp-tw">${tbl(list.slice(0, h), 0)}${tbl(list.slice(h), h)}</div>`; }
